@@ -1,0 +1,8 @@
+{
+    "name": "myraylib",
+    "dependencies": [
+        "raylib"
+    ],
+    "description": "myraylib is a wrapper around raylib with additional features",
+    "license": "MIT"
+}
