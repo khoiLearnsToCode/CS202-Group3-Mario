@@ -1,0 +1,207 @@
+RayMario Project - Object Hierarchy Documentation
+====================================================
+
+This document outlines the class inheritance hierarchy and object relationships 
+in the RayMario C++ game project.
+
+BASE CLASSES
+============
+
+1. Drawable (Abstract Base Class)
+   - Pure virtual class with draw() method
+   - Located in: include/Drawable.h
+
+MAIN INHERITANCE HIERARCHY
+=========================
+
+Drawable
+├── Sprite (Abstract Base Class)
+│   ├── Mario
+│   ├── Baddie (Abstract Base Class)
+│   │   ├── Goomba
+│   │   ├── FlyingGoomba
+│   │   ├── RedKoopaTroopa
+│   │   ├── GreenKoopaTroopa
+│   │   ├── BlueKoopaTroopa
+│   │   ├── YellowKoopaTroopa
+│   │   ├── BuzzyBeetle
+│   │   ├── MummyBeetle
+│   │   ├── BobOmb
+│   │   ├── PiranhaPlant
+│   │   ├── JumpingPiranhaPlant
+│   │   ├── BulletBill
+│   │   ├── BanzaiBill
+│   │   ├── MontyMole
+│   │   ├── Rex
+│   │   ├── Muncher
+│   │   └── Swooper
+│   ├── Block (Abstract Base Class)
+│   │   ├── StoneBlock
+│   │   ├── WoodBlock
+│   │   ├── GlassBlock
+│   │   ├── CloudBlock
+│   │   ├── EyesClosedBlock
+│   │   ├── EyesOpenedBlock
+│   │   ├── QuestionBlock
+│   │   ├── QuestionMushroomBlock
+│   │   ├── QuestionFireFlowerBlock
+│   │   ├── QuestionStarBlock
+│   │   ├── QuestionOneUpMushroomBlock
+│   │   ├── QuestionThreeUpMoonBlock
+│   │   ├── ExclamationBlock
+│   │   ├── InvisibleBlock
+│   │   └── MessageBlock
+│   └── Item (Abstract Base Class)
+│       ├── Coin
+│       ├── Mushroom
+│       ├── OneUpMushroom
+│       ├── FireFlower
+│       ├── Star
+│       ├── ThreeUpMoon
+│       ├── YoshiCoin
+│       └── CourseClearToken
+├── Map
+└── [Other Drawable classes]
+
+DETAILED CLASS DESCRIPTIONS
+==========================
+
+SPRITE HIERARCHY:
+----------------
+
+Sprite (Virtual base class inheriting from Drawable)
+- Contains: position, dimensions, velocity, color, state, collision probes
+- Abstract methods: update(), draw()
+- Concrete methods: collision detection, getters/setters
+
+Mario (inherits from Sprite)
+- The main player character
+- Contains: lives, coins, points, power-up states
+- Special features: invulnerability, power transformations, fireball shooting
+
+BADDIE HIERARCHY:
+----------------
+
+Baddie (Abstract class inheriting from Sprite)
+- Base class for all enemies
+- Contains: dying animation properties, earned points
+- Methods: proximity activation, dying behavior, hit handling
+
+Enemy Types:
+- Goomba: Basic walking enemy
+- FlyingGoomba: Flying variant of Goomba
+- RedKoopaTroopa: Red shell turtle (doesn't fall off ledges)
+- GreenKoopaTroopa: Green shell turtle (falls off ledges)
+- BlueKoopaTroopa: Blue shell turtle variant
+- YellowKoopaTroopa: Yellow shell turtle variant
+- BuzzyBeetle: Shell-protected enemy
+- MummyBeetle: Wrapped beetle enemy
+- BobOmb: Explosive enemy
+- PiranhaPlant: Pipe-dwelling plant enemy
+- JumpingPiranhaPlant: Jumping variant of PiranhaPlant
+- BulletBill: Projectile enemy
+- BanzaiBill: Large projectile enemy
+- MontyMole: Underground enemy that jumps
+- Rex: Dinosaur enemy
+- Muncher: Invulnerable plant enemy
+- Swooper: Flying bat enemy
+
+BLOCK HIERARCHY:
+---------------
+
+Block (Abstract class inheriting from Sprite)
+- Base class for all block types
+- Contains: hit state
+- Methods: hit handling, reset functionality
+
+Basic Blocks:
+- StoneBlock: Solid, unbreakable block
+- WoodBlock: Wooden block
+- GlassBlock: Transparent block
+- CloudBlock: Platform-style block
+- EyesClosedBlock: Decorative block with closed eyes
+- EyesOpenedBlock: Animated block with opening eyes
+
+Interactive Blocks:
+- QuestionBlock: Basic question mark block (gives coins)
+- QuestionMushroomBlock: Contains mushroom power-up
+- QuestionFireFlowerBlock: Contains fire flower power-up
+- QuestionStarBlock: Contains star power-up
+- QuestionOneUpMushroomBlock: Contains 1-up mushroom
+- QuestionThreeUpMoonBlock: Contains 3-up moon
+- ExclamationBlock: Exclamation mark block
+- InvisibleBlock: Hidden block that becomes visible when hit
+- MessageBlock: Block that displays messages when hit
+
+ITEM HIERARCHY:
+--------------
+
+Item (Abstract class inheriting from Sprite)
+- Base class for all collectible items
+- Contains: animation properties, pause game flag
+- Methods: collision sound, Mario update, hit handling
+
+Item Types:
+- Coin: Basic collectible currency
+- Mushroom: Power-up that makes Mario grow
+- OneUpMushroom: Gives extra life
+- FireFlower: Gives Mario fire power
+- Star: Makes Mario invincible
+- ThreeUpMoon: Gives three extra lives
+- YoshiCoin: Special collectible coin
+- CourseClearToken: Level completion token
+
+OTHER CLASSES:
+=============
+
+Map (inherits from Drawable)
+- Manages game world layout
+- Contains vectors of: tiles, blocks, items, baddies
+- Handles: map parsing, drawing, music, camera management
+
+ResourceManager
+- Singleton class for loading and managing game assets
+- Contains vectors of: textures, sounds, music, fonts
+
+Supporting Classes:
+- Tile: Basic map tile element
+- Fireball: Projectile fired by Mario
+- CollisionProbe: Collision detection helper
+- GameWorld: Main game state manager
+- GameWindow: Window and rendering management
+- ResourceManager: Asset loading and management
+
+ENUMERATIONS:
+============
+
+- SpriteState: Defines sprite states (IDLE, ACTIVE, DYING, etc.)
+- CollisionType: Defines collision directions (NORTH, SOUTH, EAST, WEST)
+- Direction: Defines facing direction (LEFT, RIGHT)
+- MarioType: Defines Mario's power states (SMALL, SUPER, FLOWER)
+- TileType: Defines different tile types
+- GameState: Defines game states
+
+KEY DESIGN PATTERNS:
+===================
+
+1. Inheritance Hierarchy: Clear base classes with specialized derived classes
+2. Abstract Base Classes: Sprite, Baddie, Block, Item define interfaces
+3. Polymorphism: Virtual methods allow different behaviors for derived classes
+4. Composition: Map contains collections of different sprite types
+5. State Pattern: SpriteState enum manages object states
+6. Factory Pattern: Map class creates different object types during parsing
+
+VIRTUAL METHODS:
+===============
+
+All derived classes from Sprite must implement:
+- update(): Game logic updates
+- draw(): Rendering
+
+Many classes override:
+- checkCollision(): Custom collision behavior
+- onHit(): Response to being hit
+- setAttributesOnDying(): Death animation setup
+
+This hierarchy supports a classic 2D platformer game structure with clear
+separation of concerns between different game object types.

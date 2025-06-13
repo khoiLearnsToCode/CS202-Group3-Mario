@@ -23,3 +23,5 @@ int main() {
 	
     return 0;
 }
+
+//!WindowShouldClose() loop is in GameWorld::init() in GameWorld.cpp

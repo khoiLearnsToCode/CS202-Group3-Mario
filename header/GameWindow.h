@@ -1,3 +1,7 @@
+#pragma once
+#include "GameWorld.h"
+#include "string"
+
 class GameWindow {
 
     int width;
@@ -12,7 +16,7 @@ class GameWindow {
 
 public:
 
-    GameWindow();
+    GameWindow() = default;
     GameWindow(int width, int height, std::string title);
     ~GameWindow();
 
@@ -21,8 +25,8 @@ public:
     // Essential getters only
     int getWidth() const;
     int getHeight() const;
-    GameWorld& getGameWorld() { return gw; }
-    Camera2D& getCamera() { return camera; }
+    GameWorld& getGameWorld();
+    Camera2D& getCamera();
 
     // Essential setters only
     void setTargetFPS(int fps);
