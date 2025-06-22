@@ -2,7 +2,7 @@
 #include "raylib.h"
 
 CollisionProbe::CollisionProbe() :
-    CollisionProbe(Vector2(0, 0), Vector2(5, 5), Color(255, 255, 255, 255)) {
+    CollisionProbe(Vector2{ 0, 0 }, Vector2{ 5, 5 }, Color{ 255, 255, 255, 255 }) {
 }
 
 CollisionProbe::CollisionProbe(Vector2 pos, Vector2 dim, Color color) :
@@ -80,7 +80,7 @@ Color& CollisionProbe::getColor() {
 }
 
 Rectangle CollisionProbe::getRect() const {
-    return Rectangle(pos.x, pos.y, dim.x, dim.y);
+    return Rectangle{ pos.x, pos.y, dim.x, dim.y };
 }
 
 void CollisionProbe::draw() {

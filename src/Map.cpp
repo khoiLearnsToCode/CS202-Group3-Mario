@@ -5,50 +5,50 @@
  *
  * @copyright Copyright (c) 2024
  */
-#include "Baddie.h"
-#include "BanzaiBill.h"
-#include "Block.h"
-#include "BlueKoopaTroopa.h"
-#include "BobOmb.h"
-#include "BulletBill.h"
-#include "BuzzyBeetle.h"
-#include "CloudBlock.h"
-#include "Coin.h"
-#include "CourseClearToken.h"
-#include "ExclamationBlock.h"
-#include "EyesClosedBlock.h"
-#include "EyesOpenedBlock.h"
-#include "FlyingGoomba.h"
+//#include "Baddie.h"
+//#include "BanzaiBill.h"
+//#include "Block.h"
+//#include "BlueKoopaTroopa.h"
+//#include "BobOmb.h"
+//#include "BulletBill.h"
+//#include "BuzzyBeetle.h"
+//#include "CloudBlock.h"
+//#include "Coin.h"
+//#include "CourseClearToken.h"
+//#include "ExclamationBlock.h"
+//#include "EyesClosedBlock.h"
+//#include "EyesOpenedBlock.h"
+//#include "FlyingGoomba.h"
 #include "GameWorld.h"
-#include "GlassBlock.h"
-#include "Goomba.h"
-#include "GreenKoopaTroopa.h"
-#include "InvisibleBlock.h"
-#include "Item.h"
-#include "JumpingPiranhaPlant.h"
+//#include "GlassBlock.h"
+//#include "Goomba.h"
+//#include "GreenKoopaTroopa.h"
+//#include "InvisibleBlock.h"
+//#include "Item.h"
+//#include "JumpingPiranhaPlant.h"
 #include "Map.h"
-#include "MessageBlock.h"
-#include "MontyMole.h"
-#include "MummyBeetle.h"
-#include "Muncher.h"
-#include "PiranhaPlant.h"
-#include "QuestionBlock.h"
-#include "QuestionFireFlowerBlock.h"
-#include "QuestionMushroomBlock.h"
-#include "QuestionOneUpMushroomBlock.h"
-#include "QuestionStarBlock.h"
-#include "QuestionThreeUpMoonBlock.h"
+//#include "MessageBlock.h"
+//#include "MontyMole.h"
+//#include "MummyBeetle.h"
+//#include "Muncher.h"
+//#include "PiranhaPlant.h"
+//#include "QuestionBlock.h"
+//#include "QuestionFireFlowerBlock.h"
+//#include "QuestionMushroomBlock.h"
+//#include "QuestionOneUpMushroomBlock.h"
+//#include "QuestionStarBlock.h"
+//#include "QuestionThreeUpMoonBlock.h"
 #include "raylib.h"
-#include "RedKoopaTroopa.h"
+//#include "RedKoopaTroopa.h"
 #include "ResourceManager.h"
-#include "Rex.h"
+//#include "Rex.h"
 #include "Sprite.h"
-#include "StoneBlock.h"
-#include "Swooper.h"
-#include "utils.h"
-#include "WoodBlock.h"
-#include "YellowKoopaTroopa.h"
-#include "YoshiCoin.h"
+//#include "StoneBlock.h"
+//#include "Swooper.h"
+//#include "utils.h"
+//#include "WoodBlock.h"
+//#include "YellowKoopaTroopa.h"
+//#include "YoshiCoin.h"
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -62,31 +62,31 @@ Map::Map(Mario& mario, int id, bool loadTestMap, bool parseBlocks, bool parseIte
     maxWidth(0),
     maxHeight(0),
 
-    mario(mario),
-    marioOffset(0),
+//    mario(mario),
+//    marioOffset(0),
 
     backgroundId(0),
     maxBackgroundId(10),
     backgroundColor(WHITE),
     backgroundTexture(Texture()),
-    drawBlackScreen(false),
-    drawBlackScreenFadeAcum(0),
-    drawBlackScreenFadeTime(1.5),
+    //drawBlackScreen(false),
+    //drawBlackScreenFadeAcum(0),
+    //drawBlackScreenFadeTime(1.5),
 
     tileSetId(1),
-    maxTileSetId(4),
+    //maxTileSetId(4),
 
-    musicId(0),
-    maxMusicId(9),
+    //musicId(0),
+    //maxMusicId(9),
 
-    parseBlocks(parseBlocks),
-    parseItems(parseItems),
-    parseBaddies(parseBaddies),
+    //parseBlocks(parseBlocks),
+    //parseItems(parseItems),
+    //parseBaddies(parseBaddies),
 
     loadTestMap(loadTestMap),
     parsed(false),
 
-    drawMessage(false),
+    //drawMessage(false),
     camera(nullptr),
     gw(gw) {
 }
@@ -105,21 +105,21 @@ Map::~Map() {
         delete frontScenarioTile;
     }
 
-    for (const auto& item : items) {
-        delete item;
-    }
+    //for (const auto& item : items) {
+    //    delete item;
+    //}
 
-    for (const auto& staticItem : staticItems) {
-        delete staticItem;
-    }
+    //for (const auto& staticItem : staticItems) {
+    //    delete staticItem;
+    //}
 
-    for (const auto& baddie : baddies) {
-        delete baddie;
-    }
+    //for (const auto& baddie : baddies) {
+    //    delete baddie;
+    //}
 
-    for (const auto& block : blocks) {
-        delete block;
-    }
+    //for (const auto& block : blocks) {
+    //    delete block;
+    //}
 
 }
 
@@ -138,33 +138,33 @@ void Map::draw() {
         }
     }
 
-    for (const auto& backScenarioTile : backScenarioTiles) {
-        backScenarioTile->draw();
-    }
+    //for (const auto& backScenarioTile : backScenarioTiles) {
+    //    backScenarioTile->draw();
+    //}
 
-    for (const auto& baddie : backBaddies) {
-        baddie->draw();
-    }
+    //for (const auto& baddie : backBaddies) {
+    //    baddie->draw();
+    //}
 
     for (const auto& tile : tiles) {
         tile->draw();
     }
 
-    for (const auto& block : blocks) {
-        block->draw();
-    }
+    //for (const auto& block : blocks) {
+    //    block->draw();
+    //}
 
-    for (const auto& item : items) {
-        item->draw();
-    }
+    //for (const auto& item : items) {
+    //    item->draw();
+    //}
 
-    for (const auto& staticItem : staticItems) {
-        staticItem->draw();
-    }
+    //for (const auto& staticItem : staticItems) {
+    //    staticItem->draw();
+    //}
 
-    for (const auto& baddie : frontBaddies) {
-        baddie->draw();
-    }
+    //for (const auto& baddie : frontBaddies) {
+    //    baddie->draw();
+    //}
 
     // for future implementation -> optimize rendering and input processing components that are only inside some boundary
     // needs to change the components storage to a 2D structure or an optimized symtable.
@@ -172,18 +172,18 @@ void Map::draw() {
     //    DrawRectangle(mario.getPos().x - TILE_WIDTH * 2, mario.getPos().y - TILE_WIDTH * 2, TILE_WIDTH * 4, TILE_WIDTH * 4, Fade(BLACK, .5));
     //}
 
-    mario.draw();
+    //mario.draw();
 
     for (const auto& frontScenarioTile : frontScenarioTiles) {
         frontScenarioTile->draw();
     }
 
-    if (drawBlackScreen) {
-        if (drawBlackScreenFadeAcum < drawBlackScreenFadeTime) {
-            drawBlackScreenFadeAcum += GetFrameTime();
-        }
-        DrawRectangle(0, 0, maxWidth, maxHeight, Fade(BLACK, 0.5 * drawBlackScreenFadeAcum / drawBlackScreenFadeTime));
-    }
+    //if (drawBlackScreen) {
+    //    if (drawBlackScreenFadeAcum < drawBlackScreenFadeTime) {
+    //        drawBlackScreenFadeAcum += GetFrameTime();
+    //    }
+    //    DrawRectangle(0, 0, maxWidth, maxHeight, Fade(BLACK, 0.5 * drawBlackScreenFadeAcum / drawBlackScreenFadeTime));
+    //}
 
     //if (drawMessage) {
 
@@ -238,49 +238,49 @@ std::vector<Block*>& Map::getBlocks() {
     return blocks;
 }
 
-std::vector<Item*>& Map::getItems() {
-    return items;
-}
+//std::vector<Item*>& Map::getItems() {
+//    return items;
+//}
 
-std::vector<Item*>& Map::getStaticItems() {
-    return staticItems;
-}
+//std::vector<Item*>& Map::getStaticItems() {
+//    return staticItems;
+//}
 
-std::vector<Baddie*>& Map::getBaddies() {
-    return baddies;
-}
+//std::vector<Baddie*>& Map::getBaddies() {
+//    return baddies;
+//}
 
-void Map::playMusic() const {
-
-    if (musicId != 0) {
-
-        std::map<std::string, Music> musics = ResourceManager::getMusics();
-        const std::string key(TextFormat("music%d", musicId));
-
-        if (mario.isInvincible()) {
-            if (IsMusicStreamPlaying(musics[key])) {
-                StopMusicStream(musics[key]);
-            }
-            if (!IsMusicStreamPlaying(musics["invincible"])) {
-                PlayMusicStream(musics["invincible"]);
-                SeekMusicStream(musics["invincible"], 1);
-            }
-            else {
-                UpdateMusicStream(musics["invincible"]);
-            }
-        }
-        else {
-            if (!IsMusicStreamPlaying(musics[key])) {
-                StopMusicStream(musics["invincible"]);
-                PlayMusicStream(musics[key]);
-            }
-            else {
-                UpdateMusicStream(musics[key]);
-            }
-        }
-
-    }
-}
+//void Map::playMusic() const {
+//
+//    if (musicId != 0) {
+//
+//        std::map<std::string, Music> musics = ResourceManager::getMusics();
+//        const std::string key(TextFormat("music%d", musicId));
+//
+//        if (mario.isInvincible()) {
+//            if (IsMusicStreamPlaying(musics[key])) {
+//                StopMusicStream(musics[key]);
+//            }
+//            if (!IsMusicStreamPlaying(musics["invincible"])) {
+//                PlayMusicStream(musics["invincible"]);
+//                SeekMusicStream(musics["invincible"], 1);
+//            }
+//            else {
+//                UpdateMusicStream(musics["invincible"]);
+//            }
+//        }
+//        else {
+//            if (!IsMusicStreamPlaying(musics[key])) {
+//                StopMusicStream(musics["invincible"]);
+//                PlayMusicStream(musics[key]);
+//            }
+//            else {
+//                UpdateMusicStream(musics[key]);
+//            }
+//        }
+//
+//    }
+//}
 
 //void Map::parseMap() {
 //
@@ -748,24 +748,24 @@ float Map::getMaxHeight() const {
     return maxHeight;
 }
 
-void Map::setMarioOffset(float marioOffset) {
-    this->marioOffset = marioOffset;
-}
+//void Map::setMarioOffset(float marioOffset) {
+//    this->marioOffset = marioOffset;
+//}
 
-void Map::setDrawBlackScreen(bool drawBlackScreen) {
-    this->drawBlackScreen = drawBlackScreen;
-}
+//void Map::setDrawBlackScreen(bool drawBlackScreen) {
+//    this->drawBlackScreen = drawBlackScreen;
+//}
 
-void Map::setDrawMessage(bool drawMessage) {
-    this->drawMessage = drawMessage;
-    for (const auto& mb : messageBlocks) {
-        mb->resetHit();
-    }
-}
+//void Map::setDrawMessage(bool drawMessage) {
+//    this->drawMessage = drawMessage;
+//    for (const auto& mb : messageBlocks) {
+//        mb->resetHit();
+//    }
+//}
 
-void Map::setMessage(std::string message) {
-    this->message = std::move(message);
-}
+//void Map::setMessage(std::string message) {
+//    this->message = std::move(message);
+//}
 
 void Map::setCamera(Camera2D* camera) {
     this->camera = camera;
@@ -780,8 +780,8 @@ void Map::reset() {
     maxWidth = 0;
     maxHeight = 0;
     marioOffset = 0;
-    drawBlackScreen = false;
-    drawBlackScreenFadeAcum = 0;
+    //drawBlackScreen = false;
+    //drawBlackScreenFadeAcum = 0;
 
     for (const auto& tile : tiles) {
         delete tile;
@@ -798,32 +798,32 @@ void Map::reset() {
     }
     frontScenarioTiles.clear();
 
-    for (const auto& block : blocks) {
-        delete block;
-    }
-    blocks.clear();
-    messageBlocks.clear();
+    //for (const auto& block : blocks) {
+    //    delete block;
+    //}
+    //blocks.clear();
+    //messageBlocks.clear();
 
-    for (const auto& item : items) {
-        delete item;
-    }
-    items.clear();
+    //for (const auto& item : items) {
+    //    delete item;
+    //}
+    //items.clear();
 
-    for (const auto& staticItem : staticItems) {
-        delete staticItem;
-    }
-    staticItems.clear();
+    //for (const auto& staticItem : staticItems) {
+    //    delete staticItem;
+    //}
+    //staticItems.clear();
 
-    for (const auto& baddie : baddies) {
-        delete baddie;
-    }
-    baddies.clear();
-    frontBaddies.clear();
-    backBaddies.clear();
+    //for (const auto& baddie : baddies) {
+    //    delete baddie;
+    //}
+    //baddies.clear();
+    //frontBaddies.clear();
+    //backBaddies.clear();
 
-    StopMusicStream(ResourceManager::getMusics()[std::string(TextFormat("music%d", musicId))]);
+//    StopMusicStream(ResourceManager::getMusics()[std::string(TextFormat("music%d", musicId))]);
     parsed = false;
-    parseMap();
+    //parseMap();
 
 }
 
@@ -846,24 +846,24 @@ void Map::first() {
     id = 1;
 }
 
-void Map::pauseGameToShowMessage() const {
-    gw->pauseGame(false, false, false, true);
-}
+//void Map::pauseGameToShowMessage() const {
+//    gw->pauseGame(false, false, false, true);
+//}
 
-void Map::eraseBaddieFromDrawingVectors(Baddie* baddie) {
-
-    for (size_t i = 0; i < frontBaddies.size(); i++) {
-        if (frontBaddies[i] == baddie) {
-            frontBaddies.erase(frontBaddies.begin() + i);
-            return;
-        }
-    }
-
-    for (size_t i = 0; i < backBaddies.size(); i++) {
-        if (backBaddies[i] == baddie) {
-            backBaddies.erase(backBaddies.begin() + i);
-            return;
-        }
-    }
-
-}
+//void Map::eraseBaddieFromDrawingVectors(Baddie* baddie) {
+//
+//    for (size_t i = 0; i < frontBaddies.size(); i++) {
+//        if (frontBaddies[i] == baddie) {
+//            frontBaddies.erase(frontBaddies.begin() + i);
+//            return;
+//        }
+//    }
+//
+//    for (size_t i = 0; i < backBaddies.size(); i++) {
+//        if (backBaddies[i] == baddie) {
+//            backBaddies.erase(backBaddies.begin() + i);
+//            return;
+//        }
+//    }
+//
+//}

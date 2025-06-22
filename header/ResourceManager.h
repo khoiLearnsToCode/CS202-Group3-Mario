@@ -1,7 +1,9 @@
 #pragma once
 
 #include "raylib.h"
+#include "utils.h"
 #include <map>
+#include <vector>
 #include <string>
 
 class ResourceManager {
@@ -56,7 +58,7 @@ public:
     std::map<std::string, Music>& getMusics();
 
     // Utility methods
-    /*Texture2D& getTexture(const std::string& key);
+    Texture2D& getTexture(const std::string& key);
     Sound& getSound(const std::string& key);
-    Music& getMusic(const std::string& key);*/
+    Music& getMusic(const std::string& key);
 };

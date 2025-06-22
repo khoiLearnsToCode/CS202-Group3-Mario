@@ -4,14 +4,14 @@ class Mario;
 
 #include "Drawable.h"
 #include "GameState.h"
-//#include "Map.h"
+#include "Map.h"
 //#include "Mario.h"
 #include "raylib.h"
 
 class GameWorld : public virtual Drawable {
 
     //Mario mario;
-    //Map map;
+    Map map;
     Camera2D* camera;
     bool showControls;
     GameState stateBeforePause;

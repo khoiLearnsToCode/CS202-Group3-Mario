@@ -28,7 +28,7 @@ void Tile::draw() {
 
     if (visible) {
 
-        std::map<std::string, Texture2D>& textures = ResourceManager::getTextures();
+        std::map<std::string, Texture2D>& textures = ResourceManager::getInstance().getTextures();
 
         if (key.length() != 0) {
             DrawTexture(textures[key], pos.x, pos.y, WHITE);
@@ -41,10 +41,10 @@ void Tile::draw() {
                 DrawRectangle(pos.x, pos.y, dim.x, dim.y, color);
                 break;
             case TILE_TYPE_SLOPE_UP:
-                DrawTriangle(Vector2(pos.x + dim.x, pos.y + dim.y), Vector2(pos.x + dim.x, pos.y), Vector2(pos.x, pos.y + dim.y), color);
+                DrawTriangle(Vector2{ pos.x + dim.x, pos.y + dim.y }, Vector2{ pos.x + dim.x, pos.y }, Vector2{ pos.x, pos.y + dim.y }, color);
                 break;
             case TILE_TYPE_SLOPE_DOWN:
-                DrawTriangle(Vector2(pos.x + dim.x, pos.y + dim.y), Vector2(pos.x, pos.y), Vector2(pos.x, pos.y + dim.y), color);
+                DrawTriangle(Vector2{ pos.x + dim.x, pos.y + dim.y }, Vector2{ pos.x, pos.y }, Vector2{ pos.x, pos.y + dim.y }, color);
                 break;
             }
 
