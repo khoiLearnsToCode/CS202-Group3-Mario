@@ -8,6 +8,10 @@ ResourceManager* ResourceManager::instance = nullptr;
 ResourceManager& ResourceManager::getInstance() {
     if (instance == nullptr) {
         instance = new ResourceManager();
+        std::cout << "ResourceManager instance created." << std::endl;
+
+        // Load resources when the instance is created
+        instance->loadResources();
     }
     return *instance;
 }
@@ -15,6 +19,7 @@ ResourceManager& ResourceManager::getInstance() {
 // Cleanup singleton
 void ResourceManager::destroyInstance() {
     if (instance != nullptr) {
+        instance->unloadResources();
         delete instance;
         instance = nullptr;
     }
@@ -27,30 +32,16 @@ void ResourceManager::loadResources() {
     loadMusics();
 }
 
+// Unload all resources
+void ResourceManager::unloadResources() {
+    unloadTextures();
+    unloadSounds();
+    unloadMusics();
+}
 // Implementation of loading textures
 void ResourceManager::loadTextures() {
 
     if (textures.empty()) {
-
-        std::vector<Color> flowerMarioReplacePallete;
-        flowerMarioReplacePallete.push_back(GetColor(0xd8a038ff));
-        flowerMarioReplacePallete.push_back(GetColor(0xf8d800ff));
-        flowerMarioReplacePallete.push_back(GetColor(0xf8d870ff));
-        flowerMarioReplacePallete.push_back(GetColor(0xf8f898ff));
-        flowerMarioReplacePallete.push_back(GetColor(0x500000ff));
-        flowerMarioReplacePallete.push_back(GetColor(0x484848ff));
-        flowerMarioReplacePallete.push_back(GetColor(0xf84070ff));
-        flowerMarioReplacePallete.push_back(GetColor(0xf8f8f8ff));
-        flowerMarioReplacePallete.push_back(GetColor(0x203088ff));
-        flowerMarioReplacePallete.push_back(GetColor(0x400000ff));
-        flowerMarioReplacePallete.push_back(GetColor(0x408098ff));
-        flowerMarioReplacePallete.push_back(GetColor(0xb80000ff));
-        flowerMarioReplacePallete.push_back(GetColor(0x80d8c8ff));
-        flowerMarioReplacePallete.push_back(GetColor(0xf80000ff));
-        flowerMarioReplacePallete.push_back(GetColor(0xb02860ff));
-        flowerMarioReplacePallete.push_back(GetColor(0xd8d8a8ff));
-        flowerMarioReplacePallete.push_back(GetColor(0xf87068ff));
-        flowerMarioReplacePallete.push_back(GetColor(0xf87018ff));
 
         // load textures...
 
@@ -418,13 +409,6 @@ void ResourceManager::unloadMusics() {
         UnloadMusicStream(music.second);
     }
     musics.clear();
-}
-
-// Unload all resources
-void ResourceManager::unloadResources() {
-    unloadTextures();
-    unloadSounds();
-    unloadMusics();
 }
 
 // Get resource maps
