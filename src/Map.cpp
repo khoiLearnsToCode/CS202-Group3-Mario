@@ -50,11 +50,13 @@
 //#include "YellowKoopaTroopa.h"
 //#include "YoshiCoin.h"
 #include <iostream>
+#include <fstream>
 #include <sstream>
 #include <string>
 #include <vector>
 
-Map::Map(Mario& mario, int id, bool loadTestMap, bool parseBlocks, bool parseItems, bool parseBaddies, GameWorld* gw) :
+
+Map::Map(int id, bool loadTestMap, GameWorld* gw) :
 
     id(id),
     maxId(3),
@@ -64,7 +66,6 @@ Map::Map(Mario& mario, int id, bool loadTestMap, bool parseBlocks, bool parseIte
 
 //    mario(mario),
 //    marioOffset(0),
-
     backgroundId(0),
     maxBackgroundId(10),
     backgroundColor(WHITE),
@@ -73,7 +74,7 @@ Map::Map(Mario& mario, int id, bool loadTestMap, bool parseBlocks, bool parseIte
     //drawBlackScreenFadeAcum(0),
     //drawBlackScreenFadeTime(1.5),
 
-    tileSetId(1),
+    //tileSetId(1),
     //maxTileSetId(4),
 
     //musicId(0),
@@ -97,13 +98,13 @@ Map::~Map() {
         delete tile;
     }
 
-    for (const auto& backScenarioTile : backScenarioTiles) {
-        delete backScenarioTile;
-    }
+    // for (const auto& backScenarioTile : backScenarioTiles) {
+    //     delete backScenarioTile;
+    // }
 
-    for (const auto& frontScenarioTile : frontScenarioTiles) {
-        delete frontScenarioTile;
-    }
+    // for (const auto& frontScenarioTile : frontScenarioTiles) {
+    //     delete frontScenarioTile;
+    // }
 
     //for (const auto& item : items) {
     //    delete item;
@@ -121,6 +122,45 @@ Map::~Map() {
     //    delete block;
     //}
 
+}
+
+void Map::loadFromJsonFile(int MapID, bool loadTestMap) {
+    //clear current map
+    reset();
+
+    std::string jsonFilePath;
+    if (loadTestMap) {
+        jsonFilePath = "resource/maps/test.json";
+    } 
+    
+    else {
+        jsonFilePath = "resource/maps/map" + std::to_string(MapID) + ".json";
+    }
+
+    std::ifstream fin(jsonFilePath);
+    if (!fin){
+        std::cout << "Cannot open " << jsonFilePath << std::endl;
+        return;
+    }
+
+    nlohmann::json mapJson;
+	fin >> mapJson;
+
+    int width = mapJson["width"];
+	int height = mapJson["height"];
+	int tilewidth = mapJson["tilewidth"];
+    std::vector<int> tileIDs = mapJson["layer"][0]["data"];
+
+    // Load IDs as data
+    for (int y = 0; y < height; y++){
+        for (int x = 0; x < width; x++){
+            int tileID = tileIDs[y * width + x];
+            if (tileID != 0){
+                tiles.push_back(new Tile(Vector2{1.0f * x * TILE_WIDTH, 1.0f * x * TILE_WIDTH}, Vector2{16.0f, 16.0f},
+                WHITE, "tile_" + std::to_string(tileID - 1), true));
+            }
+        }
+    }  
 }
 
 void Map::draw() {
@@ -174,9 +214,9 @@ void Map::draw() {
 
     //mario.draw();
 
-    for (const auto& frontScenarioTile : frontScenarioTiles) {
-        frontScenarioTile->draw();
-    }
+    // for (const auto& frontScenarioTile : frontScenarioTiles) {
+    //     frontScenarioTile->draw();
+    // }
 
     //if (drawBlackScreen) {
     //    if (drawBlackScreenFadeAcum < drawBlackScreenFadeTime) {
@@ -234,9 +274,9 @@ std::vector<Tile*>& Map::getTiles() {
     return tiles;
 }
 
-std::vector<Block*>& Map::getBlocks() {
-    return blocks;
-}
+// std::vector<Block*>& Map::getBlocks() {
+//     return blocks;
+// }
 
 //std::vector<Item*>& Map::getItems() {
 //    return items;
@@ -788,15 +828,15 @@ void Map::reset() {
     }
     tiles.clear();
 
-    for (const auto& backScenarioTile : backScenarioTiles) {
-        delete backScenarioTile;
-    }
-    backScenarioTiles.clear();
+    // for (const auto& backScenarioTile : backScenarioTiles) {
+    //     delete backScenarioTile;
+    // }
+    // backScenarioTiles.clear();
 
-    for (const auto& frontScenarioTile : frontScenarioTiles) {
-        delete frontScenarioTile;
-    }
-    frontScenarioTiles.clear();
+    // for (const auto& frontScenarioTile : frontScenarioTiles) {
+    //     delete frontScenarioTile;
+    // }
+    // frontScenarioTiles.clear();
 
     //for (const auto& block : blocks) {
     //    delete block;

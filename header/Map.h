@@ -3,11 +3,6 @@
 class Block;
 class GameWorld;
 
-//#include "Baddie.h"
-//#include "Block.h"
-//#include "Drawable.h"
-//#include "Item.h"
-//#include "Mario.h"
 #include "raylib.h"
 #include "json.hpp"
 #include "Tile.h"
@@ -16,17 +11,15 @@ class GameWorld;
 class Map : public virtual Drawable {
 
     std::vector<Tile*> tiles;
-    std::vector<Tile*> backScenarioTiles;
-    std::vector<Tile*> frontScenarioTiles;
-    std::vector<Block*> blocks;
-    std::vector<Block*> messageBlocks;
+    // std::vector<Tile*> backScenarioTiles;
+    // std::vector<Tile*> frontScenarioTiles;
+    // std::vector<Block*> blocks;
+    // std::vector<Block*> messageBlocks;
     //std::vector<Item*> items;
     //std::vector<Item*> staticItems;
     //std::vector<Baddie*> baddies;
     //std::vector<Baddie*> frontBaddies;  // auxiliary drawing vector for map placement
     //std::vector<Baddie*> backBaddies;   // auxiliary drawing vector for map placement
-
-	static const std::string MAPS_FOLDER_PREFIX;
 
     int id;
     int maxId;
@@ -67,22 +60,22 @@ public:
 
     static constexpr int TILE_WIDTH = 16;
 
-    Map(Mario& mario, int id, bool loadTestMap, bool parseBlocks, bool parseItems, bool parseBaddies, GameWorld* gw);
+    Map(int id, bool loadTestMap, GameWorld* gw);
     ~Map() override;
     void draw() override;
 
     //void parseMap();
-    void loadFromJsonFile(const std::string& jsonFilePath);
+    void loadFromJsonFile(int MapID, bool loadTestMap = false);
 
-    void setMarioOffset(float marioOffset);
-    void setDrawBlackScreen(bool drawBlackScreen);
-    void setDrawMessage(bool drawMessage);
-    void setMessage(std::string message);
+    //void setMarioOffset(float marioOffset);
+    // void setDrawBlackScreen(bool drawBlackScreen);
+    // void setDrawMessage(bool drawMessage);
+    // void setMessage(std::string message);
     void setCamera(Camera2D* camera);
     void setGameWorld(GameWorld* gw);
 
     std::vector<Tile*>& getTiles();
-    std::vector<Block*>& getBlocks();
+    //std::vector<Block*>& getBlocks();
     //std::vector<Item*>& getItems();
     //std::vector<Item*>& getStaticItems();
     //std::vector<Baddie*>& getBaddies();
