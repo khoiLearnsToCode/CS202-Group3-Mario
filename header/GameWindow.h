@@ -1,5 +1,6 @@
 #pragma once
 #include "GameWorld.h"
+#include "ResourceManager.h"
 #include "string"
 
 class GameWindow {
