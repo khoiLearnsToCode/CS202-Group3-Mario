@@ -12,7 +12,6 @@ private:
     // Static instance pointer
     static ResourceManager* instance;
 
-    // Instance data members (no longer static)
     std::map<std::string, Texture2D> textures;
     std::map<std::string, Sound> sounds;
     std::map<std::string, Music> musics;

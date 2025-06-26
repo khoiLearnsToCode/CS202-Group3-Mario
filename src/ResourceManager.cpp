@@ -5,7 +5,7 @@
 ResourceManager* ResourceManager::instance = nullptr;
 
 // Private constructor
-ResourceManager::ResourceManager() : loadFromRRES(false) {
+ResourceManager::ResourceManager() {
     // Initialize empty
 }
 
