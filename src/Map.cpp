@@ -65,8 +65,8 @@ Map::Map(int id, bool loadTestMap, GameWorld* gw) :
     maxHeight(0),
 
 //    mario(mario),
-//    marioOffset(0),
-    backgroundId(0),
+    marioOffset(0),
+    backgroundId(1),
     maxBackgroundId(10),
     backgroundColor(WHITE),
     backgroundTexture(Texture()),
@@ -130,11 +130,11 @@ void Map::loadFromJsonFile(int MapID, bool loadTestMap) {
 
     std::string jsonFilePath;
     if (loadTestMap) {
-        jsonFilePath = "resource/maps/test.json";
+        jsonFilePath = "../resource/maps/test.json";
     } 
     
     else {
-        jsonFilePath = "resource/maps/map" + std::to_string(MapID) + ".json";
+        jsonFilePath = "../resource/maps/map" + std::to_string(MapID) + ".json";
     }
 
     std::ifstream fin(jsonFilePath);
@@ -144,20 +144,49 @@ void Map::loadFromJsonFile(int MapID, bool loadTestMap) {
     }
 
     nlohmann::json mapJson;
-	fin >> mapJson;
+    try {
+        fin >> mapJson;
+    } catch (const std::exception& e) {
+        std::cout << "Error parsing JSON file " << jsonFilePath << ": " << e.what() << std::endl;
+        return;
+    }
+
+    // Check if required fields exist
+    if (!mapJson.contains("width") || !mapJson.contains("height") || 
+        !mapJson.contains("layers") || mapJson["layers"].empty() ||
+        !mapJson["layers"][0].contains("data")) {
+        std::cout << "JSON file " << jsonFilePath << " is missing required fields" << std::endl;
+        return;
+    }
 
     int width = mapJson["width"];
 	int height = mapJson["height"];
+    maxWidth = width * TILE_WIDTH;
+    maxHeight = height * TILE_WIDTH;
+
+    // Set background ID
+    if (mapJson.contains("backgroundId")) {
+        backgroundId = mapJson["backgroundId"];
+        if (backgroundId < 0) {
+            backgroundId = 0;
+        } else if (backgroundId > maxBackgroundId) {
+            backgroundId = maxBackgroundId;
+        }
+    } else {
+        backgroundId = 1; // Default value
+    }
+
+    // Load tile IDs and dimensions
 	int tilewidth = mapJson["tilewidth"];
-    std::vector<int> tileIDs = mapJson["layer"][0]["data"];
+    std::vector<int> tileIDs = mapJson["layers"][0]["data"];
 
     // Load IDs as data
     for (int y = 0; y < height; y++){
         for (int x = 0; x < width; x++){
             int tileID = tileIDs[y * width + x];
             if (tileID != 0){
-                tiles.push_back(new Tile(Vector2{1.0f * x * TILE_WIDTH, 1.0f * x * TILE_WIDTH}, Vector2{16.0f, 16.0f},
-                WHITE, "tile_" + std::to_string(tileID - 1), true));
+                tiles.push_back(new Tile(Vector2{1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, Vector2{TILE_WIDTH * 1.0f, TILE_WIDTH * 1.0f},
+                BLACK, "tile_" + std::to_string(tileID), true));
             }
         }
     }  
@@ -165,10 +194,18 @@ void Map::loadFromJsonFile(int MapID, bool loadTestMap) {
 
 void Map::draw() {
 
-    const int repeats = maxWidth / backgroundTexture.width + 2;
     DrawRectangle(0, 0, maxWidth, maxHeight, backgroundColor);
 
+    std::string backgroundTextureKey = "background" + std::to_string(backgroundId);
+    if (ResourceManager::getInstance().getTextures().find(backgroundTextureKey) != ResourceManager::getInstance().getTextures().end()) {
+        backgroundTexture = ResourceManager::getInstance().getTexture(backgroundTextureKey);
+    } else {
+        backgroundTexture = Texture2D(); // Fallback to an empty texture if not found
+        std::cout << "Background texture not found: " << backgroundTextureKey << std::endl;
+    }
+
     if (backgroundId > 0) {
+        const int repeats = maxWidth / backgroundTexture.width + 2;
         for (int i = 0; i <= repeats; i++) {
             DrawTexture(
                 backgroundTexture,
@@ -867,7 +904,7 @@ void Map::reset() {
 
 }
 
-bool Map::next() {
+bool Map::hasNext() {
 
     id++;
 
