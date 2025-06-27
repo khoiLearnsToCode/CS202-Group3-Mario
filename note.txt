@@ -11,4 +11,14 @@ map stores a reference to mario
 
 resource manager needs to load textures for tiles (currently not working)
 
+nothing new3
+
+
+>>>>>>>>>>>PMK 25/06/25 >>>>>>>>>>>>>>>>>
+if you want to get the obj of the resource manager, you can use the following code:
+ResourceManager resourceManager = ResourceManager::getInstance();
+
+
+
+
 

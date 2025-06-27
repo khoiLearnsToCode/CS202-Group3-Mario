@@ -8,45 +8,6 @@
   * @brief Construct a new GameWindow object
   */
 
-//GameWindow::GameWindow(bool initAudio, TraceLogLevel logLevel) :
-//    GameWindow(800, 450, "Window Title", 60, true, false, false, false, false, false, initAudio, logLevel) {
-//}
-//
-//GameWindow::GameWindow(int width, int height, std::string title, bool initAudio, TraceLogLevel logLevel) :
-//    GameWindow(width, height, std::move(title), 60, true, false, false, false, false, false, initAudio, logLevel) {
-//}
-//
-//GameWindow::GameWindow(int width, int height, std::string title, int targetFPS, bool initAudio, TraceLogLevel logLevel) :
-//    GameWindow(width, height, std::move(title), targetFPS, true, false, false, false, false, false, initAudio, logLevel) {
-//}
-//
-//GameWindow::GameWindow(int width, int height, std::string title, bool antialiasing, bool initAudio, TraceLogLevel logLevel) :
-//    GameWindow(width, height, std::move(title), 60, antialiasing, false, false, false, false, false, initAudio, logLevel) {
-//}
-//
-//GameWindow::GameWindow(int width, int height, std::string title, int targetFPS, bool antialiasing, bool initAudio, TraceLogLevel logLevel) :
-//    GameWindow(width, height, std::move(title), targetFPS, antialiasing, false, false, false, false, false, initAudio, logLevel) {
-//}
-//
-//GameWindow::GameWindow(int width, int height, std::string title, int targetFPS,
-//    bool antialiasing, bool resizable, bool fullScreen,
-//    bool undecorated, bool alwaysOnTop, bool alwaysRun, bool initAudio, TraceLogLevel logLevel) :
-//    width(width),
-//    height(height),
-//    title(std::move(title)),
-//    targetFPS(targetFPS),
-//    antialiasing(antialiasing),
-//    resizable(resizable),
-//    fullScreen(fullScreen),
-//    undecorated(undecorated),
-//    alwaysOnTop(alwaysOnTop),
-//    alwaysRun(alwaysRun),
-//    initAudio(initAudio),
-//    logLevel(logLevel),
-//    camera(Camera2D()),
-//    initialized(false) {
-//}
-
 GameWindow::GameWindow(int width, int height, std::string title) : 
     width(width),
     height(height),
@@ -57,7 +18,7 @@ GameWindow::GameWindow(int width, int height, std::string title) :
     initialized(false) 
 {}
 
-/**
+/** 
  * @brief Destroy the GameWindow object
  */
 GameWindow::~GameWindow() {
@@ -70,32 +31,6 @@ GameWindow::~GameWindow() {
 void GameWindow::init() {
 
     if (!initialized) {
-
-        /*if (antialiasing) {
-            SetConfigFlags(FLAG_MSAA_4X_HINT);
-        }
-
-        if (resizable) {
-            SetConfigFlags(FLAG_WINDOW_RESIZABLE);
-        }
-
-        if (fullScreen) {
-            SetConfigFlags(FLAG_FULLSCREEN_MODE);
-        }
-
-        if (undecorated) {
-            SetConfigFlags(FLAG_WINDOW_UNDECORATED);
-        }
-
-        if (alwaysOnTop) {
-            SetConfigFlags(FLAG_WINDOW_TOPMOST);
-        }
-
-        if (alwaysRun) {
-            SetConfigFlags(FLAG_WINDOW_ALWAYS_RUN);
-        }
-
-        SetTraceLogLevel(logLevel);*/
 
         InitWindow(width, height, title.c_str());
 
@@ -120,6 +55,7 @@ void GameWindow::init() {
         }
 
         GameWorld::unloadResources();
+        ResourceManager::destroyInstance();
         if (initAudio) {
             CloseAudioDevice();
         }

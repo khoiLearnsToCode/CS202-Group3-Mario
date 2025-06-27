@@ -12,18 +12,15 @@ private:
     // Static instance pointer
     static ResourceManager* instance;
 
-    // Instance data members (no longer static)
     std::map<std::string, Texture2D> textures;
     std::map<std::string, Sound> sounds;
     std::map<std::string, Music> musics;
 
-    bool loadFromRRES;
-
     // Private constructor (prevents external instantiation)
-    ResourceManager();
+    ResourceManager() = default;
 
     // Private destructor
-    ~ResourceManager();
+    ~ResourceManager() = default;
 
     // Delete copy constructor and assignment operator
     ResourceManager(const ResourceManager&) = delete;
@@ -34,9 +31,9 @@ private:
     void loadSounds();
     void loadMusics();
 
-    void loadTexture(const std::string& key, const std::string& path);
-    void loadSound(const std::string& key, const std::string& path);
-    void loadMusic(const std::string& key, const std::string& path);
+    // void loadTexture(const std::string& key, const std::string& path);
+    // void loadSound(const std::string& key, const std::string& path);
+    // void loadMusic(const std::string& key, const std::string& path);
 
     void unloadTextures();
     void unloadSounds();
