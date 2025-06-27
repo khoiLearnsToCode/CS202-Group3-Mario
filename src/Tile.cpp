@@ -33,7 +33,7 @@ void Tile::draw() {
 
         std::map<std::string, Texture2D>& textures = ResourceManager::getInstance().getTextures();
 
-        if (key.length() != 0) {
+        if (key.length() != 0 && textures.find(key) != textures.end()) {
             DrawTexture(textures[key], pos.x, pos.y, WHITE);
         }
         else {
