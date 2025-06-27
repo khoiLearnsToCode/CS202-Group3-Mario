@@ -9,7 +9,10 @@
 #include <utility>
 
 Tile::Tile(Vector2 pos, Vector2 dim, Color color, std::string key, bool visible) :
-    Tile(pos, dim, color, key, visible, TILE_TYPE_SOLID) {
+    Sprite(pos, dim, color),
+    key(std::move(key)),
+    visible(visible),
+    type(TILE_TYPE_SOLID) {
 }
 
 Tile::Tile(Vector2 pos, Vector2 dim, Color color, std::string key, bool visible, TileType type) :

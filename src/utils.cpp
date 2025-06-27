@@ -49,32 +49,32 @@ void drawYellowSmallNumber(int number, int x, int y) {
 }
 
 void drawSmallNumber(int number, int x, int y, std::string textureId) {
-    Texture2D texture = ResourceManager::getTextures()[textureId];
+    Texture2D texture = ResourceManager::getInstance().getTextures()[textureId];
     int w = 18;
     int h = 14;
     std::string str = std::to_string(number);
     int px = x;
     for (char i : str) {
-        DrawTextureRec(texture, Rectangle((i - '0') * w, 0, w, h), Vector2(px, y), WHITE);
+        DrawTextureRec(texture, Rectangle{(i - '0') * w * 1.0f, 0, w*1.0f, h*1.0f}, Vector2{px*1.0f, y*1.0f}, WHITE);
         px += w - 2;
     }
 }
 
 void drawBigNumber(int number, int x, int y) {
-    Texture2D texture = ResourceManager::getTextures()["guiNumbersBig"];
+    Texture2D texture = ResourceManager::getInstance().getTextures()["guiNumbersBig"];
     int w = 18;
     int h = 28;
     std::string str = std::to_string(number);
     int px = x;
     for (char i : str) {
-        DrawTextureRec(texture, Rectangle((i - '0') * w, 0, w, h), Vector2(px, y), WHITE);
+        DrawTextureRec(texture, Rectangle{(i - '0') * w * 1.0f, 0, w*1.0f, h*1.0f}, Vector2{px*1.0f, y*1.0f}, WHITE);
         px += w - 2;
     }
 }
 
 void drawString(std::string str, int x, int y) {
 
-    Texture2D texture = ResourceManager::getTextures()["guiAlfa"];
+    Texture2D texture = ResourceManager::getInstance().getTextures()["guiAlfa"];
     int w = 18;
     int h = 20;
     int px = x;
@@ -117,7 +117,7 @@ void drawString(std::string str, int x, int y) {
         }
 
         if (!space) {
-            DrawTextureRec(texture, Rectangle(code * w, textureY, w, h), Vector2(px, y), WHITE);
+            DrawTextureRec(texture, Rectangle{code * w * 1.0f, textureY * 1.0f, w * 1.0f, h * 1.0f}, Vector2{px * 1.0f, y * 1.0f}, WHITE);
         }
 
         px += w - 2;
@@ -128,7 +128,7 @@ void drawString(std::string str, int x, int y) {
 
 void drawString(std::wstring str, int x, int y) {
 
-    const Texture2D texture = ResourceManager::getTextures()["guiAlfa"];
+    const Texture2D texture = ResourceManager::getInstance().getTextures()["guiAlfa"];
     int w = 18;
     int h = 20;
     int px = x;
@@ -187,7 +187,7 @@ void drawString(std::wstring str, int x, int y) {
         }
 
         if (!space) {
-            DrawTextureRec(texture, Rectangle(code * w, textureY, w, h), Vector2(px, y), WHITE);
+            DrawTextureRec(texture, Rectangle{code * w * 1.0f, textureY * 1.0f, w * 1.0f, h * 1.0f}, Vector2{px * 1.0f, y * 1.0f}, WHITE);
         }
 
         px += w - 2;
@@ -222,7 +222,7 @@ int getDrawStringHeight() {
 
 void drawMessageString(std::string str, int x, int y) {
 
-    const Texture2D texture = ResourceManager::getTextures()["guiAlfaLowerUpper"];
+    const Texture2D texture = ResourceManager::getInstance().getTextures()["guiAlfaLowerUpper"];
     int w = 16;
     int h = 16;
     int px = x;
@@ -270,7 +270,7 @@ void drawMessageString(std::string str, int x, int y) {
         }
 
         if (!space) {
-            DrawTextureRec(texture, Rectangle(code * w, textureY, w, h), Vector2(px, y), WHITE);
+            DrawTextureRec(texture, Rectangle{code * w * 1.0f, textureY * 1.0f, w * 1.0f, h * 1.0f}, Vector2{px * 1.0f, y * 1.0f}, WHITE);
         }
 
         px += w - 2;
