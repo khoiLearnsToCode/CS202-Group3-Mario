@@ -3,7 +3,7 @@
  <editorsettings>
   <export target="../../maps/test.json" format="json"/>
  </editorsettings>
- <tileset firstgid="1" name="Tile" tilewidth="32" tileheight="32" tilecount="83" columns="0">
+ <tileset firstgid="1" name="Tile" tilewidth="32" tileheight="32" tilecount="87" columns="0">
   <grid orientation="orthogonal" width="1" height="1"/>
   <tile id="0">
    <image source="tile_1.png" width="32" height="32"/>
@@ -254,8 +254,20 @@
   <tile id="82">
    <image source="tile_83.png" width="32" height="32"/>
   </tile>
+  <tile id="83">
+   <image source="tile_84.png" width="32" height="32"/>
+  </tile>
+  <tile id="84">
+   <image source="tile_85.png" width="32" height="32"/>
+  </tile>
+  <tile id="85">
+   <image source="tile_86.png" width="32" height="32"/>
+  </tile>
+  <tile id="86">
+   <image source="tile_87.png" width="32" height="32"/>
+  </tile>
  </tileset>
- <tileset firstgid="84" name="Block" tilewidth="32" tileheight="32" tilecount="15" columns="0">
+ <tileset firstgid="88" name="Block" tilewidth="32" tileheight="32" tilecount="15" columns="0">
   <grid orientation="orthogonal" width="1" height="1"/>
   <tile id="0">
    <image source="../sprites/blocks/Cloud_0.png" width="32" height="32"/>
@@ -303,7 +315,7 @@
    <image source="../sprites/blocks/Wood_0.png" width="32" height="32"/>
   </tile>
  </tileset>
- <tileset firstgid="99" name="Item" tilewidth="64" tileheight="50" tilecount="18" columns="0">
+ <tileset firstgid="103" name="Item" tilewidth="64" tileheight="50" tilecount="18" columns="0">
   <grid orientation="orthogonal" width="1" height="1"/>
   <tile id="0">
    <image source="../sprites/items/1UpMushroom.png" width="32" height="32"/>
@@ -360,7 +372,7 @@
    <image source="../sprites/items/YoshiCoin_3.png" width="32" height="50"/>
   </tile>
  </tileset>
- <tileset firstgid="117" name="Baddie" tilewidth="66" tileheight="66" tilecount="38" columns="0">
+ <tileset firstgid="121" name="Baddie" tilewidth="66" tileheight="66" tilecount="38" columns="0">
   <grid orientation="orthogonal" width="1" height="1"/>
   <tile id="0">
    <image source="../sprites/baddies/BlueKoopaTroopa_0.png" width="32" height="54"/>
