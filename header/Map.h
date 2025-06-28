@@ -58,7 +58,7 @@ class Map : public virtual Drawable {
 
 public:
 
-    static constexpr int TILE_WIDTH = 16;
+    static constexpr int TILE_WIDTH = 32;
 
     Map(int id, bool loadTestMap, GameWorld* gw);
     ~Map() override;
@@ -83,8 +83,12 @@ public:
     float getMaxHeight() const;
 
     //void playMusic() const;
+
+// Reset the map to its initial state
     void reset();
-    bool next();
+
+// Returns true if there is a next map to load and jump to next map
+    bool hasNext();
     void first();
     //void pauseGameToShowMessage() const;
 

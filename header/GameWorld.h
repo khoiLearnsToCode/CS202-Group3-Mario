@@ -5,6 +5,7 @@ class Mario;
 #include "Drawable.h"
 #include "GameState.h"
 #include "Map.h"
+#include "ResourceManager.h"
 //#include "Mario.h"
 #include "raylib.h"
 
@@ -13,21 +14,21 @@ class GameWorld : public virtual Drawable {
     //Mario mario;
     Map map;
     Camera2D* camera;
-    bool showControls;
-    GameState stateBeforePause;
+    //bool showControls;
+    //GameState stateBeforePause;
     int remainingTimePointCount;
 
-    bool pauseMusic;
-    bool pauseMarioUpdate;
-    bool showOverlayOnPause;
+    // bool pauseMusic;
+    // bool pauseMarioUpdate;
+    // bool showOverlayOnPause;
 
-    bool irisOutFinished;
-    float irisOutTime;
-    float irisOutAcum;
+    // bool irisOutFinished;
+    // float irisOutTime;
+    // float irisOutAcum;
 
 public:
 
-    static bool immortalMario;
+    // static bool immortalMario;
     static GameState state;
     static float gravity;
 
@@ -39,7 +40,7 @@ public:
     /**
      * @brief Destroy the GameWorld object.
      */
-    ~GameWorld() override;
+    ~GameWorld() override = default;
 
     /**
      * @brief Reads user input and updates the state of the game.
@@ -73,7 +74,7 @@ public:
     void pauseGame(bool playPauseSFX, bool pauseMusic, bool showOverlay, bool pauseMarioUpdate);
     void unpauseGame();
 
-    bool isPauseMusicOnPause() const;
-    bool isShowOverlayOnPause() const;
+    // bool isPauseMusicOnPause() const;
+    // bool isShowOverlayOnPause() const;
 
 };
