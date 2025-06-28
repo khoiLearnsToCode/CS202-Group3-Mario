@@ -172,26 +172,30 @@ void ResourceManager::loadTextures() {
         //textures["fireball3L"] = texture2DFlipHorizontal(textures["fireball3R"]);
 
         // tiles
-        textures["tile_65"] = LoadTexture("resource/graphics/tiles/tile_65.png");
-        textures["tile_85"] = LoadTexture("resource/graphics/tiles/tile_85.png");
-        textures["tile_121"] = LoadTexture("resource/graphics/tiles/tile_121.png");
-        textures["tile_122"] = LoadTexture("resource/graphics/tiles/tile_122.png");
-        textures["tile_123"] = LoadTexture("resource/graphics/tiles/tile_123.png");
-        textures["tile_124"] = LoadTexture("resource/graphics/tiles/tile_124.png");
-        textures["tile_125"] = LoadTexture("resource/graphics/tiles/tile_125.png");
-        textures["tile_141"] = LoadTexture("resource/graphics/tiles/tile_141.png");
-        textures["tile_142"] = LoadTexture("resource/graphics/tiles/tile_142.png");
-        textures["tile_143"] = LoadTexture("resource/graphics/tiles/tile_143.png");
-        textures["tile_144"] = LoadTexture("resource/graphics/tiles/tile_144.png");
-        textures["tile_145"] = LoadTexture("resource/graphics/tiles/tile_145.png");
-        textures["tile_162"] = LoadTexture("resource/graphics/tiles/tile_162.png");
-        textures["tile_164"] = LoadTexture("resource/graphics/tiles/tile_164.png");
-        textures["tile_231"] = LoadTexture("resource/graphics/tiles/tile_231.png");
-        textures["tile_232"] = LoadTexture("resource/graphics/tiles/tile_232.png");
-        textures["tile_233"] = LoadTexture("resource/graphics/tiles/tile_233.png");
-        textures["tile_251"] = LoadTexture("resource/graphics/tiles/tile_251.png");
-        textures["tile_252"] = LoadTexture("resource/graphics/tiles/tile_252.png");
-        textures["tile_253"] = LoadTexture("resource/graphics/tiles/tile_253.png");
+        textures["tile_65"] = LoadTexture("../resource/graphic/tiles/tile_65.png");
+        textures["tile_66"] = LoadTexture("../resource/graphic/tiles/tile_66.png");
+        textures["tile_67"] = LoadTexture("../resource/graphic/tiles/tile_67.png");
+        textures["tile_85"] = LoadTexture("../resource/graphic/tiles/tile_85.png");
+        textures["tile_86"] = LoadTexture("../resource/graphic/tiles/tile_86.png");
+        textures["tile_87"] = LoadTexture("../resource/graphic/tiles/tile_87.png");
+        textures["tile_121"] = LoadTexture("../resource/graphic/tiles/tile_121.png");
+        textures["tile_122"] = LoadTexture("../resource/graphic/tiles/tile_122.png");
+        textures["tile_123"] = LoadTexture("../resource/graphic/tiles/tile_123.png");
+        textures["tile_124"] = LoadTexture("../resource/graphic/tiles/tile_124.png");
+        textures["tile_125"] = LoadTexture("../resource/graphic/tiles/tile_125.png");
+        textures["tile_141"] = LoadTexture("../resource/graphic/tiles/tile_141.png");
+        textures["tile_142"] = LoadTexture("../resource/graphic/tiles/tile_142.png");
+        textures["tile_143"] = LoadTexture("../resource/graphic/tiles/tile_143.png");
+        textures["tile_144"] = LoadTexture("../resource/graphic/tiles/tile_144.png");
+        textures["tile_145"] = LoadTexture("../resource/graphic/tiles/tile_145.png");
+        textures["tile_162"] = LoadTexture("../resource/graphic/tiles/tile_162.png");
+        textures["tile_164"] = LoadTexture("../resource/graphic/tiles/tile_164.png");
+        textures["tile_231"] = LoadTexture("../resource/graphic/tiles/tile_231.png");
+        textures["tile_232"] = LoadTexture("../resource/graphic/tiles/tile_232.png");
+        textures["tile_233"] = LoadTexture("../resource/graphic/tiles/tile_233.png");
+        textures["tile_251"] = LoadTexture("../resource/graphic/tiles/tile_251.png");
+        textures["tile_252"] = LoadTexture("../resource/graphic/tiles/tile_252.png");
+        textures["tile_253"] = LoadTexture("../resource/graphic/tiles/tile_253.png");
 
 
         //textures["tileCourseClearPoleBackTop"] = LoadTexture("resources/graphics/tiles/scenario/tile_CourseClearPoleBackTop.png");
@@ -217,7 +221,7 @@ void ResourceManager::loadTextures() {
         //textures["blockWood"] = LoadTexture("resources/images/sprites/blocks/Wood_0.png");
 
         // backgrounds
-        textures["background1"] = LoadTexture("resources/graphics/backgrounds/background1.png");
+        textures["background1"] = LoadTexture("../resource/graphic/backgrounds/background1.png");
         //textures["background2"] = LoadTexture("resources/graphics/backgrounds/background2.png");
         //textures["background3"] = LoadTexture("resources/graphics/backgrounds/background3.png");
         //textures["background4"] = LoadTexture("resources/graphics/backgrounds/background4.png");
