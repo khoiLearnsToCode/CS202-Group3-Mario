@@ -173,7 +173,11 @@ void ResourceManager::loadTextures() {
 
         // tiles
         textures["tile_65"] = LoadTexture("../resource/graphic/tiles/tile_65.png");
+        textures["tile_66"] = LoadTexture("../resource/graphic/tiles/tile_66.png");
+        textures["tile_67"] = LoadTexture("../resource/graphic/tiles/tile_67.png");
         textures["tile_85"] = LoadTexture("../resource/graphic/tiles/tile_85.png");
+        textures["tile_86"] = LoadTexture("../resource/graphic/tiles/tile_86.png");
+        textures["tile_87"] = LoadTexture("../resource/graphic/tiles/tile_87.png");
         textures["tile_121"] = LoadTexture("../resource/graphic/tiles/tile_121.png");
         textures["tile_122"] = LoadTexture("../resource/graphic/tiles/tile_122.png");
         textures["tile_123"] = LoadTexture("../resource/graphic/tiles/tile_123.png");
