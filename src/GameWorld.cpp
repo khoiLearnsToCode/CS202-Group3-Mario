@@ -1,26 +1,53 @@
 #include "GameWorld.h"
+#include "Button.h"
 
-GameState GameWorld::state = GAME_STATE_PLAYING;
+GameState GameWorld::state = GAME_STATE_TITLE_SCREEN;
 float GameWorld::gravity = 20;
 
 GameWorld::GameWorld() :
     map(1, true, this),
     camera(nullptr),
-    remainingTimePointCount(0) {}
+    remainingTimePointCount(0),
+    titleScreen(nullptr) {}
+
+GameWorld::~GameWorld() {
+    if (titleScreen != nullptr) {
+        delete titleScreen;
+        titleScreen = nullptr;
+    }
+}
 
 void GameWorld::inputAndUpdate() {
-
-    // Load map data from JSON file
-    map.loadFromJsonFile(1, true);
+    if (state == GAME_STATE_TITLE_SCREEN) {
+        if (titleScreen == nullptr) {
+            titleScreen = new TitleScreen();
+        }
+        if (titleScreen->getStartButton().isPressed()) {
+            state = GAME_STATE_PLAYING;
+        }
+    }
+    else
+    {
+        // Handle input and update the map
+        map.loadFromJsonFile(1, true);
+    }
+    
      
 }
 
 void GameWorld::draw() {
     BeginDrawing();
-    ClearBackground(BLUE);
+    ClearBackground(WHITE);
+    std::map<std::string, Texture2D>& textures = ResourceManager::getInstance().getTextures();
+
+    if (state == GAME_STATE_TITLE_SCREEN) {
+        titleScreen->draw();
+    }
 
     // Draw the map
-    map.draw();
+    else {
+        map.draw();
+    }
 
     EndDrawing();
 }
