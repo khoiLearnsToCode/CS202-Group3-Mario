@@ -77,8 +77,8 @@ Map::Map(int id, bool loadTestMap, GameWorld* gw) :
     //tileSetId(1),
     //maxTileSetId(4),
 
-    //musicId(0),
-    //maxMusicId(9),
+    musicId(0),
+    maxMusicId(9),
 
     //parseBlocks(parseBlocks),
     //parseItems(parseItems),
@@ -87,7 +87,6 @@ Map::Map(int id, bool loadTestMap, GameWorld* gw) :
     loadTestMap(loadTestMap),
     parsed(false),
 
-    //drawMessage(false),
     camera(nullptr),
     gw(gw) {
 }

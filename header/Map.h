@@ -34,8 +34,8 @@ class Map : public virtual Drawable {
     int maxBackgroundId;
     int tileSetId;
     //int maxTileSetId;
-    //int musicId;
-    //int maxMusicId;
+    int musicId;
+    int maxMusicId;
     Color backgroundColor;
     Texture2D backgroundTexture;
     //bool drawBlackScreen;

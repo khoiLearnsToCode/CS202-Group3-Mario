@@ -200,6 +200,10 @@ void ResourceManager::loadTextures() {
         //textures["blockWood"] = LoadTexture("resources/images/sprites/blocks/Wood_0.png");
 
         // backgrounds
+        Image titleScreenImage = LoadImage("../resource/graphic/backgrounds/title_screen.png");
+        ImageResize(&titleScreenImage, GetScreenWidth(), GetScreenHeight());
+        textures["title_screen"] = LoadTextureFromImage(titleScreenImage);
+        UnloadImage(titleScreenImage);
         textures["background1"] = LoadTexture("../resource/graphic/backgrounds/background1.png");
         //textures["background2"] = LoadTexture("resources/graphics/backgrounds/background2.png");
         //textures["background3"] = LoadTexture("resources/graphics/backgrounds/background3.png");
@@ -340,7 +344,7 @@ void ResourceManager::loadTextures() {
         // textures["guiNumbersWhite"] = LoadTexture("resources/images/gui/guiNumbersWhite.png");
         // textures["guiNumbersYellow"] = LoadTexture("resources/images/gui/guiNumbersYellow.png");
         // textures["guiPunctuation"] = LoadTexture("resources/images/gui/guiPunctuation.png");
-        // textures["guiRayMarioLogo"] = LoadTexture("resources/images/gui/guiRayMarioLogo.png");
+        textures["guiRayMarioLogo"] = LoadTexture("../resource/graphic/gui/guiRayMarioLogo.png");
         // textures["guiTime"] = LoadTexture("resources/images/gui/guiTime.png");
         // textures["guiTimeUp"] = LoadTexture("resources/images/gui/guiTimeUp.png");
         // textures["guiX"] = LoadTexture("resources/images/gui/guiX.png");
@@ -359,8 +363,38 @@ void ResourceManager::loadTextures() {
         // textures["gui1Up"] = LoadTexture("resources/images/gui/gui1Up.png");
         // textures["gui2Up"] = LoadTexture("resources/images/gui/gui2Up.png");
         // textures["gui3Up"] = LoadTexture("resources/images/gui/gui3Up.png");
-    }
+        textures["StartButton"] = LoadTexture("../resource/graphic/gui/StartButton.png");
 
+        // UI elements
+            // Mute buttons
+        textures["muteButtonBlue"] = LoadTexture("../resource/graphic/ui/MuteButtonBlue.png");
+        textures["muteButtonGreen"] = LoadTexture("../resource/graphic/ui/MuteButtonGreen.png");
+        textures["muteButtonOrange"] = LoadTexture("../resource/graphic/ui/MuteButtonOrange.png");
+        textures["muteButtonWhite"] = LoadTexture("../resource/graphic/ui/MuteButtonWhite.png");
+        textures["muteButtonYellow"] = LoadTexture("../resource/graphic/ui/MuteButtonYellow.png");
+        
+            // Unmute buttons
+        textures["unmuteButtonBlue"] = LoadTexture("../resource/graphic/ui/UnmuteButtonBlue.png");
+        textures["unmuteButtonGreen"] = LoadTexture("../resource/graphic/ui/UnmuteButtonGreen.png");
+        textures["unmuteButtonOrange"] = LoadTexture("../resource/graphic/ui/UnmuteButtonOrange.png");
+        textures["unmuteButtonWhite"] = LoadTexture("../resource/graphic/ui/UnmuteButtonWhite.png");
+        textures["unmuteButtonYellow"] = LoadTexture("../resource/graphic/ui/UnmuteButtonYellow.png");
+        
+            // Save buttons
+        textures["saveButtonBlue"] = LoadTexture("../resource/graphic/ui/SaveButtonBlue.png");
+        textures["saveButtonGreen"] = LoadTexture("../resource/graphic/ui/SaveButtonGreen.png");
+        textures["saveButtonOrange"] = LoadTexture("../resource/graphic/ui/SaveButtonOrange.png");
+        textures["saveButtonWhite"] = LoadTexture("../resource/graphic/ui/SaveButtonWhite.png");
+        textures["saveButtonYellow"] = LoadTexture("../resource/graphic/ui/SaveButtonYellow.png");
+        
+            // Setting buttons
+        textures["settingButtonBlue"] = LoadTexture("../resource/graphic/ui/SettingButtonBlue.png");
+        textures["settingButtonGreen"] = LoadTexture("../resource/graphic/ui/SettingButtonGreen.png");
+        textures["settingButtonOrange"] = LoadTexture("../resource/graphic/ui/SettingButtonOrange.png");
+        textures["settingButtonWhite"] = LoadTexture("../resource/graphic/ui/SettingButtonWhite.png");
+        textures["settingButtonYellow"] = LoadTexture("../resource/graphic/ui/SettingButtonYellow.png");
+        
+    }
 }
 
 // Implementation of loading sounds
@@ -370,7 +404,23 @@ void ResourceManager::loadSounds() {
 
 // Implementation of loading musics
 void ResourceManager::loadMusics() {
-    // Implement later
+    if (musics.empty()) {
+        musics["courseClear"]  = LoadMusicStream( "../resource/audio/musics/courseClear.mp3" );
+        musics["ending"] = LoadMusicStream( "../resource/audio/musics/ending.mp3" );
+        musics["gameOver"] = LoadMusicStream( "../resource/audio/musics/gameOver.mp3" );
+        musics["invincible"] = LoadMusicStream( "../resource/audio/musics/invincible.mp3" );
+        musics["music1"] = LoadMusicStream( "../resource/audio/musics/music1.mp3" );
+        musics["music2"] = LoadMusicStream( "../resource/audio/musics/music2.mp3" );
+        musics["music3"] = LoadMusicStream( "../resource/audio/musics/music3.mp3" );
+        musics["music4"] = LoadMusicStream( "../resource/audio/musics/music4.mp3" );
+        musics["music5"] = LoadMusicStream( "../resource/audio/musics/music5.mp3" );
+        musics["music6"] = LoadMusicStream( "../resource/audio/musics/music6.mp3" );
+        musics["music7"] = LoadMusicStream( "../resource/audio/musics/music7.mp3" );
+        musics["music8"] = LoadMusicStream( "../resource/audio/musics/music8.mp3" );
+        musics["music9"] = LoadMusicStream( "../resource/audio/musics/music9.mp3" );
+        musics["playerDown"] = LoadMusicStream( "../resource/audio/musics/playerDown.mp3" );
+        musics["title"] = LoadMusicStream( "../resource/audio/musics/title.mp3" );
+    }
 }
 
 void ResourceManager::unloadTextures() {
