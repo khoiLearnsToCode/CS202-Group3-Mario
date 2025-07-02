@@ -30,6 +30,7 @@ void ResourceManager::loadResources() {
     loadTextures();
     loadSounds();
     loadMusics();
+    loadFonts();
 }
 
 // Unload all resources
@@ -37,6 +38,7 @@ void ResourceManager::unloadResources() {
     unloadTextures();
     unloadSounds();
     unloadMusics();
+    unloadFonts();
 }
 // Implementation of loading textures
 void ResourceManager::loadTextures() {
@@ -185,7 +187,7 @@ void ResourceManager::loadTextures() {
         //// blocks
         //textures["blockCloud"] = LoadTexture("resources/images/sprites/blocks/Cloud_0.png");
         //textures["blockExclamation"] = LoadTexture("resources/images/sprites/blocks/Exclamation_0.png");
-        //textures["blockEyesClosed"] = LoadTexture("resources/images/sprites/blocks/EyesClosed_0.png");
+        //textures["blockEyesClosed"] = LoadTexture("resources/images/sprites/blocks/Exclamation_0.png");
         //textures["blockEyesOpened0"] = LoadTexture("resources/images/sprites/blocks/EyesOpened_0.png");
         //textures["blockEyesOpened1"] = LoadTexture("resources/images/sprites/blocks/EyesOpened_1.png");
         //textures["blockEyesOpened2"] = LoadTexture("resources/images/sprites/blocks/EyesOpened_2.png");
@@ -365,8 +367,7 @@ void ResourceManager::loadTextures() {
         // textures["gui3Up"] = LoadTexture("resources/images/gui/gui3Up.png");
         textures["StartButton"] = LoadTexture("../resource/graphic/gui/StartButton.png");
         textures["credit"] = LoadTexture("../resource/graphic/gui/credit.png");
-        textures["longButtonRelease"] = LoadTexture("../resource/graphic/gui/longButtonRelease.png");
-        textures["longButtonPress"] = LoadTexture("../resource/graphic/gui/longButtonPress.png");
+        
 
         // UI elements
             // Mute buttons
@@ -395,8 +396,12 @@ void ResourceManager::loadTextures() {
         textures["settingButtonGreen"] = LoadTexture("../resource/graphic/ui/SettingButtonGreen.png");
         textures["settingButtonOrange"] = LoadTexture("../resource/graphic/ui/SettingButtonOrange.png");
         textures["settingButtonWhite"] = LoadTexture("../resource/graphic/ui/SettingButtonWhite.png");
-        textures["settingButtonYellow"] = LoadTexture("../resource/graphic/ui/SettingButtonYellow.png");
+        textures["settingButtonYellow"] = LoadTexture("../resource/graphic/ui/SettingButtonYellow.png");   
         
+        textures["longButtonRelease"] = LoadTexture("../resource/graphic/ui/longButtonRelease.png");
+        textures["longButtonPress"] = LoadTexture("../resource/graphic/ui/longButtonPress.png");
+        textures["homeButtonRelease"] = LoadTexture("../resource/graphic/ui/homeButtonRelease.png");
+        textures["homeButtonPress"] = LoadTexture("../resource/graphic/ui/homeButtonPress.png");
     }
 }
 
@@ -426,6 +431,15 @@ void ResourceManager::loadMusics() {
     }
 }
 
+// Implementation of loading fonts
+void ResourceManager::loadFonts() {
+    if (fonts.empty()) {
+        fonts["fixedsys"] = LoadFont("../resource/font/Fixedsys500c.ttf");
+        fonts["marioKartDS"] = LoadFont("../resource/font/Mario-Kart-DS.ttf");
+        fonts["marioKartF2"] = LoadFont("../resource/font/mario_kart_f2.ttf");
+    }
+}
+
 void ResourceManager::unloadTextures() {
     for (auto& texture : textures) {
         UnloadTexture(texture.second);
@@ -447,6 +461,13 @@ void ResourceManager::unloadMusics() {
     musics.clear();
 }
 
+void ResourceManager::unloadFonts() {
+    for (auto& font : fonts) {
+        UnloadFont(font.second);
+    }
+    fonts.clear();
+}
+
 // Get resource maps
 std::map<std::string, Texture2D>& ResourceManager::getTextures() {
     return textures;
@@ -458,6 +479,10 @@ std::map<std::string, Sound>& ResourceManager::getSounds() {
 
 std::map<std::string, Music>& ResourceManager::getMusics() {
     return musics;
+}
+
+std::map<std::string, Font>& ResourceManager::getFonts() {
+    return fonts;
 }
 
 //Utility getters
@@ -480,4 +505,11 @@ Music& ResourceManager::getMusic(const std::string& key) {
         throw std::runtime_error("Music not found: " + key);
     }
     return musics[key];
+}
+
+Font& ResourceManager::getFont(const std::string& key) {
+    if (fonts.find(key) == fonts.end()) {
+        throw std::runtime_error("Font not found: " + key);
+    }
+    return fonts[key];
 }
