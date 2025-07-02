@@ -22,8 +22,26 @@ void GameWorld::inputAndUpdate() {
         if (titleScreen == nullptr) {
             titleScreen = new TitleScreen();
         }
+
         if (titleScreen->getStartButton().isPressed()) {
             state = GAME_STATE_PLAYING;
+        }
+
+        if (titleScreen->getCreditButton().isPressed()) {
+            state = GAME_STATE_CREDITS_SCREEN;
+        }
+    }
+
+    else if (state == GAME_STATE_CREDITS_SCREEN) {
+        Texture2D& creditTexture = ResourceManager::getInstance().getTexture("credit");
+        Rectangle creditRect = { 
+            (GetScreenWidth() - creditTexture.width) / 2.0f, 
+            (GetScreenHeight() - creditTexture.height) / 2.0f, 
+            1.0f * (creditTexture.width), 
+            1.0f * (creditTexture.height) 
+        };
+        if (!CheckCollisionPointRec(GetMousePosition(), creditRect) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+            state = GAME_STATE_TITLE_SCREEN;
         }
     }
     else
@@ -42,6 +60,16 @@ void GameWorld::draw() {
 
     if (state == GAME_STATE_TITLE_SCREEN) {
         titleScreen->draw();
+    }
+
+    else if (state == GAME_STATE_CREDITS_SCREEN) {
+        titleScreen->draw();
+
+        // Draw a faded background
+        DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Fade(BLACK, 0.3f));
+
+        DrawTexture(textures["credit"], (GetScreenWidth() - textures["credit"].width) / 2, 
+                                        (GetScreenHeight() - textures["credit"].height) / 2, WHITE);
     }
 
     // Draw the map

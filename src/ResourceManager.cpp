@@ -364,6 +364,9 @@ void ResourceManager::loadTextures() {
         // textures["gui2Up"] = LoadTexture("resources/images/gui/gui2Up.png");
         // textures["gui3Up"] = LoadTexture("resources/images/gui/gui3Up.png");
         textures["StartButton"] = LoadTexture("../resource/graphic/gui/StartButton.png");
+        textures["credit"] = LoadTexture("../resource/graphic/gui/credit.png");
+        textures["longButtonRelease"] = LoadTexture("../resource/graphic/gui/longButtonRelease.png");
+        textures["longButtonPress"] = LoadTexture("../resource/graphic/gui/longButtonPress.png");
 
         // UI elements
             // Mute buttons
@@ -459,13 +462,22 @@ std::map<std::string, Music>& ResourceManager::getMusics() {
 
 //Utility getters
 Texture2D& ResourceManager::getTexture(const std::string& key) {
+    if (textures.find(key) == textures.end()) {
+        throw std::runtime_error("Texture not found: " + key);
+    }
     return textures[key];
 }
 
 Sound& ResourceManager::getSound(const std::string& key) {
+    if (sounds.find(key) == sounds.end()) {
+        throw std::runtime_error("Sound not found: " + key);
+    }
     return sounds[key];
 }
 
 Music& ResourceManager::getMusic(const std::string& key) {
+    if (musics.find(key) == musics.end()) {
+        throw std::runtime_error("Music not found: " + key);
+    }
     return musics[key];
 }

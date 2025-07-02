@@ -3,17 +3,19 @@
 #include "Button.h"
 #include "Drawable.h"
 #include "raylib.h"
+#include "Screen.h"
 #include <map>
 
 
-class TitleScreen : public virtual Drawable {
-    Button startButton;
+class TitleScreen : public Screen {
+    ButtonTexture startButton;
     ButtonText credit;
-    std::map<std::string, Texture2D>& textures;
+    ButtonTextTexture temp;
 
     public:
     TitleScreen();
     ~TitleScreen() override = default;
     void draw() override;
-    Button& getStartButton();
+    ButtonTexture& getStartButton();
+    ButtonText& getCreditButton();
 };
