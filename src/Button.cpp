@@ -61,7 +61,7 @@ void ButtonText::update() {
 }
 
 ButtonTextTexture::ButtonTextTexture(const std::string& text, const char* key, Vector2 position, float scale, Color color, Font font, float fontSize): 
-    ButtonText(text, position, scale, color, font, fontSize), currentTexture(nullptr) {
+    ButtonText(text, position, scale, color, font, fontSize), currentTexture(nullptr), truePos(position) {
 
     Image img1 = LoadImageFromTexture(ResourceManager::getInstance().getTexture(std::string(key) + "Release")); 
     ImageResize(&img1, img1.width * scale, img1.height * scale); 
@@ -73,9 +73,9 @@ ButtonTextTexture::ButtonTextTexture(const std::string& text, const char* key, V
     ImageResize(&img2, img2.width * scale, img2.height * scale); 
     btnTexture2 = LoadTextureFromImage(img2); 
     UnloadImage(img2); 
-
+    
     hitbox = { pos.x, pos.y, (float)btnTexture1.width, (float)btnTexture1.height };
-    pos = position;
+    
 }
 
 ButtonTextTexture::~ButtonTextTexture() {
@@ -86,8 +86,12 @@ ButtonTextTexture::~ButtonTextTexture() {
 void ButtonTextTexture::draw() {
     update();  
     //std::cout << "Position: " << pos.x << ", " << pos.y << std::endl;
+    //std:: cout << "Hitbox: " << hitbox.x << ", " << hitbox.y << ", " << hitbox.width << ", " << hitbox.height << std::endl;
+    //std::cout << "text: " << text << std::endl;
+    //std::cout << "fontSize: " << fontSize << std::endl;
     DrawTextureEx(*currentTexture, pos, 0.0f, 1.0f, WHITE);
-    DrawTextEx(font, text.c_str(), pos, fontSize * btnScale, 1, textColor);
+    Vector2 textPos = { pos.x + (currentTexture->width - MeasureTextEx(font, text.c_str(), fontSize, 1).x) / 2.0f, pos.y + (currentTexture->height - fontSize) / 2.0f };
+    DrawTextEx(font, text.c_str(), textPos, fontSize, 0, textColor);
 }
 
 void ButtonTextTexture::update() {
@@ -96,12 +100,15 @@ void ButtonTextTexture::update() {
     if (CheckCollisionPointRec(mousePos, hitbox)) {
         if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) || IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
             currentTexture = &btnTexture2;
+            pos.y = truePos.y + 2.0f;
         } else {
             currentTexture = &btnTexture1;
+            pos.y = truePos.y;
         }
     } 
     
     else {
         currentTexture = &btnTexture1;
+        pos.y = truePos.y;
     }
 }

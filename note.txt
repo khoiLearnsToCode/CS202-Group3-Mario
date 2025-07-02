@@ -21,5 +21,11 @@ ResourceManager resourceManager = ResourceManager::getInstance();
 >>>>>>>>>>>PMK 27/06/25 >>>>>>>>>>>>>>>>>
 BeginDrawing() is inside GameWorld::draw()
 
+>>>>>>>>>>>PMK 01/07/25 BUG >>>>>>>>>>>>>
+Constructor of ButtonTextTexture is not working 
+(cannot call the base class constructor)
+
+FIXED: PMK 02/07/25 >>>>>>>>>>>>>>>>>>>>>
+
 
 
