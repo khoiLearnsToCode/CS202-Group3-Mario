@@ -15,6 +15,7 @@ private:
     std::map<std::string, Texture2D> textures;
     std::map<std::string, Sound> sounds;
     std::map<std::string, Music> musics;
+    std::map<std::string, Font> fonts;
 
     // Private constructor (prevents external instantiation)
     ResourceManager() = default;
@@ -30,6 +31,7 @@ private:
     void loadTextures();
     void loadSounds();
     void loadMusics();
+    void loadFonts();
 
     // void loadTexture(const std::string& key, const std::string& path);
     // void loadSound(const std::string& key, const std::string& path);
@@ -38,6 +40,7 @@ private:
     void unloadTextures();
     void unloadSounds();
     void unloadMusics();
+    void unloadFonts();
 
 public:
     // Static method to get the singleton instance
@@ -53,9 +56,11 @@ public:
     std::map<std::string, Texture2D>& getTextures();
     std::map<std::string, Sound>& getSounds();
     std::map<std::string, Music>& getMusics();
+    std::map<std::string, Font>& getFonts();
 
     // Utility methods
     Texture2D& getTexture(const std::string& key);
     Sound& getSound(const std::string& key);
     Music& getMusic(const std::string& key);
+    Font& getFont(const std::string& key);
 };

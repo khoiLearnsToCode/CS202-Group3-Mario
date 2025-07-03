@@ -8,23 +8,36 @@ GameWorld::GameWorld() :
     map(1, true, this),
     camera(nullptr),
     remainingTimePointCount(0),
-    titleScreen(nullptr) {}
+    titleScreen(nullptr),
+    menuScreen(nullptr) {}
 
 GameWorld::~GameWorld() {
     if (titleScreen != nullptr) {
         delete titleScreen;
         titleScreen = nullptr;
     }
+
+    if (menuScreen != nullptr) {
+        delete menuScreen;
+        menuScreen = nullptr;
+    }
+}
+
+void GameWorld::initScreens() {
+    if (titleScreen == nullptr) {
+        titleScreen = new TitleScreen();
+    }
+
+    if (menuScreen == nullptr) {
+        menuScreen = new MenuScreen();
+    }
 }
 
 void GameWorld::inputAndUpdate() {
     if (state == GAME_STATE_TITLE_SCREEN) {
-        if (titleScreen == nullptr) {
-            titleScreen = new TitleScreen();
-        }
 
         if (titleScreen->getStartButton().isPressed()) {
-            state = GAME_STATE_PLAYING;
+            state = GAME_STATE_MENU_SCREEN;
         }
 
         if (titleScreen->getCreditButton().isPressed()) {
@@ -44,6 +57,28 @@ void GameWorld::inputAndUpdate() {
             state = GAME_STATE_TITLE_SCREEN;
         }
     }
+
+    else if (state == GAME_STATE_MENU_SCREEN) {
+
+        if (menuScreen->getButton("NEW GAME")->isPressed()) {
+            state = GAME_STATE_PLAYING;
+        }
+
+        if (menuScreen->getButton("LOAD GAME")->isPressed()) {
+            // implement later
+            std::cout << "Load Game button pressed. Implement load game functionality later." << std::endl;
+        }
+
+        if (menuScreen->getButton("SETTINGS")->isPressed()) {
+            // implement later
+            std::cout << "Settings button pressed. Implement settings functionality later." << std::endl;
+        }
+
+        if (menuScreen->getButton("EXIT")->isPressed()) {
+            state = GAME_STATE_TITLE_SCREEN;
+        }
+    }
+
     else
     {
         // Handle input and update the map
@@ -70,6 +105,10 @@ void GameWorld::draw() {
 
         DrawTexture(textures["credit"], (GetScreenWidth() - textures["credit"].width) / 2, 
                                         (GetScreenHeight() - textures["credit"].height) / 2, WHITE);
+    }
+
+    else if (state == GAME_STATE_MENU_SCREEN) {
+        menuScreen->draw();
     }
 
     // Draw the map

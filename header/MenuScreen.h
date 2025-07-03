@@ -6,13 +6,10 @@
 #include "raylib.h"
 
 #include <vector>
+#include <unordered_map>
 
 class MenuScreen : public Screen {
-    std::vector<Button*> buttons;
-    // 0 for new game
-    // 1 for load game
-    // 2 for settings
-    // 3 for return to title screen
+    std::unordered_map<std::string, Button*> buttons;
 
     Texture2D backgroundTexture;
 
@@ -21,5 +18,7 @@ class MenuScreen : public Screen {
         ~MenuScreen() override;
 
         void draw() override;
+        std::unordered_map<std::string, Button*>& getButtons();
+        Button* getButton(const std::string& key) const;
 
 };

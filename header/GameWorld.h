@@ -6,7 +6,9 @@ class Mario;
 #include "GameState.h"
 #include "Map.h"
 #include "ResourceManager.h"
+#include "Screen.h"
 #include "TitleScreen.h"
+#include "MenuScreen.h"
 //#include "Mario.h"
 #include "raylib.h"
 #include <iostream>
@@ -14,6 +16,8 @@ class Mario;
 class GameWorld : public virtual Drawable {
 
     TitleScreen* titleScreen;
+    MenuScreen* menuScreen;
+    
 
     //Mario mario;
     Map map;
@@ -45,6 +49,8 @@ public:
      * @brief Destroy the GameWorld object.
      */
     ~GameWorld() override;
+
+    void initScreens();
 
     /**
      * @brief Reads user input and updates the state of the game.

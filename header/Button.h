@@ -26,7 +26,7 @@ class Button : public virtual Drawable {
 };
 
 
-class ButtonTexture : public virtual Button {
+class ButtonTexture : public Button {
     Texture2D btnTexture;
     void update() override;
 
@@ -38,7 +38,7 @@ class ButtonTexture : public virtual Button {
 
 };
 
-class ButtonText : public virtual Button {
+class ButtonText : public Button {
        
     virtual void update() override;
 
@@ -59,6 +59,7 @@ class ButtonTextTexture : public ButtonText {
     Texture2D btnTexture1;
     Texture2D btnTexture2;
     Texture2D* currentTexture;
+    const Vector2 truePos;
 
     void update() override;
 
