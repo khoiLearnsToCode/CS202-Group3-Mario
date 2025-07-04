@@ -189,6 +189,8 @@ void Map::loadFromJsonFile(int MapID, bool loadTestMap) {
             }
         }
     }  
+
+    fin.close();
 }
 
 void Map::draw() {
