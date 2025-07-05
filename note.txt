@@ -27,5 +27,7 @@ Constructor of ButtonTextTexture is not working
 
 FIXED: PMK 02/07/25 >>>>>>>>>>>>>>>>>>>>>
 
-
+>>>>>>>>>TNKB 05/07/25 >>>>>>>>>>>>>>>>>>>>>
+Added a basic implementation of the Mario class.
+Still needs to implement HUD display and other features.
 
