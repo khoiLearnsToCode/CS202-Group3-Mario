@@ -27,5 +27,13 @@ Constructor of ButtonTextTexture is not working
 
 FIXED: PMK 02/07/25 >>>>>>>>>>>>>>>>>>>>>
 
+>>>>>>>>>>>PMK 04/07/25 >>>>>>>>>>>>>>>>>
+Not implemented Memento* GameWorld::dataFromGameWorldToSave() const yet.
+Implement when mario is available
+
+Not implemented 
+void GameWorld::restoreDataFromMemento(const Memento* memento) const yet.
+Implement when mario is available
+
 
 

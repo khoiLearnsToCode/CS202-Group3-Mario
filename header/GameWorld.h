@@ -9,6 +9,8 @@ class Mario;
 #include "Screen.h"
 #include "TitleScreen.h"
 #include "MenuScreen.h"
+#include "CareTaker.h"
+#include "Memento.h"
 //#include "Mario.h"
 #include "raylib.h"
 #include <iostream>
@@ -17,6 +19,8 @@ class GameWorld : public virtual Drawable {
 
     TitleScreen* titleScreen;
     MenuScreen* menuScreen;
+
+    friend class CareTaker;
     
 
     //Mario mario;
@@ -34,20 +38,16 @@ class GameWorld : public virtual Drawable {
     // float irisOutTime;
     // float irisOutAcum;
 
+    Memento* dataFromGameWorldToSave() const;
+    void restoreDataFromMemento(const Memento* memento) const;
+
 public:
 
     // static bool immortalMario;
     static GameState state;
     static float gravity;
 
-    /**
-     * @brief Construct a new GameWorld object.
-     */
     GameWorld();
-
-    /**
-     * @brief Destroy the GameWorld object.
-     */
     ~GameWorld() override;
 
     void initScreens();

@@ -21,6 +21,7 @@ class ConcreteMemento : public Memento {
 
     public:
     ConcreteMemento(const Data& data);
+    ConcreteMemento(const Data& data, const std::string& date);
 
     std::string display() const override;
     Data getData() const override;

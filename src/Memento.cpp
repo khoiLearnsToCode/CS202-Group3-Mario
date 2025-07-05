@@ -5,6 +5,9 @@ ConcreteMemento::ConcreteMemento(const Data& data) : data(data) {
     date = std::ctime(&now);
 }
 
+ConcreteMemento::ConcreteMemento(const Data& data, const std::string& date) : 
+                                                    data(data), date(date) {}
+
 std::string ConcreteMemento::display() const {
     return "Map ID: " + std::to_string(data.mapID) + "\n" +
            "Remaining Time: " + std::to_string(data.remainingTime) + "\n" +

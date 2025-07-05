@@ -15,6 +15,16 @@ bool Button::isPressed() {
     return false;
 }
 
+bool Button::isReleased() {
+    Vector2 mousePos = GetMousePosition();
+    if (CheckCollisionPointRec(mousePos, hitbox)) {
+        if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 ButtonTexture::ButtonTexture(const char* key, Vector2 position, float scale) : Button(position, scale) {
     Image img = LoadImageFromTexture(ResourceManager::getInstance().getTexture(key)); 
     ImageResize(&img, img.width * scale, img.height * scale); 
