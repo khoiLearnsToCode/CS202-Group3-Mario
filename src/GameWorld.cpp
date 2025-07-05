@@ -23,6 +23,23 @@ GameWorld::~GameWorld() {
     }
 }
 
+Memento* GameWorld::dataFromGameWorldToSave() const {
+    // Implement later
+
+    // Data data(map.getId(), map.getRemainingTime(), map.getScore(), map.getLives());
+    // return new ConcreteMemento(data);
+    return nullptr;
+}
+
+void GameWorld::restoreDataFromMemento(const Memento* memento) const {
+    // Implement later
+    // Data data = memento->getData();
+    // map.loadFromJsonFile(data.mapID, true);
+    // map.setRemainingTime(data.remainingTime);
+    // map.setScore(data.score);
+    // map.setLives(data.lives);
+}
+
 void GameWorld::initScreens() {
     if (titleScreen == nullptr) {
         titleScreen = new TitleScreen();
@@ -36,11 +53,11 @@ void GameWorld::initScreens() {
 void GameWorld::inputAndUpdate() {
     if (state == GAME_STATE_TITLE_SCREEN) {
 
-        if (titleScreen->getStartButton().isPressed()) {
+        if (titleScreen->getStartButton().isReleased()) {
             state = GAME_STATE_MENU_SCREEN;
         }
 
-        if (titleScreen->getCreditButton().isPressed()) {
+        if (titleScreen->getCreditButton().isReleased()) {
             state = GAME_STATE_CREDITS_SCREEN;
         }
     }
@@ -60,21 +77,21 @@ void GameWorld::inputAndUpdate() {
 
     else if (state == GAME_STATE_MENU_SCREEN) {
 
-        if (menuScreen->getButton("NEW GAME")->isPressed()) {
+        if (menuScreen->getButton("NEW GAME")->isReleased()) {
             state = GAME_STATE_PLAYING;
         }
 
-        if (menuScreen->getButton("LOAD GAME")->isPressed()) {
+        if (menuScreen->getButton("LOAD GAME")->isReleased()) {
             // implement later
             std::cout << "Load Game button pressed. Implement load game functionality later." << std::endl;
         }
 
-        if (menuScreen->getButton("SETTINGS")->isPressed()) {
+        if (menuScreen->getButton("SETTINGS")->isReleased()) {
             // implement later
             std::cout << "Settings button pressed. Implement settings functionality later." << std::endl;
         }
 
-        if (menuScreen->getButton("EXIT")->isPressed()) {
+        if (menuScreen->getButton("EXIT")->isReleased()) {
             state = GAME_STATE_TITLE_SCREEN;
         }
     }
