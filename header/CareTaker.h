@@ -11,6 +11,8 @@
 class CareTaker {
     std::vector<Memento*> mementos;
     GameWorld* gw;
+    std::ifstream fin;
+    std::ofstream fout;
 
     public:
     CareTaker(GameWorld* gw);
