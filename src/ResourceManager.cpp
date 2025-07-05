@@ -184,22 +184,22 @@ void ResourceManager::loadTextures() {
         //textures["tileCourseClearPoleFrontTop"] = LoadTexture("resources/graphics/tiles/scenario/tile_CourseClearPoleFrontTop.png");
         //textures["tileCourseClearPoleFrontBody"] = LoadTexture("resources/graphics/tiles/scenario/tile_CourseClearPoleFrontBody.png");
 
-        //// blocks
-        //textures["blockCloud"] = LoadTexture("resources/images/sprites/blocks/Cloud_0.png");
-        //textures["blockExclamation"] = LoadTexture("resources/images/sprites/blocks/Exclamation_0.png");
-        //textures["blockEyesClosed"] = LoadTexture("resources/images/sprites/blocks/Exclamation_0.png");
-        //textures["blockEyesOpened0"] = LoadTexture("resources/images/sprites/blocks/EyesOpened_0.png");
-        //textures["blockEyesOpened1"] = LoadTexture("resources/images/sprites/blocks/EyesOpened_1.png");
-        //textures["blockEyesOpened2"] = LoadTexture("resources/images/sprites/blocks/EyesOpened_2.png");
-        //textures["blockEyesOpened3"] = LoadTexture("resources/images/sprites/blocks/EyesOpened_3.png");
-        //textures["blockGlass"] = LoadTexture("resources/images/sprites/blocks/Glass_0.png");
-        //textures["blockMessage"] = LoadTexture("resources/images/sprites/blocks/Message_0.png");
-        //textures["blockQuestion0"] = LoadTexture("resources/images/sprites/blocks/Question_0.png");
-        //textures["blockQuestion1"] = LoadTexture("resources/images/sprites/blocks/Question_1.png");
-        //textures["blockQuestion2"] = LoadTexture("resources/images/sprites/blocks/Question_2.png");
-        //textures["blockQuestion3"] = LoadTexture("resources/images/sprites/blocks/Question_3.png");
-        //textures["blockStone"] = LoadTexture("resources/images/sprites/blocks/Stone_0.png");
-        //textures["blockWood"] = LoadTexture("resources/images/sprites/blocks/Wood_0.png");
+        // blocks
+        textures["block88"] = LoadTexture("../resource/graphic/sprites/blocks/Cloud_0.png");
+        textures["block89"] = LoadTexture("../resource/graphic/sprites/blocks/Exclamation_0.png");
+        textures["block90"] = LoadTexture("../resource/graphic/sprites/blocks/EyesClosed_0.png");
+        textures["block91"] = LoadTexture("../resource/graphic/sprites/blocks/EyesOpened_0.png");
+        textures["block92"] = LoadTexture("../resource/graphic/sprites/blocks/EyesOpened_1.png");
+        textures["block93"] = LoadTexture("../resource/graphic/sprites/blocks/EyesOpened_2.png");
+        textures["block94"] = LoadTexture("../resource/graphic/sprites/blocks/EyesOpened_3.png");
+        textures["block95"] = LoadTexture("../resource/graphic/sprites/blocks/Glass_0.png");
+        textures["block96"] = LoadTexture("../resource/graphic/sprites/blocks/Message_0.png");
+        textures["block97"] = LoadTexture("../resource/graphic/sprites/blocks/Question_0.png");
+        textures["block98"] = LoadTexture("../resource/graphic/sprites/blocks/Question_1.png");
+        textures["block99"] = LoadTexture("../resource/graphic/sprites/blocks/Question_2.png");
+        textures["block100"] = LoadTexture("../resource/graphic/sprites/blocks/Question_3.png");
+        textures["block101"] = LoadTexture("../resource/graphic/sprites/blocks/Stone_0.png");
+        textures["block102"] = LoadTexture("../resource/graphic/sprites/blocks/Wood_0.png");
 
         // backgrounds
         Image titleScreenImage = LoadImage("../resource/graphic/backgrounds/title_screen.png");
