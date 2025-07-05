@@ -65,7 +65,7 @@ public:
     void draw() override;
 
     //void parseMap();
-    void loadFromJsonFile(int MapID, bool loadTestMap = false);
+    void loadFromJsonFile(int MapID, bool shouldLoadTestMap = false);
 
     //void setMarioOffset(float marioOffset);
     // void setDrawBlackScreen(bool drawBlackScreen);
@@ -81,6 +81,8 @@ public:
     //std::vector<Baddie*>& getBaddies();
     float getMaxWidth() const;
     float getMaxHeight() const;
+
+    int getId() const;
 
     //void playMusic() const;
 
