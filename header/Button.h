@@ -23,6 +23,7 @@ class Button : public virtual Drawable {
         virtual ~Button() = default;
         virtual void draw() = 0;
         virtual bool isPressed();
+        virtual bool isReleased();
 };
 
 

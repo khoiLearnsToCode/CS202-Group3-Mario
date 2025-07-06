@@ -14,20 +14,28 @@ resource manager needs to load textures for tiles (currently not working)
 nothing new3
 
 
->>>>>>>>>>>PMK 25/06/25 >>>>>>>>>>>>>>>>>
+****************** PMK 25/06/25 ******************
 if you want to get the obj of the resource manager, you can use the following code:
 ResourceManager resourceManager = ResourceManager::getInstance();
 
->>>>>>>>>>>PMK 27/06/25 >>>>>>>>>>>>>>>>>
+****************** PMK 27/06/25 ******************
 BeginDrawing() is inside GameWorld::draw()
 
->>>>>>>>>>>PMK 01/07/25 BUG >>>>>>>>>>>>>
+******************PMK 01/07/25 BUG ******************
 Constructor of ButtonTextTexture is not working 
 (cannot call the base class constructor)
 
-FIXED: PMK 02/07/25 >>>>>>>>>>>>>>>>>>>>>
+****************** FIXED: PMK 02/07/25 ******************
 
->>>>>>>>>TNKB 05/07/25 >>>>>>>>>>>>>>>>>>>>>
+****************** PMK 04/07/25 ******************
+Not implemented Memento* GameWorld::dataFromGameWorldToSave() const yet.
+Implement when mario is available
+
+Not implemented 
+void GameWorld::restoreDataFromMemento(const Memento* memento) const yet.
+Implement when mario is available
+
+****************** TNKB 05/07/25 ******************
 Added a basic implementation of the Mario class.
 Still needs to implement HUD display and other features.
 

@@ -123,9 +123,11 @@ Map::~Map() {
 
 }
 
-void Map::loadFromJsonFile(int MapID, bool loadTestMap) {
+void Map::loadFromJsonFile(int MapID, bool shouldLoadTestMap) {
     //clear current map
     reset();
+
+    loadTestMap = shouldLoadTestMap;
 
     std::string jsonFilePath;
     if (loadTestMap) {
