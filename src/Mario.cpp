@@ -300,6 +300,7 @@ void Mario::update() {
 }
 
 void Mario::draw() {
+
     std::map<std::string, Texture2D>& textures = ResourceManager::getInstance().getTextures();
     std::string prefix;
 
@@ -382,7 +383,7 @@ void Mario::draw() {
             else if (state == SPRITE_STATE_VICTORY || state == SPRITE_STATE_WAITING_TO_NEXT_MAP) {
                 DrawTexture(textures[std::string(TextFormat("%sMario0Vic", prefix.c_str()))], pos.x, pos.y, tint);
             }
-
+            
         }
 
         /*for (auto& fireball : fireballs) {
@@ -464,6 +465,38 @@ CollisionType Mario::checkCollision(Sprite* sprite) {
 
     return COLLISION_TYPE_NONE;
 
+}
+
+CollisionType Mario::checkCollisionBaddie(Sprite* sprite) {
+    
+    if (sprite->getState() != SPRITE_STATE_NO_COLLIDABLE) {
+        Rectangle rect = sprite->getRect();
+
+        /*for (auto& fireball : fireballs) {
+            Fireball* f = &fireball;
+            if (f->checkCollision(sprite) && sprite->getState() != SPRITE_STATE_DYING) {
+				f->setState(SPRITE_STATE_TO_BE_REMOVED);
+                return COLLISION_TYPE_FIREBALL
+            }
+        }*/
+
+        if (state == SPRITE_STATE_JUMPING || vel.y > 0) {
+            if (cpN.checkCollision(rect)) {
+				return COLLISION_TYPE_NORTH;
+			}
+            else if (cpS.checkCollision(rect)) {
+				return COLLISION_TYPE_SOUTH;
+			}
+            else if (cpE.checkCollision(rect) || cpE1.checkCollision(rect)) {
+				return COLLISION_TYPE_EAST;
+			} 
+            else if (cpW.checkCollision(rect) || cpW1.checkCollision(rect)) {
+				return COLLISION_TYPE_WEST;
+			}
+        }
+    }
+
+	return COLLISION_TYPE_NONE;
 }
 
 void Mario::updateCollisionProbes() {

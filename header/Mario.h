@@ -87,7 +87,7 @@ public:
     // void drawHud() const;
 
     CollisionType checkCollision(Sprite* sprite) override;
-    // CollisionType checkCollisionBaddie(Sprite* sprite);
+    CollisionType checkCollisionBaddie(Sprite* sprite);
 
     void setImmortal(bool immortal);
     void setActivationWidth(float activationWidth);
