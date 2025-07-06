@@ -44,14 +44,8 @@ void Fireball::update() {
 void Fireball::draw() {
 
     const char dir = facingDirection == DIRECTION_RIGHT ? 'R' : 'L';
-    DrawTexture(ResourceManager::getTextures()[std::string(TextFormat("fireball%d%c", currentFrame, dir))], pos.x, pos.y, WHITE);
+    DrawTexture(ResourceManager::getInstance().getTextures()[std::string(TextFormat("fireball%d%c", currentFrame, dir))], pos.x, pos.y, WHITE);
 
-    if (GameWorld::debug) {
-        cpN.draw();
-        cpS.draw();
-        cpE.draw();
-        cpW.draw();
-    }
 }
 
 void Fireball::updateCollisionProbes() {

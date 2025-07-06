@@ -108,9 +108,9 @@ void Mario::update() {
         state != SPRITE_STATE_VICTORY &&
         state != SPRITE_STATE_WAITING_TO_NEXT_MAP) {
         state = SPRITE_STATE_DYING;
-        // playPlayerDownMusicStream();
-		// removeLives(1);
-		// changeToSmall();
+        playPlayerDownMusicStream();
+		removeLives(1);
+		changeToSmall();
         GameWorld::state = GAME_STATE_TIME_UP;
     }
 
@@ -158,7 +158,7 @@ void Mario::update() {
                 else {
                     transitionCurrentFramePos = 0;
                     state = lastStateBeforeTransition;
-                    // changeToSuper();
+                    changeToSuper();
                     gw->unpauseGame();
                 }
             }
@@ -176,7 +176,7 @@ void Mario::update() {
                 else {
                     transitionCurrentFramePos = 0;
                     state = lastStateBeforeTransition;
-                    // changeToFlower();
+                    changeToFlower();
                     gw->unpauseGame();
                 }
             }
@@ -194,7 +194,7 @@ void Mario::update() {
                 else {
                     transitionCurrentFramePos = 0;
                     state = lastStateBeforeTransition;
-                    // changeToFlower();
+                    changeToFlower();
                     gw->unpauseGame();
                 }
             }
@@ -213,7 +213,7 @@ void Mario::update() {
                 else {
                     transitionCurrentFramePos = 0;
                     state = lastStateBeforeTransition;
-                    // changeToSmall();
+                    changeToSmall();
                     // releaseReservedPowerUp();
                     gw->unpauseGame();
                 }
@@ -263,16 +263,16 @@ void Mario::update() {
             if (IsKeyPressed(KEY_LEFT_CONTROL) && type == MARIO_TYPE_FLOWER) {
 
                 if (facingDirection == DIRECTION_RIGHT) {
-                    // fireballs.push_back(Fireball(Vector2(pos.x + dim.x / 2, pos.y + dim.y / 2 - 3), Vector2(16, 16), Vector2(400, 100), RED, DIRECTION_RIGHT, 2));
+                    fireballs.push_back(Fireball(Vector2{ pos.x + dim.x / 2, pos.y + dim.y / 2 - 3 }, Vector2{ 16, 16 }, Vector2{ 400, 100 }, RED, DIRECTION_RIGHT, 2));
                 }
                 else {
-                    // fireballs.push_back(Fireball(Vector2(pos.x, pos.y + dim.y / 2 - 3), Vector2(16, 16), Vector2(-400, 100), RED, DIRECTION_LEFT, 2));
+                    fireballs.push_back(Fireball(Vector2{ pos.x, pos.y + dim.y / 2 - 3 }, Vector2{ 16, 16 }, Vector2{ -400, 100 }, RED, DIRECTION_LEFT, 2));
                 }
                 PlaySound(sounds["fireball"]);
 
             }
 
-            /*std::vector<int> collectedIndexes;
+            std::vector<int> collectedIndexes;
             for (size_t i = 0; i < fireballs.size(); i++) {
                 fireballs[i].update();
                 if (fireballs[i].getState() == SPRITE_STATE_TO_BE_REMOVED) {
@@ -281,7 +281,7 @@ void Mario::update() {
             }
             for (int i = collectedIndexes.size() - 1; i >= 0; i--) {
                 fireballs.erase(fireballs.begin() + collectedIndexes[i]);
-            }*/
+            }
 
             pos.x = pos.x + vel.x * delta;
             pos.y = pos.y + vel.y * delta;
@@ -386,17 +386,17 @@ void Mario::draw() {
             
         }
 
-        /*for (auto& fireball : fireballs) {
+        for (auto& fireball : fireballs) {
             fireball.draw();
-        }*/
+        }
 
     }
 
     if (playerDownMusicStreamPlaying) {
-		// playPlayerDownMusicStream();
+		playPlayerDownMusicStream();
     }
     else if (gameOverMusicStreamPlaying) {
-		// playGameOverMusicStream();
+		playGameOverMusicStream();
     }
 
 }
@@ -407,39 +407,27 @@ CollisionType Mario::checkCollision(Sprite* sprite) {
 
         Rectangle rect = sprite->getRect();
 
-        /*for (auto& fireball : fireballs) {
+        for (auto& fireball : fireballs) {
 
             Fireball* f = &fireball;
 
             switch (f->checkCollision(sprite)) {
             case COLLISION_TYPE_NORTH:
-                if (GameWorld::debug) {
-                    sprite->setColor(cpN.getColor());
-                }
                 f->setVelY(-f->getVelY());
                 break;
             case COLLISION_TYPE_SOUTH:
-                if (GameWorld::debug) {
-                    sprite->setColor(cpS.getColor());
-                }
                 f->setVelY(-300);
                 break;
             case COLLISION_TYPE_EAST:
-                if (GameWorld::debug) {
-                    sprite->setColor(cpE.getColor());
-                }
                 f->setState(SPRITE_STATE_TO_BE_REMOVED);
                 break;
             case COLLISION_TYPE_WEST:
-                if (GameWorld::debug) {
-                    sprite->setColor(cpW.getColor());
-                }
                 f->setState(SPRITE_STATE_TO_BE_REMOVED);
                 break;
             default:
                 break;
             }
-        }*/
+        }
 
         if (cpN.checkCollision(rect)) {
             return COLLISION_TYPE_NORTH;
@@ -472,13 +460,13 @@ CollisionType Mario::checkCollisionBaddie(Sprite* sprite) {
     if (sprite->getState() != SPRITE_STATE_NO_COLLIDABLE) {
         Rectangle rect = sprite->getRect();
 
-        /*for (auto& fireball : fireballs) {
+        for (auto& fireball : fireballs) {
             Fireball* f = &fireball;
             if (f->checkCollision(sprite) && sprite->getState() != SPRITE_STATE_DYING) {
-				f->setState(SPRITE_STATE_TO_BE_REMOVED);
-                return COLLISION_TYPE_FIREBALL
+                f->setState(SPRITE_STATE_TO_BE_REMOVED);
+                return COLLISION_TYPE_FIREBALL;
             }
-        }*/
+        }
 
         if (state == SPRITE_STATE_JUMPING || vel.y > 0) {
             if (cpN.checkCollision(rect)) {
