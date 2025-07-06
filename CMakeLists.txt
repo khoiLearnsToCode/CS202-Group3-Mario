@@ -24,7 +24,7 @@ file(GLOB_RECURSE SOURCES "src/*.cpp" "src/*.c")
 # Add the resource directory to the build
 file(COPY ${CMAKE_SOURCE_DIR}/resource DESTINATION ${CMAKE_BINARY_DIR})
 
-add_executable(mariogame ${SOURCES})
+add_executable(mariogame ${SOURCES} "header/Baddies.h" "src/Baddies.cpp")
 
 target_link_libraries(mariogame PRIVATE raylib)
 
