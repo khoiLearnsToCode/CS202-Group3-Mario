@@ -4,7 +4,9 @@ class GameWorld;
 class Map;
 
 #include "CollisionProbe.h"
+#include "CollisionType.h"
 #include "Direction.h"
+#include "Fireball.h"
 #include "MarioType.h"
 #include "raylib.h"
 #include "Sprite.h"
@@ -47,7 +49,7 @@ class Mario : public Sprite {
 
 	MarioType reservedPowerUp; // Power-Up stored in reserve
 
-	// std::vector<Fireball> fireballs;
+	std::vector<Fireball> fireballs;
 
 	float runningAcum;
 	float runningTime;
@@ -87,7 +89,7 @@ public:
     // void drawHud() const;
 
     CollisionType checkCollision(Sprite* sprite) override;
-    // CollisionType checkCollisionBaddie(Sprite* sprite);
+    CollisionType checkCollisionBaddie(Sprite* sprite);
 
     void setImmortal(bool immortal);
     void setActivationWidth(float activationWidth);
