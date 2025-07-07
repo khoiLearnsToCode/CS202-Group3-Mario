@@ -487,6 +487,36 @@ CollisionType Mario::checkCollisionBaddie(Sprite* sprite) {
 	return COLLISION_TYPE_NONE;
 }
 
+void Mario::drawHud() const {
+	std::map<std::string, Texture2D>& textures = ResourceManager::getInstance().getTextures();
+
+    DrawTexture(textures["guiMario"], 34, 32, WHITE);
+    DrawTexture(textures["guiX"], 54, 49, WHITE);
+    drawWhiteSmallNumber(lives < 0 ? 0 : lives, 68, 49);
+
+    for (int i = 0; i < yoshiCoins; i++) {
+        DrawTexture(textures["guiCoin"], 34 + textures["guiMario"].width + 16 + i * textures["guiCoin"].width, 32, WHITE);
+    }
+
+	DrawTexture(textures["guiCoin"], GetScreenWidth() - 115, 32, WHITE);
+    DrawTexture(textures["guiX"], GetScreenWidth() - 97, 34, WHITE);
+    drawWhiteSmallNumber(coins, GetScreenWidth() - 34 - getSmallNumberWidth(coins), 34);
+    drawWhiteSmallNumber(points, GetScreenWidth() - 34 - getSmallNumberWidth(points), 50);
+
+	int t = getRemainingTime();
+	t = t < 0 ? 0 : t;
+
+    DrawTexture(textures["guiTime"], GetScreenWidth() - 34 - 176, 32, WHITE);
+	drawYellowSmallNumber(t, GetScreenWidth() - 34 - 128 - getSmallNumberWidth(t), 50);
+
+    if (reservedPowerUp == MARIO_TYPE_SUPER) {
+        DrawTexture(textures["mushroom"], GetScreenWidth() / 2 - textures["mushroom"].width / 2, 32, WHITE);
+    } else if (reservedPowerUp == MARIO_TYPE_FLOWER) {
+        DrawTexture(textures["fireFlower0"], GetScreenWidth() / 2 - textures["fireFlower0"].width / 2, 32, WHITE);
+    }
+	DrawTexture(textures["guiNextItem"], GetScreenWidth() / 2 - textures["guiNextItem"].width / 2, 20, WHITE);
+}
+
 void Mario::updateCollisionProbes() {
 
     cpN.setX(pos.x + dim.x / 2 - cpN.getWidth() / 2);

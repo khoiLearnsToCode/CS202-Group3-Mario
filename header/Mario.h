@@ -86,7 +86,7 @@ public:
     void update() override;
     void draw() override;
     void updateCollisionProbes() override;
-    // void drawHud() const;
+    void drawHud() const;
 
     CollisionType checkCollision(Sprite* sprite) override;
     CollisionType checkCollisionBaddie(Sprite* sprite);
