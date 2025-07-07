@@ -47,44 +47,44 @@ void ResourceManager::loadTextures() {
 
         // load textures...
 
-        //// small mario
-        //textures["smallMario0R"] = LoadTexture("resources/images/sprites/mario/SmallMario_0.png");
-        //textures["smallMario1R"] = LoadTexture("resources/images/sprites/mario/SmallMario_1.png");
-        //textures["smallMario0L"] = texture2DFlipHorizontal(textures["smallMario0R"]);
-        //textures["smallMario1L"] = texture2DFlipHorizontal(textures["smallMario1R"]);
+        // small mario
+        textures["smallMario0R"] = LoadTexture("../resource/graphic/sprites/mario/SmallMario_0.png");
+        textures["smallMario1R"] = LoadTexture("../resource/graphic/sprites/mario/SmallMario_1.png");
+        textures["smallMario0L"] = texture2DFlipHorizontal(textures["smallMario0R"]);
+        textures["smallMario1L"] = texture2DFlipHorizontal(textures["smallMario1R"]);
 
-        //textures["smallMario0RuR"] = LoadTexture("resources/images/sprites/mario/SmallMarioRunning_0.png");
-        //textures["smallMario1RuR"] = LoadTexture("resources/images/sprites/mario/SmallMarioRunning_1.png");
-        //textures["smallMario0RuL"] = texture2DFlipHorizontal(textures["smallMario0RuR"]);
-        //textures["smallMario1RuL"] = texture2DFlipHorizontal(textures["smallMario1RuR"]);
+        textures["smallMario0RuR"] = LoadTexture("../resource/graphic/sprites/mario/SmallMarioRunning_0.png");
+        textures["smallMario1RuR"] = LoadTexture("../resource/graphic/sprites/mario/SmallMarioRunning_1.png");
+        textures["smallMario0RuL"] = texture2DFlipHorizontal(textures["smallMario0RuR"]);
+        textures["smallMario1RuL"] = texture2DFlipHorizontal(textures["smallMario1RuR"]);
 
-        //textures["smallMario0JuR"] = LoadTexture("resources/images/sprites/mario/SmallMarioJumping_0.png");
-        //textures["smallMario0JuL"] = texture2DFlipHorizontal(textures["smallMario0JuR"]);
+        textures["smallMario0JuR"] = LoadTexture("../resource/graphic/sprites/mario/SmallMarioJumping_0.png");
+        textures["smallMario0JuL"] = texture2DFlipHorizontal(textures["smallMario0JuR"]);
 
-        //textures["smallMario0JuRuR"] = LoadTexture("resources/images/sprites/mario/SmallMarioJumpingAndRunning_0.png");
-        //textures["smallMario0JuRuL"] = texture2DFlipHorizontal(textures["smallMario0JuRuR"]);
+        textures["smallMario0JuRuR"] = LoadTexture("../resource/graphic/sprites/mario/SmallMarioJumpingAndRunning_0.png");
+        textures["smallMario0JuRuL"] = texture2DFlipHorizontal(textures["smallMario0JuRuR"]);
 
-        //textures["smallMario0FaR"] = LoadTexture("resources/images/sprites/mario/SmallMarioFalling_0.png");
-        //textures["smallMario0FaL"] = texture2DFlipHorizontal(textures["smallMario0FaR"]);
+        textures["smallMario0FaR"] = LoadTexture("../resource/graphic/sprites/mario/SmallMarioFalling_0.png");
+        textures["smallMario0FaL"] = texture2DFlipHorizontal(textures["smallMario0FaR"]);
 
-        //textures["smallMario0LuR"] = LoadTexture("resources/images/sprites/mario/SmallMarioLookingUp_0.png");
-        //textures["smallMario0LuL"] = texture2DFlipHorizontal(textures["smallMario0LuR"]);
+        textures["smallMario0LuR"] = LoadTexture("../resource/graphic/sprites/mario/SmallMarioLookingUp_0.png");
+        textures["smallMario0LuL"] = texture2DFlipHorizontal(textures["smallMario0LuR"]);
 
-        //textures["smallMario0DuR"] = LoadTexture("resources/images/sprites/mario/SmallMarioDucking_0.png");
-        //textures["smallMario0DuL"] = texture2DFlipHorizontal(textures["smallMario0DuR"]);
+        textures["smallMario0DuR"] = LoadTexture("../resource/graphic/sprites/mario/SmallMarioDucking_0.png");
+        textures["smallMario0DuL"] = texture2DFlipHorizontal(textures["smallMario0DuR"]);
 
-        //textures["smallMario0Vic"] = LoadTexture("resources/images/sprites/mario/SmallMarioVictory_0.png");
+        textures["smallMario0Vic"] = LoadTexture("../resource/graphic/sprites/mario/SmallMarioVictory_0.png");
 
-        //textures["smallMario0Dy"] = LoadTexture("resources/images/sprites/mario/SmallMarioDying_0.png");
-        //textures["smallMario1Dy"] = texture2DFlipHorizontal(textures["smallMario0Dy"]);
+        textures["smallMario0Dy"] = LoadTexture("../resource/graphic/sprites/mario/SmallMarioDying_0.png");
+        textures["smallMario1Dy"] = texture2DFlipHorizontal(textures["smallMario0Dy"]);
 
-        //// transitioning mario
-        //textures["transitioningMarioSS0R"] = LoadTexture("resources/images/sprites/mario/TransitioningMario_0.png");
-        //textures["transitioningMarioSS1R"] = LoadTexture("resources/images/sprites/mario/TransitioningMario_1.png");
-        //textures["transitioningMarioSS2R"] = LoadTexture("resources/images/sprites/mario/TransitioningMario_2.png");
-        //textures["transitioningMarioSS0L"] = texture2DFlipHorizontal(textures["transitioningMarioSS0R"]);
-        //textures["transitioningMarioSS1L"] = texture2DFlipHorizontal(textures["transitioningMarioSS1R"]);
-        //textures["transitioningMarioSS2L"] = texture2DFlipHorizontal(textures["transitioningMarioSS2R"]);
+        // transitioning mario
+        textures["transitioningMarioSS0R"] = LoadTexture("../resource/graphic/sprites/mario/TransitioningMario_0.png");
+        textures["transitioningMarioSS1R"] = LoadTexture("../resource/graphic/sprites/mario/TransitioningMario_1.png");
+        textures["transitioningMarioSS2R"] = LoadTexture("../resource/graphic/sprites/mario/TransitioningMario_2.png");
+        textures["transitioningMarioSS0L"] = texture2DFlipHorizontal(textures["transitioningMarioSS0R"]);
+        textures["transitioningMarioSS1L"] = texture2DFlipHorizontal(textures["transitioningMarioSS1R"]);
+        textures["transitioningMarioSS2L"] = texture2DFlipHorizontal(textures["transitioningMarioSS2R"]);
 
         //textures["transitioningMarioSF0R"] = textureColorReplace(textures["transitioningMarioSS0R"], flowerMarioReplacePallete);
         //textures["transitioningMarioSF1R"] = textureColorReplace(textures["transitioningMarioSS1R"], flowerMarioReplacePallete);
@@ -376,6 +376,8 @@ void ResourceManager::loadTextures() {
         textures["muteButtonOrange"] = LoadTexture("../resource/graphic/ui/MuteButtonOrange.png");
         textures["muteButtonWhite"] = LoadTexture("../resource/graphic/ui/MuteButtonWhite.png");
         textures["muteButtonYellow"] = LoadTexture("../resource/graphic/ui/MuteButtonYellow.png");
+        textures["muteButtonPress"] = LoadTexture("../resource/graphic/ui/muteButtonPress.png");
+        textures["muteButtonRelease"] = LoadTexture("../resource/graphic/ui/muteButtonRelease.png");
         
             // Unmute buttons
         textures["unmuteButtonBlue"] = LoadTexture("../resource/graphic/ui/UnmuteButtonBlue.png");
@@ -383,6 +385,8 @@ void ResourceManager::loadTextures() {
         textures["unmuteButtonOrange"] = LoadTexture("../resource/graphic/ui/UnmuteButtonOrange.png");
         textures["unmuteButtonWhite"] = LoadTexture("../resource/graphic/ui/UnmuteButtonWhite.png");
         textures["unmuteButtonYellow"] = LoadTexture("../resource/graphic/ui/UnmuteButtonYellow.png");
+        textures["unmuteButtonPress"] = LoadTexture("../resource/graphic/ui/unmuteButtonPress.png");
+        textures["unmuteButtonRelease"] = LoadTexture("../resource/graphic/ui/unmuteButtonRelease.png");
         
             // Save buttons
         textures["saveButtonBlue"] = LoadTexture("../resource/graphic/ui/SaveButtonBlue.png");
@@ -396,12 +400,30 @@ void ResourceManager::loadTextures() {
         textures["settingButtonGreen"] = LoadTexture("../resource/graphic/ui/SettingButtonGreen.png");
         textures["settingButtonOrange"] = LoadTexture("../resource/graphic/ui/SettingButtonOrange.png");
         textures["settingButtonWhite"] = LoadTexture("../resource/graphic/ui/SettingButtonWhite.png");
-        textures["settingButtonYellow"] = LoadTexture("../resource/graphic/ui/SettingButtonYellow.png");   
+        textures["settingButtonYellow"] = LoadTexture("../resource/graphic/ui/SettingButtonYellow.png");
+        textures["settingButtonPress"] = LoadTexture("../resource/graphic/ui/settingButtonPress.png");
+        textures["settingButtonRelease"] = LoadTexture("../resource/graphic/ui/settingButtonRelease.png");
         
+            // Menu navigation buttons
         textures["longButtonRelease"] = LoadTexture("../resource/graphic/ui/longButtonRelease.png");
         textures["longButtonPress"] = LoadTexture("../resource/graphic/ui/longButtonPress.png");
         textures["homeButtonRelease"] = LoadTexture("../resource/graphic/ui/homeButtonRelease.png");
         textures["homeButtonPress"] = LoadTexture("../resource/graphic/ui/homeButtonPress.png");
+        textures["menuButtonPress"] = LoadTexture("../resource/graphic/ui/menuButtonPress.png");
+        textures["menuButtonRelease"] = LoadTexture("../resource/graphic/ui/menuButtonRelease.png");
+        textures["cancelButtonPress"] = LoadTexture("../resource/graphic/ui/cancelButtonPress.png");
+        textures["cancelButtonRelease"] = LoadTexture("../resource/graphic/ui/cancelButtonRelease.png");
+        textures["helpButtonPress"] = LoadTexture("../resource/graphic/ui/helpButtonPress.png");
+        textures["helpButtonRelease"] = LoadTexture("../resource/graphic/ui/helpButtonRelease.png");
+        
+            // Game control buttons
+        textures["pauseButtonPress"] = LoadTexture("../resource/graphic/ui/pauseButtonPress.png");
+        textures["pauseButtonRelease"] = LoadTexture("../resource/graphic/ui/pauseButtonRelease.png");
+        textures["resumeButtonPress"] = LoadTexture("../resource/graphic/ui/resumeButtonPress.png");
+        textures["resumeButtonRelease"] = LoadTexture("../resource/graphic/ui/resumeButtonRelease.png");
+        textures["resetButtonPress"] = LoadTexture("../resource/graphic/ui/resetButtonPress.png");
+        textures["resetButtonRelease"] = LoadTexture("../resource/graphic/ui/resetButtonRelease.png");
+
     }
 }
 
