@@ -2,13 +2,19 @@
 using json = nlohmann::json;
 
 CareTaker::CareTaker(GameWorld* gw) : gw(gw) {
-    fin.open("../savedGame.json");
+    fin.open("../resource/savedGame.json");
     if (!fin.is_open()) {
-        std::cerr << "Error opening save data file." << std::endl;
+        std::cerr << "WARNING: Error opening save data file." << std::endl;
     }
 
     json j;
     fin >> j;
+
+    if (!j.contains("numberOfSavedGames")) {
+        std::cerr << "WARNING: No saved games found." << std::endl;
+        fin.close();
+        return;
+    }
     int numberOfSavedGames = j["numberOfSavedGames"];
     for (int i = 0; i < numberOfSavedGames; ++i) {
         int mapID = j["savedGames"][i]["mapID"];
