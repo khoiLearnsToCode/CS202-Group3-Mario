@@ -7,9 +7,11 @@ float GameWorld::gravity = 20;
 GameWorld::GameWorld() :
     map(1, true, this),
     camera(nullptr),
+    settingBoardIsOpen(false),
     remainingTimePointCount(0),
     titleScreen(nullptr),
-    menuScreen(nullptr) {}
+    menuScreen(nullptr),
+    settingScreen(nullptr) {}
 
 GameWorld::~GameWorld() {
     if (titleScreen != nullptr) {
@@ -20,6 +22,11 @@ GameWorld::~GameWorld() {
     if (menuScreen != nullptr) {
         delete menuScreen;
         menuScreen = nullptr;
+    }
+
+    if (settingScreen != nullptr) {
+        delete settingScreen;
+        settingScreen = nullptr;
     }
 }
 
@@ -48,9 +55,19 @@ void GameWorld::initScreens() {
     if (menuScreen == nullptr) {
         menuScreen = new MenuScreen();
     }
+
+    if (settingScreen == nullptr) {
+        settingScreen = new SettingScreen();
+    }
 }
 
 void GameWorld::inputAndUpdate() {
+
+    if (settingBoardIsOpen){
+        settingScreen->update(); 
+        return;
+    }
+
     if (state == GAME_STATE_TITLE_SCREEN) {
 
         if (titleScreen->getStartButton().isReleased()) {
@@ -87,8 +104,7 @@ void GameWorld::inputAndUpdate() {
         }
 
         if (menuScreen->getButton("SETTINGS")->isReleased()) {
-            // implement later
-            std::cout << "Settings button pressed. Implement settings functionality later." << std::endl;
+            settingBoardIsOpen = true;
         }
 
         if (menuScreen->getButton("EXIT")->isReleased()) {
@@ -101,8 +117,7 @@ void GameWorld::inputAndUpdate() {
         // Handle input and update the map
         map.loadFromJsonFile(1, true);
     }
-    
-     
+      
 }
 
 void GameWorld::draw() {
@@ -132,6 +147,12 @@ void GameWorld::draw() {
     else {
         map.draw();
     }
+
+    if (settingBoardIsOpen) {
+        settingScreen->draw();
+    }
+
+    
 
     EndDrawing();
 }

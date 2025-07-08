@@ -15,6 +15,9 @@ class TitleScreen : public Screen {
     public:
     TitleScreen();
     ~TitleScreen() override = default;
+    TitleScreen(const TitleScreen&) = delete;
+    TitleScreen& operator=(const TitleScreen&) = delete;
+    
     void draw() override;
     ButtonTexture& getStartButton();
     ButtonText& getCreditButton();

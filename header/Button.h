@@ -67,6 +67,7 @@ class ButtonTextTexture : public ButtonText {
     public:
         ButtonTextTexture() = default;
         ButtonTextTexture(const std::string& text, const char* key, Vector2 position, float scale, Color color, Font font, float fontSize);
+        ButtonTextTexture(const char* key, Vector2 position, float scale);
         ~ButtonTextTexture() override;
         void draw() override;
 };
