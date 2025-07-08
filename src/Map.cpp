@@ -849,6 +849,10 @@ void Map::setGameWorld(GameWorld* gw) {
     this->gw = gw;
 }
 
+int Map::getId() const {
+    return id;
+}
+
 void Map::reset() {
 
     maxWidth = 0;

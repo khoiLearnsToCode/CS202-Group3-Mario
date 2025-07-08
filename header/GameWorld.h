@@ -12,7 +12,7 @@ class Mario;
 #include "SettingScreen.h"
 #include "CareTaker.h"
 #include "Memento.h"
-//#include "Mario.h"
+#include "Mario.h"
 #include "raylib.h"
 #include <iostream>
 
@@ -25,7 +25,7 @@ class GameWorld : public virtual Drawable {
     friend class CareTaker;
     
 
-    //Mario mario;
+    Mario mario;
     Map map;
     Camera2D* camera;
     bool settingBoardIsOpen;

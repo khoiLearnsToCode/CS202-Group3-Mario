@@ -5,13 +5,27 @@ GameState GameWorld::state = GAME_STATE_TITLE_SCREEN;
 float GameWorld::gravity = 20;
 
 GameWorld::GameWorld() :
+    mario( 
+        {0,0},          // position
+        {32, 40},       // dimention
+        {0, 0},         // velocity
+        {0, 0, 0, 255}, // color
+        260,            // speedX
+        360,            // maxSpeedX
+        -600,           // jumpSpeed
+        false           
+    ),
     map(1, true, this),
     camera(nullptr),
     settingBoardIsOpen(false),
     remainingTimePointCount(0),
     titleScreen(nullptr),
     menuScreen(nullptr),
-    settingScreen(nullptr) {}
+    settingScreen(nullptr) {
+
+        mario.setGameWorld(this);
+        mario.setMap(&map);
+    }
 
 GameWorld::~GameWorld() {
     if (titleScreen != nullptr) {
@@ -31,11 +45,8 @@ GameWorld::~GameWorld() {
 }
 
 Memento* GameWorld::dataFromGameWorldToSave() const {
-    // Implement later
-
-    // Data data(map.getId(), map.getRemainingTime(), map.getScore(), map.getLives());
-    // return new ConcreteMemento(data);
-    return nullptr;
+    Data data(map.getId(), remainingTimePointCount, mario.getPoints(), mario.getLives());
+    return new ConcreteMemento(data);
 }
 
 void GameWorld::restoreDataFromMemento(const Memento* memento) const {
@@ -65,8 +76,15 @@ void GameWorld::inputAndUpdate() {
 
     if (settingBoardIsOpen){
         settingScreen->update(); 
+
+        if (settingScreen->settingBoardShouldClose()) {
+        settingBoardIsOpen = false;
+        }
+
         return;
     }
+
+    // If setting board is not open, handle input for other states
 
     if (state == GAME_STATE_TITLE_SCREEN) {
 
@@ -145,14 +163,14 @@ void GameWorld::draw() {
 
     // Draw the map
     else {
+        BeginMode2D(*camera);
         map.draw();
+        EndMode2D();
     }
 
     if (settingBoardIsOpen) {
         settingScreen->draw();
     }
-
-    
 
     EndDrawing();
 }
@@ -175,12 +193,16 @@ Camera2D* GameWorld::getCamera() const {
 }
 
 void GameWorld::resetMap() {
+    mario.reset(true);
     map.reset();
     state = GAME_STATE_PLAYING;
 }
 
 void GameWorld::resetGame() {
-    //implement later
+    mario.resetAll();
+    map.first();
+    map.reset();
+    state = GAME_STATE_TITLE_SCREEN;
 }
 
 void GameWorld::nextMap() {
