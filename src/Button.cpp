@@ -88,6 +88,23 @@ ButtonTextTexture::ButtonTextTexture(const std::string& text, const char* key, V
     
 }
 
+ButtonTextTexture::ButtonTextTexture(const char* key, Vector2 position, float scale) : 
+    ButtonText("", position, scale, WHITE, GetFontDefault(), 40.0f), currentTexture(nullptr), truePos(position) {
+
+    Image img1 = LoadImageFromTexture(ResourceManager::getInstance().getTexture(std::string(key) + "Release")); 
+    ImageResize(&img1, img1.width * scale, img1.height * scale); 
+    btnTexture1 = LoadTextureFromImage(img1); 
+    currentTexture = &btnTexture1; 
+    UnloadImage(img1); 
+
+    Image img2 = LoadImageFromTexture(ResourceManager::getInstance().getTexture(std::string(key) + "Press")); 
+    ImageResize(&img2, img2.width * scale, img2.height * scale); 
+    btnTexture2 = LoadTextureFromImage(img2); 
+    UnloadImage(img2); 
+
+    hitbox = { pos.x, pos.y, (float)btnTexture1.width, (float)btnTexture1.height };
+}
+
 ButtonTextTexture::~ButtonTextTexture() {
     UnloadTexture(btnTexture1);
     UnloadTexture(btnTexture2);

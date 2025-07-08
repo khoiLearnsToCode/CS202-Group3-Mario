@@ -9,6 +9,7 @@ class Mario;
 #include "Screen.h"
 #include "TitleScreen.h"
 #include "MenuScreen.h"
+#include "SettingScreen.h"
 #include "CareTaker.h"
 #include "Memento.h"
 //#include "Mario.h"
@@ -19,6 +20,7 @@ class GameWorld : public virtual Drawable {
 
     TitleScreen* titleScreen;
     MenuScreen* menuScreen;
+    SettingScreen* settingScreen;
 
     friend class CareTaker;
     
@@ -26,7 +28,7 @@ class GameWorld : public virtual Drawable {
     //Mario mario;
     Map map;
     Camera2D* camera;
-    //bool showControls;
+    bool settingBoardIsOpen;
     //GameState stateBeforePause;
     int remainingTimePointCount;
 

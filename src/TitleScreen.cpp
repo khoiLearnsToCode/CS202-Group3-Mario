@@ -1,6 +1,7 @@
 #include "TitleScreen.h"
 #include "ResourceManager.h"
 
+
 TitleScreen::TitleScreen() : Screen(),
     startButton("StartButton", {GetScreenWidth() - 330.0f, GetScreenHeight() - 110.0f} , 0.3f), 
     credit("Credit", {100.0f, GetScreenHeight() - 60.0f}, 0.3f, BLACK, GetFontDefault(), 40.0f),
@@ -12,6 +13,7 @@ void TitleScreen::draw() {
     startButton.draw();
     credit.draw();
     temp.draw();
+
 }
 
 ButtonTexture& TitleScreen::getStartButton() {

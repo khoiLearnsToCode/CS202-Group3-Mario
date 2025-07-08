@@ -6,7 +6,7 @@
 #include <map>
 
 
-class Screen : public virtual Drawable {
+class Screen : public Drawable {
     protected:
     std::map<std::string, Texture2D>& textures;
 

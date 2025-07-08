@@ -93,40 +93,40 @@ void ResourceManager::loadTextures() {
         //textures["transitioningMarioSF1L"] = texture2DFlipHorizontal(textures["transitioningMarioSF1R"]);
         //textures["transitioningMarioSF2L"] = texture2DFlipHorizontal(textures["transitioningMarioSF2R"]);
 
-        //// super mario
-        //textures["superMario0R"] = LoadTexture("resources/images/sprites/mario/SuperMario_0.png");
-        //textures["superMario1R"] = LoadTexture("resources/images/sprites/mario/SuperMario_1.png");
-        //textures["superMario2R"] = LoadTexture("resources/images/sprites/mario/SuperMario_2.png");
-        //textures["superMario0L"] = texture2DFlipHorizontal(textures["superMario0R"]);
-        //textures["superMario1L"] = texture2DFlipHorizontal(textures["superMario1R"]);
-        //textures["superMario2L"] = texture2DFlipHorizontal(textures["superMario2R"]);
+        // super mario
+        textures["superMario0R"] = LoadTexture("../resource/graphic/sprites/mario/SuperMario_0.png");
+        textures["superMario1R"] = LoadTexture("../resource/graphic/sprites/mario/SuperMario_1.png");
+        textures["superMario2R"] = LoadTexture("../resource/graphic/sprites/mario/SuperMario_2.png");
+        textures["superMario0L"] = texture2DFlipHorizontal(textures["superMario0R"]);
+        textures["superMario1L"] = texture2DFlipHorizontal(textures["superMario1R"]);
+        textures["superMario2L"] = texture2DFlipHorizontal(textures["superMario2R"]);
 
-        //textures["superMario0RuR"] = LoadTexture("resources/images/sprites/mario/SuperMarioRunning_0.png");
-        //textures["superMario1RuR"] = LoadTexture("resources/images/sprites/mario/SuperMarioRunning_1.png");
-        //textures["superMario2RuR"] = LoadTexture("resources/images/sprites/mario/SuperMarioRunning_2.png");
-        //textures["superMario0RuL"] = texture2DFlipHorizontal(textures["superMario0RuR"]);
-        //textures["superMario1RuL"] = texture2DFlipHorizontal(textures["superMario1RuR"]);
-        //textures["superMario2RuL"] = texture2DFlipHorizontal(textures["superMario2RuR"]);
+        textures["superMario0RuR"] = LoadTexture("../resource/graphic/sprites/mario/SuperMarioRunning_0.png");
+        textures["superMario1RuR"] = LoadTexture("../resource/graphic/sprites/mario/SuperMarioRunning_1.png");
+        textures["superMario2RuR"] = LoadTexture("../resource/graphic/sprites/mario/SuperMarioRunning_2.png");
+        textures["superMario0RuL"] = texture2DFlipHorizontal(textures["superMario0RuR"]);
+        textures["superMario1RuL"] = texture2DFlipHorizontal(textures["superMario1RuR"]);
+        textures["superMario2RuL"] = texture2DFlipHorizontal(textures["superMario2RuR"]);
 
-        //textures["superMario0JuR"] = LoadTexture("resources/images/sprites/mario/SuperMarioJumping_0.png");
-        //textures["superMario0JuL"] = texture2DFlipHorizontal(textures["superMario0JuR"]);
+        textures["superMario0JuR"] = LoadTexture("../resource/graphic/sprites/mario/SuperMarioJumping_0.png");
+        textures["superMario0JuL"] = texture2DFlipHorizontal(textures["superMario0JuR"]);
 
-        //textures["superMario0JuRuR"] = LoadTexture("resources/images/sprites/mario/SuperMarioJumpingAndRunning_0.png");
-        //textures["superMario0JuRuL"] = texture2DFlipHorizontal(textures["superMario0JuRuR"]);
+        textures["superMario0JuRuR"] = LoadTexture("../resource/graphic/sprites/mario/SuperMarioJumpingAndRunning_0.png");
+        textures["superMario0JuRuL"] = texture2DFlipHorizontal(textures["superMario0JuRuR"]);
 
-        //textures["superMario0FaR"] = LoadTexture("resources/images/sprites/mario/SuperMarioFalling_0.png");
-        //textures["superMario0FaL"] = texture2DFlipHorizontal(textures["superMario0FaR"]);
+        textures["superMario0FaR"] = LoadTexture("../resource/graphic/sprites/mario/SuperMarioFalling_0.png");
+        textures["superMario0FaL"] = texture2DFlipHorizontal(textures["superMario0FaR"]);
 
-        //textures["superMario0LuR"] = LoadTexture("resources/images/sprites/mario/SuperMarioLookingUp_0.png");
-        //textures["superMario0LuL"] = texture2DFlipHorizontal(textures["superMario0LuR"]);
+        textures["superMario0LuR"] = LoadTexture("../resource/graphic/sprites/mario/SuperMarioLookingUp_0.png");
+        textures["superMario0LuL"] = texture2DFlipHorizontal(textures["superMario0LuR"]);
 
-        //textures["superMario0DuR"] = LoadTexture("resources/images/sprites/mario/SuperMarioDucking_0.png");
-        //textures["superMario0DuL"] = texture2DFlipHorizontal(textures["superMario0DuR"]);
+        textures["superMario0DuR"] = LoadTexture("../resource/graphic/sprites/mario/SuperMarioDucking_0.png");
+        textures["superMario0DuL"] = texture2DFlipHorizontal(textures["superMario0DuR"]);
 
-        //textures["superMario0Vic"] = LoadTexture("resources/images/sprites/mario/SuperMarioVictory_0.png");
+        textures["superMario0Vic"] = LoadTexture("../resource/graphic/sprites/mario/SuperMarioVictory_0.png");
 
-        //textures["superMario0TfR"] = LoadTexture("resources/images/sprites/mario/SuperMarioThrowingFireball_0.png");
-        //textures["superMario0TfL"] = texture2DFlipHorizontal(textures["superMario0TfR"]);
+        textures["superMario0TfR"] = LoadTexture("../resource/graphic/sprites/mario/SuperMarioThrowingFireball_0.png");
+        textures["superMario0TfL"] = texture2DFlipHorizontal(textures["superMario0TfR"]);
 
         // flower mario
         //textures["flowerMario0R"] = textureColorReplace(textures["superMario0R"], flowerMarioReplacePallete);
@@ -163,15 +163,15 @@ void ResourceManager::loadTextures() {
         //textures["flowerMario0TfR"] = textureColorReplace(textures["superMario0TfR"], flowerMarioReplacePallete);
         //textures["flowerMario0TfL"] = texture2DFlipHorizontal(textures["flowerMario0TfR"]);
 
-        //// fireball
-        //textures["fireball0R"] = LoadTexture("resources/images/sprites/mario/FlowerMarioFireball_0.png");
-        //textures["fireball1R"] = LoadTexture("resources/images/sprites/mario/FlowerMarioFireball_1.png");
-        //textures["fireball2R"] = LoadTexture("resources/images/sprites/mario/FlowerMarioFireball_2.png");
-        //textures["fireball3R"] = LoadTexture("resources/images/sprites/mario/FlowerMarioFireball_3.png");
-        //textures["fireball0L"] = texture2DFlipHorizontal(textures["fireball0R"]);
-        //textures["fireball1L"] = texture2DFlipHorizontal(textures["fireball1R"]);
-        //textures["fireball2L"] = texture2DFlipHorizontal(textures["fireball2R"]);
-        //textures["fireball3L"] = texture2DFlipHorizontal(textures["fireball3R"]);
+        // fireball
+        textures["fireball0R"] = LoadTexture("../resource/graphic/sprites/mario/FlowerMarioFireball_0.png");
+        textures["fireball1R"] = LoadTexture("../resource/graphic/sprites/mario/FlowerMarioFireball_1.png");
+        textures["fireball2R"] = LoadTexture("../resource/graphic/sprites/mario/FlowerMarioFireball_2.png");
+        textures["fireball3R"] = LoadTexture("../resource/graphic/sprites/mario/FlowerMarioFireball_3.png");
+        textures["fireball0L"] = texture2DFlipHorizontal(textures["fireball0R"]);
+        textures["fireball1L"] = texture2DFlipHorizontal(textures["fireball1R"]);
+        textures["fireball2L"] = texture2DFlipHorizontal(textures["fireball2R"]);
+        textures["fireball3L"] = texture2DFlipHorizontal(textures["fireball3R"]);
 
         // tiles
         for (int i = 1; i <= 87; i++) {
@@ -216,6 +216,7 @@ void ResourceManager::loadTextures() {
         //textures["background8"] = LoadTexture("resources/graphics/backgrounds/background8.png");
         //textures["background9"] = LoadTexture("resources/graphics/backgrounds/background9.png");
         //textures["background10"] = LoadTexture("resources/graphics/backgrounds/background10.png");
+        textures["settingBackground"] = LoadTexture("../resource/graphic/backgrounds/settingBackground.png");
 
         // items
         //textures["coin0"] = LoadTexture("resources/images/sprites/items/Coin_0.png");
@@ -320,51 +321,51 @@ void ResourceManager::loadTextures() {
         //textures["jumpingPiranhaPlant2"] = LoadTexture("resources/images/sprites/baddies/JumpingPiranhaPlant_2.png");
         //textures["jumpingPiranhaPlant3"] = LoadTexture("resources/images/sprites/baddies/JumpingPiranhaPlant_3.png");
 
-        //// effects
-        //textures["puft0"] = LoadTexture("resources/images/sprites/effects/Puft_0.png");
-        //textures["puft1"] = LoadTexture("resources/images/sprites/effects/Puft_1.png");
-        //textures["puft2"] = LoadTexture("resources/images/sprites/effects/Puft_2.png");
-        //textures["puft3"] = LoadTexture("resources/images/sprites/effects/Puft_3.png");
+        // effects
+        textures["puft0"] = LoadTexture("../resource/graphic/sprites/effects/Puft_0.png");
+        textures["puft1"] = LoadTexture("../resource/graphic/sprites/effects/Puft_1.png");
+        textures["puft2"] = LoadTexture("../resource/graphic/sprites/effects/Puft_2.png");
+        textures["puft3"] = LoadTexture("../resource/graphic/sprites/effects/Puft_3.png");
 
-        // textures["stardust0"] = LoadTexture("resources/images/sprites/effects/Stardust_0.png");
-        // textures["stardust1"] = LoadTexture("resources/images/sprites/effects/Stardust_1.png");
-        // textures["stardust2"] = LoadTexture("resources/images/sprites/effects/Stardust_2.png");
-        // textures["stardust3"] = LoadTexture("resources/images/sprites/effects/Stardust_3.png");
+        textures["stardust0"] = LoadTexture("../resource/graphic/sprites/effects/Stardust_0.png");
+        textures["stardust1"] = LoadTexture("../resource/graphic/sprites/effects/Stardust_1.png");
+        textures["stardust2"] = LoadTexture("../resource/graphic/sprites/effects/Stardust_2.png");
+        textures["stardust3"] = LoadTexture("../resource/graphic/sprites/effects/Stardust_3.png");
 
-        // // gui
-        // textures["guiAlfa"] = LoadTexture("resources/images/gui/guiAlfa.png");
-        // textures["guiAlfaLowerUpper"] = LoadTexture("resources/images/gui/guiAlfaLowerUpper.png");
-        // textures["guiClock"] = LoadTexture("resources/images/gui/guiClock.png");
-        // textures["guiCoin"] = LoadTexture("resources/images/gui/guiCoin.png");
-        // textures["guiCredits"] = LoadTexture("resources/images/gui/guiCredits.png");
-        // textures["guiGameOver"] = LoadTexture("resources/images/gui/guiGameOver.png");
-        // textures["guiLetters"] = LoadTexture("resources/images/gui/guiLetters.png");
-        // textures["guiMario"] = LoadTexture("resources/images/gui/guiMario.png");
-        // textures["guiMarioStart"] = LoadTexture("resources/images/gui/guiMarioStart.png");
-        // textures["guiNextItem"] = LoadTexture("resources/images/gui/guiNextItem.png");
-        // textures["guiNumbersBig"] = LoadTexture("resources/images/gui/guiNumbersBig.png");
-        // textures["guiNumbersWhite"] = LoadTexture("resources/images/gui/guiNumbersWhite.png");
-        // textures["guiNumbersYellow"] = LoadTexture("resources/images/gui/guiNumbersYellow.png");
-        // textures["guiPunctuation"] = LoadTexture("resources/images/gui/guiPunctuation.png");
+        // gui
+        textures["guiAlfa"] = LoadTexture("../resource/graphic/gui/guiAlfa.png");
+        textures["guiAlfaLowerUpper"] = LoadTexture("../resource/graphic/gui/guiAlfaLowerUpper.png");
+        textures["guiClock"] = LoadTexture("../resource/graphic/gui/guiClock.png");
+        textures["guiCoin"] = LoadTexture("../resource/graphic/gui/guiCoin.png");
+        textures["guiCredits"] = LoadTexture("../resource/graphic/gui/guiCredits.png");
+        textures["guiGameOver"] = LoadTexture("../resource/graphic/gui/guiGameOver.png");
+        textures["guiLetters"] = LoadTexture("../resource/graphic/gui/guiLetters.png");
+        textures["guiMario"] = LoadTexture("../resource/graphic/gui/guiMario.png");
+        textures["guiMarioStart"] = LoadTexture("../resource/graphic/gui/guiMarioStart.png");
+        textures["guiNextItem"] = LoadTexture("../resource/graphic/gui/guiNextItem.png");
+        textures["guiNumbersBig"] = LoadTexture("../resource/graphic/gui/guiNumbersBig.png");
+        textures["guiNumbersWhite"] = LoadTexture("../resource/graphic/gui/guiNumbersWhite.png");
+        textures["guiNumbersYellow"] = LoadTexture("../resource/graphic/gui/guiNumbersYellow.png");
+        textures["guiPunctuation"] = LoadTexture("../resource/graphic/gui/guiPunctuation.png");
         textures["guiRayMarioLogo"] = LoadTexture("../resource/graphic/gui/guiRayMarioLogo.png");
-        // textures["guiTime"] = LoadTexture("resources/images/gui/guiTime.png");
-        // textures["guiTimeUp"] = LoadTexture("resources/images/gui/guiTimeUp.png");
-        // textures["guiX"] = LoadTexture("resources/images/gui/guiX.png");
-        // textures["guiPoints10"] = LoadTexture("resources/images/gui/guiTensPoints_10.png");
-        // textures["guiPoints20"] = LoadTexture("resources/images/gui/guiTensPoints_20.png");
-        // textures["guiPoints40"] = LoadTexture("resources/images/gui/guiTensPoints_40.png");
-        // textures["guiPoints80"] = LoadTexture("resources/images/gui/guiTensPoints_80.png");
-        // textures["guiPoints100"] = LoadTexture("resources/images/gui/guiHundredsPoints_100.png");
-        // textures["guiPoints200"] = LoadTexture("resources/images/gui/guiHundredsPoints_200.png");
-        // textures["guiPoints400"] = LoadTexture("resources/images/gui/guiHundredsPoints_400.png");
-        // textures["guiPoints800"] = LoadTexture("resources/images/gui/guiHundredsPoints_800.png");
-        // textures["guiPoints1000"] = LoadTexture("resources/images/gui/guiThousandsPoints_1000.png");
-        // textures["guiPoints2000"] = LoadTexture("resources/images/gui/guiThousandsPoints_2000.png");
-        // textures["guiPoints4000"] = LoadTexture("resources/images/gui/guiThousandsPoints_4000.png");
-        // textures["guiPoints8000"] = LoadTexture("resources/images/gui/guiThousandsPoints_8000.png");
-        // textures["gui1Up"] = LoadTexture("resources/images/gui/gui1Up.png");
-        // textures["gui2Up"] = LoadTexture("resources/images/gui/gui2Up.png");
-        // textures["gui3Up"] = LoadTexture("resources/images/gui/gui3Up.png");
+        textures["guiTime"] = LoadTexture("../resource/graphic/gui/guiTime.png");
+        textures["guiTimeUp"] = LoadTexture("../resource/graphic/gui/guiTimeUp.png");
+        textures["guiX"] = LoadTexture("../resource/graphic/gui/guiX.png");
+        textures["guiPoints10"] = LoadTexture("../resource/graphic/gui/guiTensPoints_10.png");
+        textures["guiPoints20"] = LoadTexture("../resource/graphic/gui/guiTensPoints_20.png");
+        textures["guiPoints40"] = LoadTexture("../resource/graphic/gui/guiTensPoints_40.png");
+        textures["guiPoints80"] = LoadTexture("../resource/graphic/gui/guiTensPoints_80.png");
+        textures["guiPoints100"] = LoadTexture("../resource/graphic/gui/guiHundredsPoints_100.png");
+        textures["guiPoints200"] = LoadTexture("../resource/graphic/gui/guiHundredsPoints_200.png");
+        textures["guiPoints400"] = LoadTexture("../resource/graphic/gui/guiHundredsPoints_400.png");
+        textures["guiPoints800"] = LoadTexture("../resource/graphic/gui/guiHundredsPoints_800.png");
+        textures["guiPoints1000"] = LoadTexture("../resource/graphic/gui/guiThousandsPoints_1000.png");
+        textures["guiPoints2000"] = LoadTexture("../resource/graphic/gui/guiThousandsPoints_2000.png");
+        textures["guiPoints4000"] = LoadTexture("../resource/graphic/gui/guiThousandsPoints_4000.png");
+        textures["guiPoints8000"] = LoadTexture("../resource/graphic/gui/guiThousandsPoints_8000.png");
+        textures["gui1Up"] = LoadTexture("../resource/graphic/gui/gui1Up.png");
+        textures["gui2Up"] = LoadTexture("../resource/graphic/gui/gui2Up.png");
+        textures["gui3Up"] = LoadTexture("../resource/graphic/gui/gui3Up.png");
         textures["StartButton"] = LoadTexture("../resource/graphic/gui/StartButton.png");
         textures["credit"] = LoadTexture("../resource/graphic/gui/credit.png");
         
