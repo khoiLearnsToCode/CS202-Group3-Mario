@@ -18,6 +18,8 @@ public:
     void update();
     void draw() override;
 
+    bool settingBoardShouldClose() const;
+
 private:
     std::unordered_map<std::string, Button*> buttons;
     Texture2D backgroundTexture;
