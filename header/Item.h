@@ -142,8 +142,8 @@ public:
 };
 
 class YoshiCoin : public Item {
- 
-        bool countingUp;
+
+    bool countingUp;
 
 public:
 
@@ -155,10 +155,10 @@ public:
     void playCollisionSound() override;
     void updateMario(Mario& mario) override;
     CollisionType checkCollision(Sprite* sprite) override;
-	std::string getType() const override {
-		return "YoshiCoin";
-	}
-}:
+    std::string getType() const override {
+        return "YoshiCoin";
+    }
+};
 
 class CourseClearToken : public Item {
 public:
