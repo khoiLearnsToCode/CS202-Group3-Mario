@@ -17,6 +17,8 @@ SettingScreen::SettingScreen() : Screen(), musicVolume(0.5f), sfxVolume(0.5f), i
                (float)backgroundTexture.width, 
                (float)backgroundTexture.height };
 
+    std::cout << "Border: " << border.x << ", " << border.y << ", " << border.width << ", " << border.height << std::endl;
+
     buttons.emplace("MUTEMUSIC", new ButtonTextTexture("muteButton", {border.x + 50, border.y + 50}, 2.0f));
     buttons.emplace("UNMUTEMUSIC", new ButtonTextTexture("unmuteButton", {border.x + 50, border.y + 50}, 2.0f));
 
@@ -88,4 +90,9 @@ void SettingScreen::draw() {
     } else {
         buttons["UNMUTESFX"]->draw();
     }
+}
+
+bool SettingScreen::settingBoardShouldClose() const {
+    Vector2 mousePos = GetMousePosition();
+    return (!CheckCollisionPointRec(mousePos, border)) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
 }

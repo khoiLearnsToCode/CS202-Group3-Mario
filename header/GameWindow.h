@@ -13,6 +13,7 @@ class GameWindow {
 
     GameWorld gw;
     Camera2D camera;
+    CareTaker careTaker;
     bool initialized;
 
 public:
