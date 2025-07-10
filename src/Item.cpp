@@ -22,7 +22,9 @@ Item::Item(Vector2 pos, Vector2 dim, Vector2 vel, Color color, float frameTime, 
 Item::~Item() = default;
 
 void Item::onSouthCollision(Mario& mario) {}
-bool Item::isPauseGameOnHit() {}
+bool Item::isPauseGameOnHit() {
+    return pauseGameOnHit;
+}
 
 // Coin
 Coin::Coin(Vector2 pos, Vector2 dim, Color color) :
@@ -90,7 +92,7 @@ void Coin::updateMario(Mario& mario) {
 }
 
 CollisionType Coin::checkCollision(Sprite* sprite) {
-    
+    return CheckCollisionRecs( getRect(), sprite->getRect() ) ? COLLISION_TYPE_COLLIDED : COLLISION_TYPE_NONE;
 }
 
 
@@ -530,7 +532,7 @@ void YoshiCoin::updateMario(Mario& mario) {
 }
 
 CollisionType YoshiCoin::checkCollision(Sprite* sprite) {
-
+    return CheckCollisionRecs( getRect(), sprite->getRect() ) ? COLLISION_TYPE_COLLIDED : COLLISION_TYPE_NONE;
 }
 
 
@@ -598,7 +600,7 @@ void CourseClearToken::updateMario(Mario& mario) {
 }
 
 CollisionType CourseClearToken::checkCollision(Sprite* sprite) {
-    
+    return CheckCollisionRecs( getRect(), sprite->getRect() ) ? COLLISION_TYPE_COLLIDED : COLLISION_TYPE_NONE;
 }
 
 
