@@ -8,7 +8,7 @@
 
 SettingScreen::SettingScreen() : Screen(), musicVolume(0.5f), sfxVolume(0.5f), isMutedMusic(false), isMutedSFX(false) {
     Image img = LoadImageFromTexture(textures["settingBackground"]);
-    ImageResize(&img, img.width * 10.0f, img.height * 10.0f); 
+    ImageResize(&img, img.width * 0.5f, img.height * 0.5f); 
     backgroundTexture = LoadTextureFromImage(img);
     UnloadImage(img);
 
