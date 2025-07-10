@@ -18,7 +18,7 @@ GameWorld::GameWorld() :
     map(mario, 1, true, this),
     camera(nullptr),
     settingBoardIsOpen(false),
-    remainingTimePointCount(0),
+    remainingTimePointCount(400),
     titleScreen(nullptr),
     menuScreen(nullptr),
     settingScreen(nullptr) {
@@ -74,6 +74,31 @@ void GameWorld::initScreens() {
 
 void GameWorld::inputAndUpdate() {
 
+    std::map<std::string, Sound> &sounds = ResourceManager::getInstance().getSounds();
+    std::map<std::string, Music> &musics = ResourceManager::getInstance().getMusics();
+
+    if ( mario.getState() != SPRITE_STATE_DYING && 
+         mario.getState() != SPRITE_STATE_VICTORY &&
+         mario.getState() != SPRITE_STATE_WAITING_TO_NEXT_MAP &&
+         state != GAME_STATE_TITLE_SCREEN &&
+         state != GAME_STATE_MENU_SCREEN &&
+         state != GAME_STATE_CREDITS_SCREEN &&
+         state != GAME_STATE_FINISHED /*&& 
+         !pauseMusic*/ ) {
+        map.playMusic();
+    }
+
+    if ( state != GAME_STATE_TITLE_SCREEN &&
+         state != GAME_STATE_MENU_SCREEN &&
+         state != GAME_STATE_CREDITS_SCREEN &&
+         state != GAME_STATE_FINISHED &&
+         state != GAME_STATE_PAUSED ) {
+        mario.setActivationWidth( GetScreenWidth() * 2 );
+        mario.update();
+    } else if ( /*!pauseMarioUpdate &&*/ state != GAME_STATE_TITLE_SCREEN && state != GAME_STATE_MENU_SCREEN && state != GAME_STATE_CREDITS_SCREEN) {
+        mario.update();
+    }
+
     if (settingBoardIsOpen){
         settingScreen->update(); 
 
@@ -81,7 +106,7 @@ void GameWorld::inputAndUpdate() {
         settingBoardIsOpen = false;
         }
 
-        return;
+        //return;
     }
 
     // If setting board is not open, handle input for other states
@@ -115,47 +140,74 @@ void GameWorld::inputAndUpdate() {
         camera->target.y = pyc + Map::TILE_WIDTH;
     }
 
-    if (state == GAME_STATE_TITLE_SCREEN) {
+    if (state == GAME_STATE_TITLE_SCREEN || 
+        state == GAME_STATE_MENU_SCREEN || 
+        state == GAME_STATE_CREDITS_SCREEN) {
 
-        if (titleScreen->getStartButton().isReleased()) {
-            state = GAME_STATE_MENU_SCREEN;
+        if (!IsMusicStreamPlaying(musics["title"])) {
+            PlayMusicStream(musics["title"]);
+        } else {
+            UpdateMusicStream(musics["title"]);
         }
 
-        if (titleScreen->getCreditButton().isReleased()) {
-            state = GAME_STATE_CREDITS_SCREEN;
-        }
-    }
+        if (state == GAME_STATE_TITLE_SCREEN) {
 
-    else if (state == GAME_STATE_CREDITS_SCREEN) {
-        Texture2D& creditTexture = ResourceManager::getInstance().getTexture("credit");
-        Rectangle creditRect = { 
-            (GetScreenWidth() - creditTexture.width) / 2.0f, 
-            (GetScreenHeight() - creditTexture.height) / 2.0f, 
-            1.0f * (creditTexture.width), 
-            1.0f * (creditTexture.height) 
-        };
-        if (!CheckCollisionPointRec(GetMousePosition(), creditRect) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-            state = GAME_STATE_TITLE_SCREEN;
-        }
-    }
+            if (titleScreen->getStartButton().isReleased()) {
+                state = GAME_STATE_MENU_SCREEN;
+            }
 
-    else if (state == GAME_STATE_MENU_SCREEN) {
-
-        if (menuScreen->getButton("NEW GAME")->isReleased()) {
-            state = GAME_STATE_PLAYING;
+            else if (titleScreen->getCreditButton().isReleased()) {
+                state = GAME_STATE_CREDITS_SCREEN;
+            }
         }
 
-        if (menuScreen->getButton("LOAD GAME")->isReleased()) {
-            // implement later
-            std::cout << "Load Game button pressed. Implement load game functionality later." << std::endl;
+        else if (state == GAME_STATE_CREDITS_SCREEN) {
+            Texture2D& creditTexture = ResourceManager::getInstance().getTexture("credit");
+            Rectangle creditRect = { 
+                (GetScreenWidth() - creditTexture.width) / 2.0f, 
+                (GetScreenHeight() - creditTexture.height) / 2.0f, 
+                1.0f * (creditTexture.width), 
+                1.0f * (creditTexture.height) 
+            };
+            if (!CheckCollisionPointRec(GetMousePosition(), creditRect) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                state = GAME_STATE_TITLE_SCREEN;
+            }
         }
 
-        if (menuScreen->getButton("SETTINGS")->isReleased()) {
-            settingBoardIsOpen = true;
-        }
+        else if (state == GAME_STATE_MENU_SCREEN) {
 
-        if (menuScreen->getButton("EXIT")->isReleased()) {
-            state = GAME_STATE_TITLE_SCREEN;
+            if (settingBoardIsOpen){
+                return;
+            }
+
+            if (menuScreen->getButton("NEW GAME")->isReleased()) {
+                mario.resetAll();
+                map.first();
+                map.reset();
+                map.loadFromJsonFile(); // Load the map immediately
+                // Set Mario to a proper starting position (e.g., 100 pixels from left, near ground level)
+                mario.setPos(100.0f, 400.0f);
+                // Set the time limit (400 seconds = typical Mario game time)
+                mario.setMaxTime(400.0f);
+
+                if (IsMusicStreamPlaying(musics["title"])) {
+                    StopMusicStream(musics["title"]);
+                }            
+                state = GAME_STATE_PLAYING;
+            }
+
+            else if (menuScreen->getButton("LOAD GAME")->isReleased()) {
+                // implement later
+                std::cout << "Load Game button pressed. Implement load game functionality later." << std::endl;
+            }
+
+            else if (menuScreen->getButton("SETTINGS")->isReleased()) {
+                settingBoardIsOpen = true;
+            }
+
+            else if (menuScreen->getButton("EXIT")->isReleased()) {
+                state = GAME_STATE_TITLE_SCREEN;
+            }
         }
     }
 
@@ -196,6 +248,7 @@ void GameWorld::draw() {
         BeginMode2D(*camera);
         map.draw();
         EndMode2D();
+        mario.drawHud();
     }
 
     if (settingBoardIsOpen) {

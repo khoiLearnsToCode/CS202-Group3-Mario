@@ -30,7 +30,7 @@ Mario::Mario( Vector2 pos, Vector2 dim, Vector2 vel, Color color, float speedX, 
     coins(0),
     yoshiCoins(0),
     points(0),
-    maxTime(0),
+    maxTime(400.0f),  // Set default time limit to 400 seconds (typical Mario game time)
     ellapsedTime(0.0f),
     type(MARIO_TYPE_SMALL),
     reservedPowerUp(MARIO_TYPE_SMALL),
