@@ -1,10 +1,3 @@
-/**
- * @file BlueKoopaTroopa.cpp
- * @author Prof. Dr. David Buzatto
- * @brief BlueKoopaTroopa class implementation.
- * 
- * @copyright Copyright (c) 2024
- */
 #include "Baddie.h"
 #include "BlueKoopaTroopa.h"
 #include "CollisionProbe.h"

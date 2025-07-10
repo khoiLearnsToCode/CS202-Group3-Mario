@@ -1,10 +1,3 @@
-/**
- * @file Rex.h
- * @author Prof. Dr. David Buzatto
- * @brief Rex class declaration.
- * 
- * @copyright Copyright (c) 2024
- */
 #pragma once
 
 #include "Baddie.h"

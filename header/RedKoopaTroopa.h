@@ -1,10 +1,3 @@
-/**
- * @file RedKoopaTroopa.h
- * @author Prof. Dr. David Buzatto
- * @brief RedKoopaTroopa class declaration.
- * 
- * @copyright Copyright (c) 2024
- */
 #pragma once
 
 #include "Baddie.h"

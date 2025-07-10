@@ -1,10 +1,3 @@
-/**
- * @file FlyingGoomba.cpp
- * @author Prof. Dr. David Buzatto
- * @brief FlyingGoomba class implementation.
- * 
- * @copyright Copyright (c) 2024
- */
 #include "Baddie.h"
 #include "CollisionProbe.h"
 #include "Direction.h"

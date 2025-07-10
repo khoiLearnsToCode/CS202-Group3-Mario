@@ -1,10 +1,3 @@
-/**
- * @file YellowKoopaTroopa.h
- * @author Prof. Dr. David Buzatto
- * @brief YellowKoopaTroopa class declaration.
- * 
- * @copyright Copyright (c) 2024
- */
 #pragma once
 
 #include "Baddie.h"

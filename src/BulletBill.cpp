@@ -1,10 +1,3 @@
-/**
- * @file BulletBill.cpp
- * @author Prof. Dr. David Buzatto
- * @brief BulletBill class implementation.
- * 
- * @copyright Copyright (c) 2024
- */
 #include "Baddie.h"
 #include "BulletBill.h"
 #include "CollisionProbe.h"

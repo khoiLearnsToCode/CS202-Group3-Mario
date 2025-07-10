@@ -1,10 +1,3 @@
-/**
- * @file BuzzyBeetle.cpp
- * @author Prof. Dr. David Buzatto
- * @brief BuzzyBeetle class implementation.
- * 
- * @copyright Copyright (c) 2024
- */
 #include "Baddie.h"
 #include "BuzzyBeetle.h"
 #include "CollisionProbe.h"

@@ -1,10 +1,3 @@
-/**
- * @file Baddie.h
- * @author Prof. Dr. David Buzatto
- * @brief Baddie class declaration.
- * 
- * @copyright Copyright (c) 2024
- */
 #pragma once
 
 #include "Mario.h"

@@ -1,10 +1,3 @@
-/**
- * @file BanzaiBill.cpp
- * @author Prof. Dr. David Buzatto
- * @brief BanzaiBill class implementation.
- * 
- * @copyright Copyright (c) 2024
- */
 #include "Baddie.h"
 #include "BanzaiBill.h"
 #include "CollisionProbe.h"

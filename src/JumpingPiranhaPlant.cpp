@@ -1,10 +1,3 @@
-/**
- * @file JumpingPiranhaPlant.cpp
- * @author Prof. Dr. David Buzatto
- * @brief JumpingPiranhaPlant class implementation.
- * 
- * @copyright Copyright (c) 2024
- */
 #include "Baddie.h"
 #include "CollisionProbe.h"
 #include "GameWorld.h"

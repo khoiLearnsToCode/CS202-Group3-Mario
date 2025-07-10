@@ -1,10 +1,3 @@
-/**
- * @file BobOmb.cpp
- * @author Prof. Dr. David Buzatto
- * @brief BobOmb class implementation.
- * 
- * @copyright Copyright (c) 2024
- */
 #include "Baddie.h"
 #include "BobOmb.h"
 #include "CollisionProbe.h"

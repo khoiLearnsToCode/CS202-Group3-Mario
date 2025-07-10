@@ -1,10 +1,3 @@
-/**
- * @file Goomba.cpp
- * @author Prof. Dr. David Buzatto
- * @brief Goomba class implementation.
- * 
- * @copyright Copyright (c) 2024
- */
 #include "Baddie.h"
 #include "Mario.h"
 #include "raylib.h"

@@ -1,10 +1,3 @@
-/**
- * @file JumpingPiranhaPlant.h
- * @author Prof. Dr. David Buzatto
- * @brief JumpingPiranhaPlant class declaration.
- * 
- * @copyright Copyright (c) 2024
- */
 #pragma once
 
 #include "Baddie.h"

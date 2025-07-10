@@ -1,10 +1,3 @@
-/**
- * @file Goomba.h
- * @author Prof. Dr. David Buzatto
- * @brief Goomba class declaration.
- * 
- * @copyright Copyright (c) 2024
- */
 #pragma once
 
 #include "Baddie.h"
