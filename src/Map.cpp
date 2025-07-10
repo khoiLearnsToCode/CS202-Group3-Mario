@@ -56,7 +56,7 @@
 #include <vector>
 
 
-Map::Map(Mario& mario, int id, bool loadTestMap, GameWorld* gw) :
+Map::Map(int id, bool loadTestMap, GameWorld* gw) :
 
     id(id),
     maxId(3),
@@ -64,7 +64,7 @@ Map::Map(Mario& mario, int id, bool loadTestMap, GameWorld* gw) :
     maxWidth(0),
     maxHeight(0),
 
-    mario(mario),
+//    mario(mario),
     marioOffset(0),
     backgroundId(1),
     maxBackgroundId(10),
@@ -93,11 +93,7 @@ Map::Map(Mario& mario, int id, bool loadTestMap, GameWorld* gw) :
 
 Map::~Map() {
 
-    for (const auto& tile : untouchableTiles) {
-        delete tile;
-    }
-
-    for (const auto& tile : touchableTiles) {
+    for (const auto& tile : tiles) {
         delete tile;
     }
 
@@ -117,9 +113,9 @@ Map::~Map() {
     //    delete staticItem;
     //}
 
-    for (const auto& baddie : baddies) {
-       delete baddie;
-    }
+    //for (const auto& baddie : baddies) {
+    //    delete baddie;
+    //}
 
     //for (const auto& block : blocks) {
     //    delete block;
@@ -127,13 +123,9 @@ Map::~Map() {
 
 }
 
-void Map::loadFromJsonFile(bool shouldLoadTestMap) {
+void Map::loadFromJsonFile(int MapID, bool shouldLoadTestMap) {
     //clear current map
-    //reset();
-
-    if (parsed) {
-        return;
-    }
+    reset();
 
     loadTestMap = shouldLoadTestMap;
 
@@ -143,7 +135,7 @@ void Map::loadFromJsonFile(bool shouldLoadTestMap) {
     } 
     
     else {
-        jsonFilePath = "../resource/maps/map" + std::to_string(id) + ".json";
+        jsonFilePath = "../resource/maps/map" + std::to_string(MapID) + ".json";
     }
 
     std::ifstream fin(jsonFilePath);
@@ -187,134 +179,18 @@ void Map::loadFromJsonFile(bool shouldLoadTestMap) {
 
     // Load tile IDs and dimensions
 	int tilewidth = mapJson["tilewidth"];
-    std::vector<int> tileIDsUntouchable = mapJson["layers"][0]["data"];
+    std::vector<int> tileIDs = mapJson["layers"][0]["data"];
 
     // Load IDs as data
     for (int y = 0; y < height; y++){
         for (int x = 0; x < width; x++){
-            int tileID = tileIDsUntouchable[y * width + x];
+            int tileID = tileIDs[y * width + x];
             if (tileID != 0){
-                untouchableTiles.push_back(new Tile(Vector2{1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, Vector2{TILE_WIDTH * 1.0f, TILE_WIDTH * 1.0f},
-                BLACK, "tile_" + std::to_string(tileID), true, TILE_TYPE_NON_SOLID));
-            }
-        }
-    } 
-
-    tileIDsUntouchable.clear();
-
-    // Load touchable tiles
-    std::vector<int> tileIDsTouchable = mapJson["layers"][2]["data"];
-
-    for (int y = 0; y < height; y++){
-        for (int x = 0; x < width; x++){
-            int tileID = tileIDsTouchable[y * width + x];
-            if (tileID != 0){
-                touchableTiles.push_back(new Tile(Vector2{1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, Vector2{TILE_WIDTH * 1.0f, TILE_WIDTH * 1.0f},
+                tiles.push_back(new Tile(Vector2{1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, Vector2{TILE_WIDTH * 1.0f, TILE_WIDTH * 1.0f},
                 BLACK, "tile_" + std::to_string(tileID), true));
             }
         }
-    }
-
-    tileIDsTouchable.clear();
-
-    std::vector<int> backBaddieIDs = mapJson["layers"][1]["data"];
-
-    for (int y = 0; y < height; y++){
-        for (int x = 0; x < width; x++){
-            int baddieID = backBaddieIDs[y * width + x];
-            if (baddieID != 146 && baddieID != 136) continue;
-
-            Baddie* newBaddie;
-
-            if (baddieID == 146) { // Piranha Plant
-                newBaddie = new PiranhaPlant({1.0f * x * TILE_WIDTH + 16, 1.0f * y * TILE_WIDTH + 36}, {32,66}, {0,0}, RED);
-            } 
-
-            else if (baddieID == 136) { // Jumping Piranha Plant
-                newBaddie = new JumpingPiranhaPlant({1.0f * x * TILE_WIDTH + 16, 1.0f * y * TILE_WIDTH + 34}, {32,42}, {0,0}, RED);
-            } 
-
-            backBaddies.push_back(newBaddie);
-            baddies.push_back(newBaddie);
-        }
-    }
-
-    backBaddieIDs.clear();
-
-    std::vector<int> frontBaddieIDs = mapJson["layers"][5]["data"];
-
-    for (int y = 0; y < height; y++){
-        for (int x = 0; x < width; x++){
-            int baddieID = frontBaddieIDs[y * width + x];
-            if (baddieID == 0 || baddieID < 121 || baddieID > 158) continue;
-
-            Baddie* newBaddie;
-            if (baddieID == 121) {
-                newBaddie = new BlueKoopaTroopa({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {32,54}, {-100,0}, BLUE);
-            } 
-
-            else if (baddieID == 123) {
-                newBaddie = new BobOmb({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {24,30}, {-100,0}, BLACK);
-            } 
-
-            else if (baddieID == 125) { //bullet bill
-                newBaddie = new BulletBill({1.0f * x * TILE_WIDTH, 1.0f * (y+2) * TILE_WIDTH }, {32,28}, {-200,0}, BLACK);
-            } 
-
-            else if (baddieID == 126) { // buzzy beetle
-                newBaddie = new BuzzyBeetle({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {32,32}, {-80,0}, BLUE);
-            }
-
-            else if (baddieID == 128) { //flying gomba
-                newBaddie = new FlyingGoomba({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {66,50}, {-100,0}, MAROON);
-            } 
-
-            else if (baddieID == 132) { //goomba
-                newBaddie = new Goomba({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {32,30}, {-100,0}, MAROON);
-            } 
-
-            else if (baddieID == 134) { //green koopa troopa
-                newBaddie = new GreenKoopaTroopa({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {32,54}, {-100,0}, GREEN);
-            } 
-
-            else if (baddieID == 140) { //monty mole
-                newBaddie = new MontyMole({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {32,30}, {-200,0}, BROWN);
-            } 
-
-            else if (baddieID == 142) { // mummy beetle
-                newBaddie = new MummyBeetle({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {32,32}, {-80,0}, GRAY);
-            } 
-
-            else if (baddieID == 144) { //muncher
-                newBaddie = new Muncher({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {32,30}, {-80,0}, BROWN);
-            }
-
-            else if (baddieID == 148) { // red koopa troopa
-                newBaddie = new RedKoopaTroopa({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {32,54}, {-100,0}, RED);
-            } 
-
-            else if (baddieID == 152) { //rex
-                newBaddie = new Rex({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {40,64}, {-100,0}, VIOLET);
-            }
-
-            else if (baddieID == 154) { //swooper
-                newBaddie = new Swooper({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {32,34}, {-100,0}, BLACK);
-            } 
-
-            else if (baddieID == 157) { // yellow koopa troopa
-                newBaddie = new YellowKoopaTroopa({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {32,54}, {-100,0}, YELLOW);
-            } 
-            
-            else {
-                std::cerr << "Unsupported baddie ID: " << baddieID << " at position (" << x << ", " << y << ")" << std::endl;
-                continue; // Skip unsupported baddies
-            }
-            frontBaddies.push_back(newBaddie);
-            baddies.push_back(newBaddie);
-        }
-    }
-
-    parsed = true;
+    }  
 
     fin.close();
 }
@@ -350,11 +226,7 @@ void Map::draw() {
     //    baddie->draw();
     //}
 
-    for (const auto& tile : untouchableTiles) {
-        tile->draw();
-    }
-
-    for (const auto& tile : touchableTiles) {
+    for (const auto& tile : tiles) {
         tile->draw();
     }
 
@@ -374,7 +246,7 @@ void Map::draw() {
     //    baddie->draw();
     //}
 
-    mario.draw();
+    //mario.draw();
 
     // for (const auto& frontScenarioTile : frontScenarioTiles) {
     //     frontScenarioTile->draw();
@@ -433,7 +305,7 @@ void Map::draw() {
 }
 
 std::vector<Tile*>& Map::getTiles() {
-    return touchableTiles;
+    return tiles;
 }
 
 // std::vector<Block*>& Map::getBlocks() {
@@ -448,9 +320,9 @@ std::vector<Tile*>& Map::getTiles() {
 //    return staticItems;
 //}
 
-std::vector<Baddie*>& Map::getBaddies() {
-   return baddies;
-}
+//std::vector<Baddie*>& Map::getBaddies() {
+//    return baddies;
+//}
 
 //void Map::playMusic() const {
 //
@@ -950,9 +822,9 @@ float Map::getMaxHeight() const {
     return maxHeight;
 }
 
-void Map::setMarioOffset(float marioOffset) {
-   this->marioOffset = marioOffset;
-}
+//void Map::setMarioOffset(float marioOffset) {
+//    this->marioOffset = marioOffset;
+//}
 
 //void Map::setDrawBlackScreen(bool drawBlackScreen) {
 //    this->drawBlackScreen = drawBlackScreen;
@@ -989,15 +861,10 @@ void Map::reset() {
     //drawBlackScreen = false;
     //drawBlackScreenFadeAcum = 0;
 
-    for (const auto& tile : untouchableTiles) {
+    for (const auto& tile : tiles) {
         delete tile;
     }
-    untouchableTiles.clear();
-
-    for (const auto& tile : touchableTiles) {
-        delete tile;
-    }
-    touchableTiles.clear();
+    tiles.clear();
 
     // for (const auto& backScenarioTile : backScenarioTiles) {
     //     delete backScenarioTile;
@@ -1025,12 +892,12 @@ void Map::reset() {
     //}
     //staticItems.clear();
 
-    for (const auto& baddie : baddies) {
-       delete baddie;
-    }
-    baddies.clear();
-    frontBaddies.clear();
-    backBaddies.clear();
+    //for (const auto& baddie : baddies) {
+    //    delete baddie;
+    //}
+    //baddies.clear();
+    //frontBaddies.clear();
+    //backBaddies.clear();
 
 //    StopMusicStream(ResourceManager::getMusics()[std::string(TextFormat("music%d", musicId))]);
     parsed = false;
