@@ -39,3 +39,6 @@ Implement when mario is available
 Added a basic implementation of the Mario class.
 Still needs to implement HUD display and other features.
 
+****************** PMK 10/07/25 ******************
+Might use unordered map for resourceManager later.
+

@@ -86,7 +86,7 @@ public:
 
     int getId() const;
 
-    //void playMusic() const;
+    void playMusic() const;
 
 // Reset the map to its initial state
     void reset();

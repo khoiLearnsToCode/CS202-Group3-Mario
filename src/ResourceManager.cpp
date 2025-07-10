@@ -430,7 +430,28 @@ void ResourceManager::loadTextures() {
 
 // Implementation of loading sounds
 void ResourceManager::loadSounds() {
-    // Implement later
+    if (sounds.empty()){
+        sounds["1up"] = LoadSound( "resources/sfx/smw_1-up.wav" );
+        sounds["breakBlock"] = LoadSound( "resources/sfx/smw_break_block.wav" );
+        sounds["coin"] = LoadSound( "resources/sfx/smw_coin.wav" );
+        sounds["chuckWhistle"] = LoadSound( "resources/sfx/smw_chuck_whistle.wav" );
+        sounds["dragonCoin"] = LoadSound( "resources/sfx/smw_dragon_coin.wav" );
+        sounds["fireball"] = LoadSound( "resources/sfx/smw_fireball.wav" );
+        sounds["goalIrisOut"] = LoadSound( "resources/sfx/smw_goal_iris-out.wav" );
+        sounds["jump"] = LoadSound( "resources/sfx/smw_jump.wav" );
+        sounds["kick"] = LoadSound( "resources/sfx/smw_kick.wav" );
+        sounds["messageBlock"] = LoadSound( "resources/sfx/smw_message_block.wav" );
+        sounds["pause"] = LoadSound( "resources/sfx/smw_pause.wav" );
+        sounds["pipe"] = LoadSound( "resources/sfx/smw_pipe.wav" );
+        sounds["powerUp"] = LoadSound( "resources/sfx/smw_power-up.wav" );
+        sounds["powerUpAppears"] = LoadSound( "resources/sfx/smw_power-up_appears.wav" );
+        sounds["reserveItemRelease"] = LoadSound( "resources/sfx/smw_reserve_item_release.wav" );
+        sounds["reserveItemStore"] = LoadSound( "resources/sfx/smw_reserve_item_store.wav" );
+        sounds["ridingYoshi"] = LoadSound( "resources/sfx/smw_riding_yoshi.wav" );
+        sounds["shellRicochet"] = LoadSound( "resources/sfx/smw_shell_ricochet.wav" );
+        sounds["stomp"] = LoadSound( "resources/sfx/smw_stomp.wav" );
+        sounds["stompNoDamage"] = LoadSound( "resources/sfx/smw_stomp_no_damage.wav" );
+    }
 }
 
 // Implementation of loading musics
