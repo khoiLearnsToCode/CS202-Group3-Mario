@@ -15,7 +15,7 @@ GameWorld::GameWorld() :
         -600,           // jumpSpeed
         false           
     ),
-    map(mario, 1, true, this),
+    map(1, true, this),
     camera(nullptr),
     settingBoardIsOpen(false),
     remainingTimePointCount(0),
@@ -86,35 +86,6 @@ void GameWorld::inputAndUpdate() {
 
     // If setting board is not open, handle input for other states
 
-    const float xc = GetScreenWidth() / 2.0;
-    const float yc = GetScreenHeight() / 2.0;
-    const float pxc = mario.getX() + mario.getWidth() / 2.0;
-    const float pyc = mario.getY() + mario.getHeight() / 2.0;
-    
-    camera->offset.x = xc;
-
-    if ( pxc < xc ) {
-        camera->target.x = xc + Map::TILE_WIDTH;
-        map.setMarioOffset( 0 );         // x parallax
-    } else if ( pxc >= map.getMaxWidth() - xc - Map::TILE_WIDTH ) {
-        camera->target.x = map.getMaxWidth() - GetScreenWidth();
-        camera->offset.x = 0;
-    } else {
-        camera->target.x = pxc + Map::TILE_WIDTH;
-        map.setMarioOffset( pxc - xc );  // x parallax
-    }
-
-    camera->offset.y = yc;
-
-    if ( pyc < yc ) {
-        camera->target.y = yc + Map::TILE_WIDTH;
-    } else if ( pyc >= map.getMaxHeight() - yc - Map::TILE_WIDTH ) {
-        camera->target.y = map.getMaxHeight() - GetScreenHeight();
-        camera->offset.y = 0;
-    } else {
-        camera->target.y = pyc + Map::TILE_WIDTH;
-    }
-
     if (state == GAME_STATE_TITLE_SCREEN) {
 
         if (titleScreen->getStartButton().isReleased()) {
@@ -162,8 +133,7 @@ void GameWorld::inputAndUpdate() {
     else
     {
         // Handle input and update the map
-        map.loadFromJsonFile();
-        mario.update();
+        map.loadFromJsonFile(1, true);
     }
       
 }

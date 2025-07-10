@@ -235,91 +235,91 @@ void ResourceManager::loadTextures() {
         //textures["yoshiCoin2"] = LoadTexture("resources/images/sprites/items/YoshiCoin_2.png");
         //textures["yoshiCoin3"] = LoadTexture("resources/images/sprites/items/YoshiCoin_3.png");
 
-        // baddies
-        textures["blueKoopaTroopa0R"] = LoadTexture("../resource/graphic/sprites/baddies/BlueKoopaTroopa_0.png");
-        textures["blueKoopaTroopa1R"] = LoadTexture("../resource/graphic/sprites/baddies/BlueKoopaTroopa_1.png");
-        textures["blueKoopaTroopa0L"] = texture2DFlipHorizontal(textures["blueKoopaTroopa0R"]);
-        textures["blueKoopaTroopa1L"] = texture2DFlipHorizontal(textures["blueKoopaTroopa1R"]);
+        //// baddies
+        //textures["blueKoopaTroopa0R"] = LoadTexture("resources/images/sprites/baddies/BlueKoopaTroopa_0.png");
+        //textures["blueKoopaTroopa1R"] = LoadTexture("resources/images/sprites/baddies/BlueKoopaTroopa_1.png");
+        //textures["blueKoopaTroopa0L"] = texture2DFlipHorizontal(textures["blueKoopaTroopa0R"]);
+        //textures["blueKoopaTroopa1L"] = texture2DFlipHorizontal(textures["blueKoopaTroopa1R"]);
 
-        textures["bobOmb0R"] = LoadTexture("../resource/graphic/sprites/baddies/BobOmb_0.png");
-        textures["bobOmb1R"] = LoadTexture("../resource/graphic/sprites/baddies/BobOmb_1.png");
-        textures["bobOmb0L"] = texture2DFlipHorizontal(textures["bobOmb0R"]);
-        textures["bobOmb1L"] = texture2DFlipHorizontal(textures["bobOmb1R"]);
+        //textures["bobOmb0R"] = LoadTexture("resources/images/sprites/baddies/BobOmb_0.png");
+        //textures["bobOmb1R"] = LoadTexture("resources/images/sprites/baddies/BobOmb_1.png");
+        //textures["bobOmb0L"] = texture2DFlipHorizontal(textures["bobOmb0R"]);
+        //textures["bobOmb1L"] = texture2DFlipHorizontal(textures["bobOmb1R"]);
 
-        textures["bulletBill0R"] = LoadTexture("../resource/graphic/sprites/baddies/BulletBill_0.png");
-        textures["bulletBill0L"] = texture2DFlipHorizontal(textures["bulletBill0R"]);
+        //textures["bulletBill0R"] = LoadTexture("resources/images/sprites/baddies/BulletBill_0.png");
+        //textures["bulletBill0L"] = texture2DFlipHorizontal(textures["bulletBill0R"]);
 
-        textures["buzzyBeetle0R"] = LoadTexture("../resource/graphic/sprites/baddies/BuzzyBeetle_0.png");
-        textures["buzzyBeetle1R"] = LoadTexture("../resource/graphic/sprites/baddies/BuzzyBeetle_1.png");
-        textures["buzzyBeetle0L"] = texture2DFlipHorizontal(textures["buzzyBeetle0R"]);
-        textures["buzzyBeetle1L"] = texture2DFlipHorizontal(textures["buzzyBeetle1R"]);
+        //textures["buzzyBeetle0R"] = LoadTexture("resources/images/sprites/baddies/BuzzyBeetle_0.png");
+        //textures["buzzyBeetle1R"] = LoadTexture("resources/images/sprites/baddies/BuzzyBeetle_1.png");
+        //textures["buzzyBeetle0L"] = texture2DFlipHorizontal(textures["buzzyBeetle0R"]);
+        //textures["buzzyBeetle1L"] = texture2DFlipHorizontal(textures["buzzyBeetle1R"]);
 
-        textures["flyingGoomba0R"] = LoadTexture("../resource/graphic/sprites/baddies/FlyingGoomba_0.png");
-        textures["flyingGoomba1R"] = LoadTexture("../resource/graphic/sprites/baddies/FlyingGoomba_1.png");
-        textures["flyingGoomba2R"] = LoadTexture("../resource/graphic/sprites/baddies/FlyingGoomba_2.png");
-        textures["flyingGoomba3R"] = LoadTexture("../resource/graphic/sprites/baddies/FlyingGoomba_3.png");
-        textures["flyingGoomba0L"] = texture2DFlipHorizontal(textures["flyingGoomba0R"]);
-        textures["flyingGoomba1L"] = texture2DFlipHorizontal(textures["flyingGoomba1R"]);
-        textures["flyingGoomba2L"] = texture2DFlipHorizontal(textures["flyingGoomba2R"]);
-        textures["flyingGoomba3L"] = texture2DFlipHorizontal(textures["flyingGoomba3R"]);
+        //textures["flyingGoomba0R"] = LoadTexture("resources/images/sprites/baddies/FlyingGoomba_0.png");
+        //textures["flyingGoomba1R"] = LoadTexture("resources/images/sprites/baddies/FlyingGoomba_1.png");
+        //textures["flyingGoomba2R"] = LoadTexture("resources/images/sprites/baddies/FlyingGoomba_2.png");
+        //textures["flyingGoomba3R"] = LoadTexture("resources/images/sprites/baddies/FlyingGoomba_3.png");
+        //textures["flyingGoomba0L"] = texture2DFlipHorizontal(textures["flyingGoomba0R"]);
+        //textures["flyingGoomba1L"] = texture2DFlipHorizontal(textures["flyingGoomba1R"]);
+        //textures["flyingGoomba2L"] = texture2DFlipHorizontal(textures["flyingGoomba2R"]);
+        //textures["flyingGoomba3L"] = texture2DFlipHorizontal(textures["flyingGoomba3R"]);
 
-        textures["goomba0R"] = LoadTexture("../resource/graphic/sprites/baddies/Goomba_0.png");
-        textures["goomba1R"] = LoadTexture("../resource/graphic/sprites/baddies/Goomba_1.png");
-        textures["goomba0L"] = texture2DFlipHorizontal(textures["goomba0R"]);
-        textures["goomba1L"] = texture2DFlipHorizontal(textures["goomba1R"]);
+        //textures["goomba0R"] = LoadTexture("resources/images/sprites/baddies/Goomba_0.png");
+        //textures["goomba1R"] = LoadTexture("resources/imagesdanss/sprites/baddies/Goomba_1.png");
+        //textures["goomba0L"] = texture2DFlipHorizontal(textures["goomba0R"]);
+        //textures["goomba1L"] = texture2DFlipHorizontal(textures["goomba1R"]);
 
-        textures["greenKoopaTroopa0R"] = LoadTexture("../resource/graphic/sprites/baddies/GreenKoopaTroopa_0.png");
-        textures["greenKoopaTroopa1R"] = LoadTexture("../resource/graphic/sprites/baddies/GreenKoopaTroopa_1.png");
-        textures["greenKoopaTroopa0L"] = texture2DFlipHorizontal(textures["greenKoopaTroopa0R"]);
-        textures["greenKoopaTroopa1L"] = texture2DFlipHorizontal(textures["greenKoopaTroopa1R"]);
+        //textures["greenKoopaTroopa0R"] = LoadTexture("resources/images/sprites/baddies/GreenKoopaTroopa_0.png");
+        //textures["greenKoopaTroopa1R"] = LoadTexture("resources/images/sprites/baddies/GreenKoopaTroopa_1.png");
+        //textures["greenKoopaTroopa0L"] = texture2DFlipHorizontal(textures["greenKoopaTroopa0R"]);
+        //textures["greenKoopaTroopa1L"] = texture2DFlipHorizontal(textures["greenKoopaTroopa1R"]);
 
-        textures["mummyBeetle0R"] = LoadTexture("../resource/graphic/sprites/baddies/MummyBeetle_0.png");
-        textures["mummyBeetle1R"] = LoadTexture("../resource/graphic/sprites/baddies/MummyBeetle_1.png");
-        textures["mummyBeetle0L"] = texture2DFlipHorizontal(textures["mummyBeetle0R"]);
-        textures["mummyBeetle1L"] = texture2DFlipHorizontal(textures["mummyBeetle1R"]);
+        //textures["mummyBeetle0R"] = LoadTexture("resources/images/sprites/baddies/MummyBeetle_0.png");
+        //textures["mummyBeetle1R"] = LoadTexture("resources/images/sprites/baddies/MummyBeetle_1.png");
+        //textures["mummyBeetle0L"] = texture2DFlipHorizontal(textures["mummyBeetle0R"]);
+        //textures["mummyBeetle1L"] = texture2DFlipHorizontal(textures["mummyBeetle1R"]);
 
-        textures["muncher0"] = LoadTexture("../resource/graphic/sprites/baddies/Muncher_0.png");
-        textures["muncher1"] = LoadTexture("../resource/graphic/sprites/baddies/Muncher_1.png");
+        //textures["muncher0"] = LoadTexture("resources/images/sprites/baddies/Muncher_0.png");
+        //textures["muncher1"] = LoadTexture("resources/images/sprites/baddies/Muncher_1.png");
 
-        textures["piranhaPlant0"] = LoadTexture("../resource/graphic/sprites/baddies/PiranhaPlant_0.png");
-        textures["piranhaPlant1"] = LoadTexture("../resource/graphic/sprites/baddies/PiranhaPlant_1.png");
+        //textures["piranhaPlant0"] = LoadTexture("resources/images/sprites/baddies/PiranhaPlant_0.png");
+        //textures["piranhaPlant1"] = LoadTexture("resources/images/sprites/baddies/PiranhaPlant_1.png");
 
-        textures["redKoopaTroopa0R"] = LoadTexture("../resource/graphic/sprites/baddies/RedKoopaTroopa_0.png");
-        textures["redKoopaTroopa1R"] = LoadTexture("../resource/graphic/sprites/baddies/RedKoopaTroopa_1.png");
-        textures["redKoopaTroopa0L"] = texture2DFlipHorizontal(textures["redKoopaTroopa0R"]);
-        textures["redKoopaTroopa1L"] = texture2DFlipHorizontal(textures["redKoopaTroopa1R"]);
+        //textures["redKoopaTroopa0R"] = LoadTexture("resources/images/sprites/baddies/RedKoopaTroopa_0.png");
+        //textures["redKoopaTroopa1R"] = LoadTexture("resources/images/sprites/baddies/RedKoopaTroopa_1.png");
+        //textures["redKoopaTroopa0L"] = texture2DFlipHorizontal(textures["redKoopaTroopa0R"]);
+        //textures["redKoopaTroopa1L"] = texture2DFlipHorizontal(textures["redKoopaTroopa1R"]);
 
-        textures["rex10R"] = LoadTexture("../resource/graphic/sprites/baddies/Rex_1_0.png");
-        textures["rex11R"] = LoadTexture("../resource/graphic/sprites/baddies/Rex_1_1.png");
-        textures["rex20R"] = LoadTexture("../resource/graphic/sprites/baddies/Rex_2_0.png");
-        textures["rex21R"] = LoadTexture("../resource/graphic/sprites/baddies/Rex_2_1.png");
-        textures["rex10L"] = texture2DFlipHorizontal(textures["rex10R"]);
-        textures["rex11L"] = texture2DFlipHorizontal(textures["rex11R"]);
-        textures["rex20L"] = texture2DFlipHorizontal(textures["rex20R"]);
-        textures["rex21L"] = texture2DFlipHorizontal(textures["rex21R"]);
+        //textures["rex10R"] = LoadTexture("resources/images/sprites/baddies/Rex_1_0.png");
+        //textures["rex11R"] = LoadTexture("resources/images/sprites/baddies/Rex_1_1.png");
+        //textures["rex20R"] = LoadTexture("resources/images/sprites/baddies/Rex_2_0.png");
+        //textures["rex21R"] = LoadTexture("resources/images/sprites/baddies/Rex_2_1.png");
+        //textures["rex10L"] = texture2DFlipHorizontal(textures["rex10R"]);
+        //textures["rex11L"] = texture2DFlipHorizontal(textures["rex11R"]);
+        //textures["rex20L"] = texture2DFlipHorizontal(textures["rex20R"]);
+        //textures["rex21L"] = texture2DFlipHorizontal(textures["rex21R"]);
 
-        textures["swooper0R"] = LoadTexture("../resource/graphic/sprites/baddies/Swooper_1.png");
-        textures["swooper1R"] = LoadTexture("../resource/graphic/sprites/baddies/Swooper_2.png");
-        textures["swooper0L"] = texture2DFlipHorizontal(textures["swooper0R"]);
-        textures["swooper1L"] = texture2DFlipHorizontal(textures["swooper1R"]);
+        //textures["swooper0R"] = LoadTexture("resources/images/sprites/baddies/Swooper_1.png");
+        //textures["swooper1R"] = LoadTexture("resources/images/sprites/baddies/Swooper_2.png");
+        //textures["swooper0L"] = texture2DFlipHorizontal(textures["swooper0R"]);
+        //textures["swooper1L"] = texture2DFlipHorizontal(textures["swooper1R"]);
 
-        textures["yellowKoopaTroopa0R"] = LoadTexture("../resource/graphic/sprites/baddies/YellowKoopaTroopa_0.png");
-        textures["yellowKoopaTroopa1R"] = LoadTexture("../resource/graphic/sprites/baddies/YellowKoopaTroopa_1.png");
-        textures["yellowKoopaTroopa0L"] = texture2DFlipHorizontal(textures["yellowKoopaTroopa0R"]);
-        textures["yellowKoopaTroopa1L"] = texture2DFlipHorizontal(textures["yellowKoopaTroopa1R"]);
+        //textures["yellowKoopaTroopa0R"] = LoadTexture("resources/images/sprites/baddies/YellowKoopaTroopa_0.png");
+        //textures["yellowKoopaTroopa1R"] = LoadTexture("resources/images/sprites/baddies/YellowKoopaTroopa_1.png");
+        //textures["yellowKoopaTroopa0L"] = texture2DFlipHorizontal(textures["yellowKoopaTroopa0R"]);
+        //textures["yellowKoopaTroopa1L"] = texture2DFlipHorizontal(textures["yellowKoopaTroopa1R"]);
 
-        textures["montyMole0R"] = LoadTexture("../resource/graphic/sprites/baddies/MontyMole_0.png");
-        textures["montyMole1R"] = LoadTexture("../resource/graphic/sprites/baddies/MontyMole_1.png");
-        textures["montyMole0L"] = texture2DFlipHorizontal(textures["montyMole0R"]);
-        textures["montyMole1L"] = texture2DFlipHorizontal(textures["montyMole1R"]);
+        //textures["montyMole0R"] = LoadTexture("resources/images/sprites/baddies/MontyMole_0.png");
+        //textures["montyMole1R"] = LoadTexture("resources/images/sprites/baddies/MontyMole_1.png");
+        //textures["montyMole0L"] = texture2DFlipHorizontal(textures["montyMole0R"]);
+        //textures["montyMole1L"] = texture2DFlipHorizontal(textures["montyMole1R"]);
 
-        textures["banzaiBill0R"] = LoadTexture("../resource/graphic/sprites/baddies/BanzaiBill_0.png");
-        textures["banzaiBill0L"] = texture2DFlipHorizontal(textures["banzaiBill0R"]);
+        //textures["banzaiBill0R"] = LoadTexture("resources/images/sprites/baddies/BanzaiBill_0.png");
+        //textures["banzaiBill0L"] = texture2DFlipHorizontal(textures["banzaiBill0R"]);
 
-        textures["jumpingPiranhaPlant0"] = LoadTexture("../resource/graphic/sprites/baddies/JumpingPiranhaPlant_0.png");
-        textures["jumpingPiranhaPlant1"] = LoadTexture("../resource/graphic/sprites/baddies/JumpingPiranhaPlant_1.png");
-        textures["jumpingPiranhaPlant2"] = LoadTexture("../resource/graphic/sprites/baddies/JumpingPiranhaPlant_2.png");
-        textures["jumpingPiranhaPlant3"] = LoadTexture("../resource/graphic/sprites/baddies/JumpingPiranhaPlant_3.png");
+        //textures["jumpingPiranhaPlant0"] = LoadTexture("resources/images/sprites/baddies/JumpingPiranhaPlant_0.png");
+        //textures["jumpingPiranhaPlant1"] = LoadTexture("resources/images/sprites/baddies/JumpingPiranhaPlant_1.png");
+        //textures["jumpingPiranhaPlant2"] = LoadTexture("resources/images/sprites/baddies/JumpingPiranhaPlant_2.png");
+        //textures["jumpingPiranhaPlant3"] = LoadTexture("resources/images/sprites/baddies/JumpingPiranhaPlant_3.png");
 
         // effects
         textures["puft0"] = LoadTexture("../resource/graphic/sprites/effects/Puft_0.png");
