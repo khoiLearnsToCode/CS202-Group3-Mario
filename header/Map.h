@@ -7,7 +7,7 @@ class GameWorld;
 #include "json.hpp"
 #include "Tile.h"
 #include "Mario.h"
-#include "Baddies.h"
+#include "Baddie.h"
 #include <vector>
 
 class Map : public virtual Drawable {

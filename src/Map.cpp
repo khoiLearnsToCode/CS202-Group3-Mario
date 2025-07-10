@@ -8,30 +8,30 @@
 //#include "Baddie.h"
 //#include "BanzaiBill.h"
 //#include "Block.h"
-//#include "BlueKoopaTroopa.h"
-//#include "BobOmb.h"
-//#include "BulletBill.h"
-//#include "BuzzyBeetle.h"
+#include "BlueKoopaTroopa.h"
+#include "BobOmb.h"
+#include "BulletBill.h"
+#include "BuzzyBeetle.h"
 //#include "CloudBlock.h"
 //#include "Coin.h"
 //#include "CourseClearToken.h"
 //#include "ExclamationBlock.h"
 //#include "EyesClosedBlock.h"
 //#include "EyesOpenedBlock.h"
-//#include "FlyingGoomba.h"
+#include "FlyingGoomba.h"
 #include "GameWorld.h"
 //#include "GlassBlock.h"
-//#include "Goomba.h"
-//#include "GreenKoopaTroopa.h"
+#include "Goomba.h"
+#include "GreenKoopaTroopa.h"
 //#include "InvisibleBlock.h"
 //#include "Item.h"
-//#include "JumpingPiranhaPlant.h"
+#include "JumpingPiranhaPlant.h"
 #include "Map.h"
 //#include "MessageBlock.h"
-//#include "MontyMole.h"
-//#include "MummyBeetle.h"
-//#include "Muncher.h"
-//#include "PiranhaPlant.h"
+#include "MontyMole.h"
+#include "MummyBeetle.h"
+#include "Muncher.h"
+#include "PiranhaPlant.h"
 //#include "QuestionBlock.h"
 //#include "QuestionFireFlowerBlock.h"
 //#include "QuestionMushroomBlock.h"
@@ -39,15 +39,15 @@
 //#include "QuestionStarBlock.h"
 //#include "QuestionThreeUpMoonBlock.h"
 #include "raylib.h"
-//#include "RedKoopaTroopa.h"
+#include "RedKoopaTroopa.h"
 #include "ResourceManager.h"
-//#include "Rex.h"
+#include "Rex.h"
 #include "Sprite.h"
 //#include "StoneBlock.h"
-//#include "Swooper.h"
+#include "Swooper.h"
 //#include "utils.h"
 //#include "WoodBlock.h"
-//#include "YellowKoopaTroopa.h"
+#include "YellowKoopaTroopa.h"
 //#include "YoshiCoin.h"
 #include <iostream>
 #include <fstream>
@@ -227,11 +227,11 @@ void Map::loadFromJsonFile(bool shouldLoadTestMap) {
             Baddie* newBaddie;
 
             if (baddieID == 146) { // Piranha Plant
-                newBaddie = new PiranhaPlant({1.0f * x * TILE_WIDTH + 16, 1.0f * y * TILE_WIDTH + 36}, {32,66}, {0,0}, RED);
+                newBaddie = new PiranhaPlant({1.0f * x * TILE_WIDTH + 16, 1.0f * y * TILE_WIDTH + 36}, {32,66}, RED);
             } 
 
             else if (baddieID == 136) { // Jumping Piranha Plant
-                newBaddie = new JumpingPiranhaPlant({1.0f * x * TILE_WIDTH + 16, 1.0f * y * TILE_WIDTH + 34}, {32,42}, {0,0}, RED);
+                newBaddie = new JumpingPiranhaPlant({1.0f * x * TILE_WIDTH + 16, 1.0f * y * TILE_WIDTH + 34}, {32,42}, RED);
             } 
 
             backBaddies.push_back(newBaddie);
@@ -286,7 +286,7 @@ void Map::loadFromJsonFile(bool shouldLoadTestMap) {
             } 
 
             else if (baddieID == 144) { //muncher
-                newBaddie = new Muncher({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {32,30}, {-80,0}, BROWN);
+                newBaddie = new Muncher({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {32,30}, BROWN);
             }
 
             else if (baddieID == 148) { // red koopa troopa
