@@ -4,7 +4,7 @@
 #include "ResourceManager.h"
 #include "raylib.h"
 #include <iostream>
-
+#include "Item.h"
 Block::Block() : Sprite(), hit(false) {}
 Block::Block(Vector2 pos, Vector2 dim, Color color)
 	: Sprite(pos, dim, color), hit(false) {}
@@ -19,7 +19,8 @@ void Block::resetHit() {
 }
 
 void Block::doHit(Mario& mario, Map* map) {
-
+	if (!hit)
+		hit = true;
 }
 // StoneBlock
 void StoneBlock::update() {
@@ -113,12 +114,41 @@ EyesOpenedBlock::~EyesOpenedBlock() {
 
 // QuestionBlock
 void QuestionBlock::update() {
-
+	if (!hit) {
+		frameAcum += GetFrameTime();
+		if (frameAcum >= frameTime) {
+			frameAcum = 0;
+			currentFrame = (currentFrame + 1) % maxFrames;
+		}
+	}
 }
 void QuestionBlock::draw() {
 	DrawTexture(ResourceManager::getInstance().getTexture("block97"), pos.x, pos.y, color);
 }
-//void QuestionBlock::doHit(Mario& mario, Map* map);
+void QuestionBlock::doHit(Mario& mario, Map* map) {
+	if (!hit)
+		hit = true;
+	std::string itemType;
+	if (mario.getType() == MARIO_TYPE_SMALL) {
+		itemType = "Mushroom";
+	}
+	else if (mario.getType() == MARIO_TYPE_SUPER) {
+		itemType = "FireFlower";
+	}
+	else {
+		itemType = "";
+	}
+	if (!itemType.empty()) {
+		Vector2 itemPos = { pos.x, pos.y - dim.y };
+		Vector2 itemDim = { 32, 32 }; // Assuming a standard item size
+		Vector2 itemVel = { 0, -150 };
+		Item* item = FactoryItem::createItem(itemType, itemPos, itemDim, itemVel, WHITE, true, true, false);
+		if (item) {
+			// Add the item to the game world
+			delete item;
+		}
+	}
+}
 QuestionBlock::QuestionBlock(Vector2 pos, Vector2 dim, Color color)
 	: Block(pos, dim, color) {}
 QuestionBlock::QuestionBlock(Vector2 pos, Vector2 dim, Color color, float frameTime, int maxFrames)
@@ -129,12 +159,28 @@ QuestionBlock::~QuestionBlock() {
 
 //QuestionMushroomBlock
 void QuestionMushroomBlock::update() {
-
+	
 }
 void QuestionMushroomBlock::draw() {
 	DrawTexture(ResourceManager::getInstance().getTexture("block97"), pos.x, pos.y, color);
 }
-//void QuestionMushroomBlock::doHit(Mario& mario, Map* map);
+void QuestionMushroomBlock::doHit(Mario& mario, Map* map) {
+	if (!hit) {
+		hit = true;
+		Vector2 itemPos = { pos.x, pos.y - dim.y };
+		Vector2 itemDim = { 32, 32 };
+		Vector2 itemVel = { 0, -150 };
+		Item* item = FactoryItem::createItem("Mushroom", itemPos, itemDim, itemVel, ORANGE, true, true, false);
+		if (item) {
+			//add item to the game world
+			delete item; 
+			if (mario.getType() != MARIO_TYPE_SMALL) {
+				item->updateMario(mario); 
+			}
+		}
+		mario.addPoints(200); 
+	}
+}
 QuestionMushroomBlock::QuestionMushroomBlock(Vector2 pos, Vector2 dim, Color color)
 	: QuestionBlock(pos, dim, color) {}
 QuestionMushroomBlock::QuestionMushroomBlock(Vector2 pos, Vector2 dim, Color color, float frameTime, int maxFrames)
@@ -150,7 +196,23 @@ void QuestionFireFlowerBlock::update() {
 void QuestionFireFlowerBlock::draw() {
 	DrawTexture(ResourceManager::getInstance().getTexture("block97"), pos.x, pos.y, color);
 }
-//void QuestionFireFlowerBlock::doHit(Mario& mario, Map* map);
+void QuestionFireFlowerBlock::doHit(Mario& mario, Map* map) {
+	if (!hit) {
+		hit = true;
+		Vector2 itemPos = { pos.x, pos.y - dim.y };
+		Vector2 itemDim = { 32, 32 };
+		Vector2 itemVel = { 0, -150 };
+		Item* item = FactoryItem::createItem("FireFlower", itemPos, itemDim, itemVel, ORANGE, true, true, false);
+		if (item) {
+			// add the item to the game world
+			delete item;
+			if (mario.getType() != MARIO_TYPE_FLOWER) {
+				item->updateMario(mario); 
+			}
+		}
+		mario.addPoints(200);
+	}
+}
 QuestionFireFlowerBlock::QuestionFireFlowerBlock(Vector2 pos, Vector2 dim, Color color)
 	: QuestionBlock(pos, dim, color) {}
 QuestionFireFlowerBlock::QuestionFireFlowerBlock(Vector2 pos, Vector2 dim, Color color, float frameTime, int maxFrames)
@@ -166,7 +228,21 @@ void QuestionStarBlock::update() {
 void QuestionStarBlock::draw() {
 	DrawTexture(ResourceManager::getInstance().getTexture("block97"), pos.x, pos.y, color);
 }
-//void QuestionStarBlock::doHit(Mario& mario, Map* map);
+void QuestionStarBlock::doHit(Mario& mario, Map* map) {
+	if (!hit) {
+		hit = true;
+		Vector2 itemPos = { pos.x, pos.y - dim.y };
+		Vector2 itemDim = { 30, 32 }; 
+		Vector2 itemVel = { 0, -150 };
+		Item* item = FactoryItem::createItem("Star", itemPos, itemDim, itemVel, YELLOW, true, true, false);
+		if (item) {
+			// Add the item to the game world
+			delete item; 
+			mario.setInvincible(true); 
+		}
+		mario.addPoints(1000); 
+	}
+}
 QuestionStarBlock::QuestionStarBlock(Vector2 pos, Vector2 dim, Color color)
 	: QuestionBlock(pos, dim, color) {}
 QuestionStarBlock::QuestionStarBlock(Vector2 pos, Vector2 dim, Color color, float frameTime, int maxFrames)
@@ -182,7 +258,21 @@ void QuestionOneUpMushroomBlock::update() {
 void QuestionOneUpMushroomBlock::draw() {
 	DrawTexture(ResourceManager::getInstance().getTexture("block97"), pos.x, pos.y, color);
 }
-//void QuestionOneUpMushroomBlock::doHit(Mario& mario, Map* map);
+void QuestionOneUpMushroomBlock::doHit(Mario& mario, Map* map) {
+	if (!hit) {
+		hit = true;
+		Vector2 itemPos = { pos.x, pos.y - dim.y };
+		Vector2 itemDim = { 32, 32 };
+		Vector2 itemVel = { 0, -150 };
+		Item* item = FactoryItem::createItem("OneUpMushroom", itemPos, itemDim, itemVel, YELLOW, true, true, false);
+		if (item) {
+			// Add the item to the game world
+			delete item; 
+			mario.addLives(1); 
+		}
+		mario.addPoints(200); 
+	}
+}
 QuestionOneUpMushroomBlock::QuestionOneUpMushroomBlock(Vector2 pos, Vector2 dim, Color color)
 	: QuestionBlock(pos, dim, color) {}
 QuestionOneUpMushroomBlock::QuestionOneUpMushroomBlock(Vector2 pos, Vector2 dim, Color color, float frameTime, int maxFrames)
@@ -198,7 +288,21 @@ void QuestionThreeUpMoonBlock::update() {
 void QuestionThreeUpMoonBlock::draw() {
 	DrawTexture(ResourceManager::getInstance().getTexture("block97"), pos.x, pos.y, color);
 }
-// void QuestionThreeUpMoonBlock::doHit(Mario& mario, Map* map);
+void QuestionThreeUpMoonBlock::doHit(Mario& mario, Map* map) {
+	if (!hit) {
+		hit = true;
+		Vector2 itemPos = { pos.x, pos.y - dim.y };
+		Vector2 itemDim = { 32, 32 };
+		Vector2 itemVel = { 0, -150 };
+		Item* item = FactoryItem::createItem("ThreeUpMoon", itemPos, itemDim, itemVel, YELLOW, true, true, false);
+		if (item) {
+			// Add the item to the game world
+			delete item; 
+			mario.addLives(3); 
+		}
+		mario.addPoints(500); 
+	}
+}
 QuestionThreeUpMoonBlock::QuestionThreeUpMoonBlock(Vector2 pos, Vector2 dim, Color color)
 	: QuestionBlock(pos, dim, color) {}
 QuestionThreeUpMoonBlock::QuestionThreeUpMoonBlock(Vector2 pos, Vector2 dim, Color color, float frameTime, int maxFrames)
@@ -209,12 +313,31 @@ QuestionThreeUpMoonBlock::~QuestionThreeUpMoonBlock() {
 
 // ExclamationBlock
 void ExclamationBlock::update() {
-
+	if (!hit) {
+		frameAcum += GetFrameTime();
+		if (frameAcum >= frameTime) {
+			frameAcum = 0;
+			currentFrame = (currentFrame + 1) % maxFrames;
+		}
+	}
 }
 void ExclamationBlock::draw() {
 	DrawTexture(ResourceManager::getInstance().getTexture("block89"), pos.x, pos.y, color);
 }
-// void ExclamationBlock::doHit(Mario& mario, Map* map);
+void ExclamationBlock::doHit(Mario& mario, Map* map) {
+	if (!hit)
+		hit = true;
+	Vector2 itemPos = { pos.x, pos.y - dim.y };
+	Vector2 itemDim = { 32, 32 }; // Assuming a standard item size
+	Vector2 itemVel = { 0, -150 };
+	Item* item = FactoryItem::createItem("Coin", itemPos, itemDim, itemVel, YELLOW, true, true, false);
+	if (item) {
+		// Add the item to the game world
+		delete item;
+	}
+	mario.addPoints(100);
+	mario.addCoins(1);
+}
 ExclamationBlock::ExclamationBlock(Vector2 pos, Vector2 dim, Color color)
 	: Block(pos, dim, color) {}
 ExclamationBlock::ExclamationBlock(Vector2 pos, Vector2 dim, Color color, float frameTime, int maxFrames)
@@ -230,7 +353,21 @@ void InvisibleBlock::update() {
 void InvisibleBlock::draw() {
 
 }
-// void InvisibleBlock::doHit(Mario& mario, Map* map);
+void InvisibleBlock::doHit(Mario& mario, Map* map) {
+	if (!hit) {
+		hit = true;
+		Vector2 itemPos = { pos.x, pos.y - dim.y }; 
+		Vector2 itemDim = { 32, 32 };
+		Vector2 itemVel = { 0, -150 }; 
+		Item* item = FactoryItem::createItem("Coin", itemPos, itemDim, itemVel, YELLOW, true, true, false);
+		if (item) {
+			// Add the item to the game world
+			delete item;
+			mario.addCoins(1);
+		}
+		mario.addPoints(100); 
+	}
+}
 InvisibleBlock::InvisibleBlock(Vector2 pos, Vector2 dim, Color color)
 	: Block(pos, dim, color) {}
 InvisibleBlock::InvisibleBlock(Vector2 pos, Vector2 dim, Color color, float frameTime, int maxFrames)
@@ -246,7 +383,13 @@ void MessageBlock::update() {
 void MessageBlock::draw() {
 	DrawTexture(ResourceManager::getInstance().getTexture("block96"), pos.x, pos.y, color);
 }
-// void MessageBlock::doHit(Mario& mario, Map* map);
+void MessageBlock::doHit(Mario& mario, Map* map) {
+	if (!hit) {
+		hit = true;
+		// Display a message or perform an action
+		mario.addPoints(50);
+	}
+}
 MessageBlock::MessageBlock(Vector2 pos, Vector2 dim, Color color)
 	: Block(pos, dim, color) {}
 MessageBlock::MessageBlock(Vector2 pos, Vector2 dim, Color color, float frameTime, int maxFrames)
@@ -254,6 +397,7 @@ MessageBlock::MessageBlock(Vector2 pos, Vector2 dim, Color color, float frameTim
 MessageBlock::~MessageBlock() {
 	std::cout << "Destroying MessageBlock at position: " << pos.x << ", " << pos.y << std::endl;
 }
+
 
 //Factory pattern for Block creation
 Block* BlockFactory::createBlock(const std::string& type, Vector2 pos, Vector2 dim, Color color, float frameTime, int maxFrames) {
