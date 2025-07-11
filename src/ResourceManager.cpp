@@ -529,6 +529,29 @@ std::map<std::string, Font>& ResourceManager::getFonts() {
     return fonts;
 }
 
+
+float ResourceManager::getMusicVolume() const {
+    return musicVolume;
+}
+
+float ResourceManager::getSfxVolume() const {
+    return sfxVolume;
+}
+
+void ResourceManager::setMusicVolume(float volume) {
+    musicVolume = volume;
+    for (auto& music : musics) {
+        SetMusicVolume(music.second, musicVolume);
+    }
+}
+
+void ResourceManager::setSfxVolume(float volume) {
+    sfxVolume = volume;
+    for (auto& sound : sounds) {
+        SetSoundVolume(sound.second, sfxVolume);
+    }
+}
+
 //Utility getters
 Texture2D& ResourceManager::getTexture(const std::string& key) {
     if (textures.find(key) == textures.end()) {
