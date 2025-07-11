@@ -8,6 +8,9 @@ class GameWorld;
 #include "Tile.h"
 #include "Mario.h"
 #include "Baddie.h"
+#include "Tile.h"
+#include "Block.h"
+#include "Item.h"
 #include <vector>
 
 class Map : public virtual Drawable {
@@ -15,10 +18,10 @@ class Map : public virtual Drawable {
     std::vector<Tile*> untouchableTiles;
     std::vector<Tile*> touchableTiles;
     // std::vector<Tile*> frontScenarioTiles;
-    // std::vector<Block*> blocks;
+    std::vector<Block*> blocks;
     // std::vector<Block*> messageBlocks;
-    //std::vector<Item*> items;
-    //std::vector<Item*> staticItems;
+    std::vector<Item*> items;
+    std::vector<Item*> staticItems;
     std::vector<Baddie*> baddies;
     std::vector<Baddie*> frontBaddies;  // auxiliary drawing vector for map placement
     std::vector<Baddie*> backBaddies;   // auxiliary drawing vector for map placement
@@ -77,9 +80,9 @@ public:
     void setGameWorld(GameWorld* gw);
 
     std::vector<Tile*>& getTiles();
-    //std::vector<Block*>& getBlocks();
-    //std::vector<Item*>& getItems();
-    //std::vector<Item*>& getStaticItems();
+    std::vector<Block*>& getBlocks();
+    std::vector<Item*>& getItems();
+    std::vector<Item*>& getStaticItems();
     std::vector<Baddie*>& getBaddies();
     float getMaxWidth() const;
     float getMaxHeight() const;
