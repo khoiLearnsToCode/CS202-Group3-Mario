@@ -1,5 +1,6 @@
 #include "GameWorld.h"
 #include "Button.h"
+#include "Item.h"
 
 GameState GameWorld::state = GAME_STATE_TITLE_SCREEN;
 float GameWorld::gravity = 20;
@@ -18,11 +19,15 @@ GameWorld::GameWorld() :
     map(mario, 1, true, this),
     camera(nullptr),
     settingBoardIsOpen(false),
+    helpingBoardIsOpen(false),
+    stateBeforePause(GAME_STATE_TITLE_SCREEN),
     remainingTimePointCount(400),
+    pauseMusic(false),
+    pauseMario(false),
     titleScreen(nullptr),
     menuScreen(nullptr),
-    settingScreen(nullptr) {
-
+    settingScreen(nullptr)
+    {
         mario.setGameWorld(this);
         mario.setMap(&map);
     }
@@ -74,17 +79,27 @@ void GameWorld::initScreens() {
 
 void GameWorld::inputAndUpdate() {
 
-    std::map<std::string, Sound> &sounds = ResourceManager::getInstance().getSounds();
-    std::map<std::string, Music> &musics = ResourceManager::getInstance().getMusics();
+    map.loadFromJsonFile();
 
+    std::map<std::string, Sound>& sounds = ResourceManager::getInstance().getSounds();
+    std::map<std::string, Music>& musics = ResourceManager::getInstance().getMusics();
+
+    std::vector<Tile*>& Tiles = map.getTiles();
+    std::vector<Block*>& Blocks = map.getBlocks();
+    std::vector<Baddie*>& Baddies = map.getBaddies();
+    std::vector<Item*>& Items = map.getItems();
+    std::vector<Item*>& StaticItems = map.getStaticItems();
+
+    // std::cerr << "Mario state: " << mario.getState() << std::endl;
+    // std::cerr << "GameWorld state: " << state << std::endl;
     if ( mario.getState() != SPRITE_STATE_DYING && 
          mario.getState() != SPRITE_STATE_VICTORY &&
          mario.getState() != SPRITE_STATE_WAITING_TO_NEXT_MAP &&
          state != GAME_STATE_TITLE_SCREEN &&
          state != GAME_STATE_MENU_SCREEN &&
          state != GAME_STATE_CREDITS_SCREEN &&
-         state != GAME_STATE_FINISHED /*&& 
-         !pauseMusic*/ ) {
+         state != GAME_STATE_FINISHED && 
+         !pauseMusic ) {
         map.playMusic();
     }
 
@@ -92,24 +107,79 @@ void GameWorld::inputAndUpdate() {
          state != GAME_STATE_MENU_SCREEN &&
          state != GAME_STATE_CREDITS_SCREEN &&
          state != GAME_STATE_FINISHED &&
-         state != GAME_STATE_PAUSED ) {
+         state != GAME_STATE_SETTINGS_SCREEN &&
+         state != GAME_STATE_HELPING_SCREEN ) {
         mario.setActivationWidth( GetScreenWidth() * 2 );
         mario.update();
-    } else if ( /*!pauseMarioUpdate &&*/ state != GAME_STATE_TITLE_SCREEN && state != GAME_STATE_MENU_SCREEN && state != GAME_STATE_CREDITS_SCREEN) {
+    } else if ( !pauseMario && state != GAME_STATE_TITLE_SCREEN && 
+        state != GAME_STATE_MENU_SCREEN && 
+        state != GAME_STATE_CREDITS_SCREEN) {
+
         mario.update();
     }
 
+    if ( mario.getState() != SPRITE_STATE_DYING && 
+         mario.getState() != SPRITE_STATE_VICTORY &&
+         mario.getState() != SPRITE_STATE_WAITING_TO_NEXT_MAP &&
+         state != GAME_STATE_TITLE_SCREEN &&
+         state != GAME_STATE_MENU_SCREEN &&
+         state != GAME_STATE_CREDITS_SCREEN &&
+         state != GAME_STATE_FINISHED &&
+         state != GAME_STATE_SETTINGS_SCREEN &&
+         state != GAME_STATE_HELPING_SCREEN ) {}
+
+    else if (mario.getState() == SPRITE_STATE_DYING) {
+            if ( !mario.isPlayerDownMusicStreamPlaying() && !mario.isGameOverMusicStreamPlaying() ) {
+            
+            if ( mario.getLives() > 0 ) {
+                resetMap();
+            } else if ( mario.getLives() < 0 ) {
+                resetGame();
+            } else {
+                mario.playGameOverMusicStream();
+                state = GAME_STATE_GAME_OVER;
+                mario.setLives( -1 );
+            }
+        }
+    }
+
+    else if ( mario.getState() == SPRITE_STATE_VICTORY ) {}
+
+    else if (state == GAME_STATE_COUNTING_POINTS) {}
+
+    else if (state == GAME_STATE_IRIS_OUT) {}
+
+    else if (state == GAME_STATE_GO_TO_NEXT_MAP) {}
+
+    else if ( state == GAME_STATE_SETTINGS_SCREEN ) {
+        if (IsKeyPressed(KEY_P)) {
+            unpauseGame();
+        }
+    }
+
+    else if ( state == GAME_STATE_HELPING_SCREEN ) {
+        if (IsKeyPressed(KEY_H)) {
+            unpauseGame();
+        }
+    }
+
+
     if (settingBoardIsOpen){
-        settingScreen->update(); 
+        settingScreen->update();
+        settingScreen->updateVolume(); 
 
         if (settingScreen->settingBoardShouldClose()) {
         settingBoardIsOpen = false;
         }
-
-        //return;
     }
 
-    // If setting board is not open, handle input for other states
+    if ( mario.getState() != SPRITE_STATE_DYING && 
+         mario.getY() > map.getMaxHeight() ) {
+
+        mario.setState( SPRITE_STATE_DYING );
+        mario.playPlayerDownMusicStream();
+        mario.removeLives( 1 );
+    }
 
     const float xc = GetScreenWidth() / 2.0;
     const float yc = GetScreenHeight() / 2.0;
@@ -211,11 +281,8 @@ void GameWorld::inputAndUpdate() {
         }
     }
 
-    else
-    {
-        // Handle input and update the map
-        map.loadFromJsonFile();
-        mario.update();
+    else if ( state == GAME_STATE_GAME_OVER ) {
+        mario.playGameOverMusicStream();
     }
       
 }
@@ -291,16 +358,31 @@ void GameWorld::resetGame() {
 void GameWorld::nextMap() {
     if (map.hasNext()) {
         state = GAME_STATE_PLAYING;
+        // reset state but keep the power-up
+        mario.reset(false);
     } else {
         state = GAME_STATE_FINISHED;
     }
 }
 
-void GameWorld::pauseGame(bool playPauseSFX, bool pauseMusic, bool showOverlay, bool pauseMarioUpdate) {
-    //implement later
+void GameWorld::pauseGame(bool playPauseSFX, bool pauseMusic, bool pauseMario, bool showSettingBoard, bool showHelpingBoard) {
+    if (playPauseSFX) {
+        PlaySound(ResourceManager::getInstance().getSounds()["pause"]);
+    }
+    this->pauseMusic = pauseMusic;
+    this->pauseMario = pauseMario;
+    settingBoardIsOpen = showSettingBoard;
+    helpingBoardIsOpen = showHelpingBoard;
+    this->stateBeforePause = state;
+
+    state = settingBoardIsOpen ? GAME_STATE_SETTINGS_SCREEN : GAME_STATE_HELPING_SCREEN; 
 }
 
 void GameWorld::unpauseGame() {
-    //implement later
+    state = stateBeforePause;
+    pauseMusic = false;
+    pauseMario = false;
+    settingBoardIsOpen = false;
+    helpingBoardIsOpen = false;
 }
 

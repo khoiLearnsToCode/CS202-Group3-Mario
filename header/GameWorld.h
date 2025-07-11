@@ -29,11 +29,12 @@ class GameWorld : public virtual Drawable {
     Map map;
     Camera2D* camera;
     bool settingBoardIsOpen;
-    //GameState stateBeforePause;
+    bool helpingBoardIsOpen;
+    GameState stateBeforePause;
     int remainingTimePointCount;
 
-    // bool pauseMusic;
-    // bool pauseMarioUpdate;
+    bool pauseMusic;
+    bool pauseMario;
     // bool showOverlayOnPause;
 
     // bool irisOutFinished;
@@ -83,7 +84,7 @@ public:
     void resetMap();
     void resetGame();
     void nextMap();
-    void pauseGame(bool playPauseSFX, bool pauseMusic, bool showOverlay, bool pauseMarioUpdate);
+    void pauseGame(bool playPauseSFX, bool pauseMusic, bool pauseMario, bool showSettingBoard, bool showHelpingBoard);
     void unpauseGame();
 
     // bool isPauseMusicOnPause() const;
