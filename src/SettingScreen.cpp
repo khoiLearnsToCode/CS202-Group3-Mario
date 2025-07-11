@@ -19,12 +19,15 @@ SettingScreen::SettingScreen() : Screen(), musicVolume(0.5f), sfxVolume(0.5f), i
 
     std::cout << "Border: " << border.x << ", " << border.y << ", " << border.width << ", " << border.height << std::endl;
 
-    buttons.emplace("MUTEMUSIC", new ButtonTextTexture("muteButton", {border.x + 50, border.y + 50}, 2.0f));
-    buttons.emplace("UNMUTEMUSIC", new ButtonTextTexture("unmuteButton", {border.x + 50, border.y + 50}, 2.0f));
+    buttons.emplace("MUTEMUSIC", new ButtonTextTexture("muteButton", {border.x + 100, border.y + 100}, 2.0f));
+    buttons.emplace("UNMUTEMUSIC", new ButtonTextTexture("unmuteButton", {border.x + 100, border.y + 100}, 2.0f));
 
-    buttons.emplace("MUTESFX", new ButtonTextTexture("muteButton", {border.x + 50, border.y + 120}, 2.0f));
-    buttons.emplace("UNMUTESFX", new ButtonTextTexture("unmuteButton", {border.x + 50, border.y + 120}, 2.0f));
+    buttons.emplace("MUTESFX", new ButtonTextTexture("muteButton", {border.x + 100, border.y + 175}, 2.0f));
+    buttons.emplace("UNMUTESFX", new ButtonTextTexture("unmuteButton", {border.x + 100, border.y + 175}, 2.0f));
 
+    GuiLoadStyle("../resource/font/candy.rgs");
+
+    GuiSetStyle(SLIDER, TEXT_ALIGNMENT_VERTICAL, TEXT_ALIGN_BOTTOM);
 }
 
 SettingScreen::~SettingScreen() {
@@ -62,12 +65,13 @@ void SettingScreen::draw() {
         buttonPair.second->draw();
     }
 
-    Vector2 musicSliderPos = { border.x + 120, border.y + 50 + 16 };
-    GuiSlider({ musicSliderPos.x, musicSliderPos.y, 200, 20 }, "", "", &musicVolume, 0.0f, 1.0f);
+    Vector2 musicSliderPos = { border.x + 175, border.y + 105 + 16 };
+    GuiSlider({ musicSliderPos.x, musicSliderPos.y, 200, 20 }, "", "MUSIC", &musicVolume, 0.0f, 1.0f);
     musicVolume = floor(musicVolume * 10.0f) / 10.0f;
+    
 
-    Vector2 sfxSliderPos = { border.x + 120, border.y + 50 + 16 + 70};
-    GuiSlider({ sfxSliderPos.x, sfxSliderPos.y, 200, 20 }, "", "", &sfxVolume, 0.0f, 1.0f);
+    Vector2 sfxSliderPos = { border.x + 175, border.y + 105 + 16 + 75 };
+    GuiSlider({ sfxSliderPos.x, sfxSliderPos.y, 200, 20 }, "", "SFX", &sfxVolume, 0.0f, 1.0f);
     sfxVolume = floor(sfxVolume * 10.0f) / 10.0f;
 
     if (musicVolume != 0.0f) {
@@ -95,4 +99,22 @@ void SettingScreen::draw() {
 bool SettingScreen::settingBoardShouldClose() const {
     Vector2 mousePos = GetMousePosition();
     return (!CheckCollisionPointRec(mousePos, border)) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
+}
+
+float SettingScreen::getMusicVolume() const {
+    return musicVolume;
+}
+
+float SettingScreen::getSfxVolume() const {
+    return sfxVolume;
+} 
+
+void SettingScreen::updateVolume() const {
+    if (musicVolume != ResourceManager::getInstance().getMusicVolume()) {
+        ResourceManager::getInstance().setMusicVolume(musicVolume);
+    }
+
+    if (sfxVolume != ResourceManager::getInstance().getSfxVolume()) {
+        ResourceManager::getInstance().setSfxVolume(sfxVolume);
+    }
 }
