@@ -447,17 +447,17 @@ std::vector<Tile*>& Map::getTiles() {
     return touchableTiles;
 }
 
-// std::vector<Block*>& Map::getBlocks() {
-//     return blocks;
-// }
+std::vector<Block*>& Map::getBlocks() {
+    return blocks;
+}
 
-//std::vector<Item*>& Map::getItems() {
-//    return items;
-//}
+std::vector<Item*>& Map::getItems() {
+   return items;
+}
 
-//std::vector<Item*>& Map::getStaticItems() {
-//    return staticItems;
-//}
+std::vector<Item*>& Map::getStaticItems() {
+   return staticItems;
+}
 
 std::vector<Baddie*>& Map::getBaddies() {
    return baddies;

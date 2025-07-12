@@ -20,6 +20,10 @@ public:
 
     bool settingBoardShouldClose() const;
 
+    float getMusicVolume() const;
+    float getSfxVolume() const;
+    void updateVolume() const;
+
 private:
     std::unordered_map<std::string, Button*> buttons;
     Texture2D backgroundTexture;
