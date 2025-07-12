@@ -88,7 +88,9 @@ void Coin::playCollisionSound() {
 }
 
 void Coin::updateMario(Mario& mario) {
-
+	mario.addCoins(1);
+    mario.addPoints(100);
+	state = SPRITE_STATE_HIT;
 }
 
 CollisionType Coin::checkCollision(Sprite* sprite) {
@@ -182,7 +184,20 @@ void Mushroom::playCollisionSound() {
 }
 
 void Mushroom::updateMario(Mario& mario) {
-    
+    if (mario.getType() == MARIO_TYPE_SMALL) {
+        mario.changeToSuper();
+		state = SPRITE_STATE_HIT;
+		//play sound
+	}
+    else if (mario.getType() == MARIO_TYPE_SUPER) {
+        mario.changeToFlower();
+        state = SPRITE_STATE_HIT;
+        //play sound
+    }
+    else if (mario.getType() == MARIO_TYPE_FLOWER) {
+        state = SPRITE_STATE_HIT;
+        //play sound
+    }
 }
 
 void Mushroom::onSouthCollision(Mario& mario) {
@@ -244,7 +259,9 @@ void OneUpMushroom::playCollisionSound() {
 }
 
 void OneUpMushroom::updateMario(Mario& mario) {
-
+    mario.addLives(1); 
+    state = SPRITE_STATE_HIT; 
+	//play sound
 }
 
 
@@ -322,7 +339,9 @@ void FireFlower::playCollisionSound() {
 }
 
 void FireFlower::updateMario(Mario& mario) {
-    
+    mario.changeToFlower(); 
+    state = SPRITE_STATE_HIT; 
+	//play sound
 }
 
 void FireFlower::onSouthCollision(Mario& mario) {
@@ -383,7 +402,9 @@ void Star::playCollisionSound() {
 }
 
 void Star::updateMario(Mario& mario) {
-
+    mario.setInvincible(true); 
+    state = SPRITE_STATE_HIT; 
+	//play sound
 }
 
 void Star::onSouthCollision(Mario& mario) {
@@ -445,7 +466,9 @@ void ThreeUpMoon::playCollisionSound() {
 }
 
 void ThreeUpMoon::updateMario(Mario& mario) {
-
+    mario.addLives(3); 
+    state = SPRITE_STATE_HIT; 
+	//play sound
 }
 
 
