@@ -37,9 +37,9 @@ class GameWorld : public virtual Drawable {
     bool pauseMario;
     // bool showOverlayOnPause;
 
-    // bool irisOutFinished;
-    // float irisOutTime;
-    // float irisOutAcum;
+    bool outroFinished;
+    float outroTime;
+    float outroAcum;
 
     Memento* dataFromGameWorldToSave() const;
     void restoreDataFromMemento(const Memento* memento) const;
