@@ -22,6 +22,7 @@ void Block::doHit(Mario& mario, Map* map) {
 	if (!hit)
 		hit = true;
 }
+
 // StoneBlock
 void StoneBlock::update() {
 
@@ -173,10 +174,10 @@ void QuestionMushroomBlock::doHit(Mario& mario, Map* map) {
 		Item* item = FactoryItem::createItem("Mushroom", itemPos, itemDim, itemVel, ORANGE, true, true, false);
 		if (item) {
 			//add item to the game world
-			delete item; 
 			if (mario.getType() != MARIO_TYPE_SMALL) {
-				item->updateMario(mario); 
+				item->updateMario(mario);
 			}
+			delete item;
 		}
 		mario.addPoints(200); 
 	}
@@ -205,10 +206,10 @@ void QuestionFireFlowerBlock::doHit(Mario& mario, Map* map) {
 		Item* item = FactoryItem::createItem("FireFlower", itemPos, itemDim, itemVel, ORANGE, true, true, false);
 		if (item) {
 			// add the item to the game world
-			delete item;
 			if (mario.getType() != MARIO_TYPE_FLOWER) {
-				item->updateMario(mario); 
+				item->updateMario(mario);
 			}
+			delete item;
 		}
 		mario.addPoints(200);
 	}
