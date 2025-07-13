@@ -43,9 +43,9 @@ class Map : public virtual Drawable {
     int maxMusicId;
     Color backgroundColor;
     Texture2D backgroundTexture;
-    //bool drawBlackScreen;
-    //float drawBlackScreenFadeAcum;
-    //float drawBlackScreenFadeTime;
+    bool drawBlackScreen;
+    float drawBlackScreenFadeAcum;
+    float drawBlackScreenFadeTime;
 
     
 
@@ -73,7 +73,7 @@ public:
     void loadFromJsonFile(bool shouldLoadTestMap = false);
 
     void setMarioOffset(float marioOffset);
-    // void setDrawBlackScreen(bool drawBlackScreen);
+    void setDrawBlackScreen(bool drawBlackScreen);
     // void setDrawMessage(bool drawMessage);
     // void setMessage(std::string message);
     void setCamera(Camera2D* camera);
@@ -99,6 +99,6 @@ public:
     void first();
     //void pauseGameToShowMessage() const;
 
-    //void eraseBaddieFromDrawingVectors(Baddie* baddie);
+    void eraseBaddieFromDrawingVectors(Baddie* baddie);
 
 };

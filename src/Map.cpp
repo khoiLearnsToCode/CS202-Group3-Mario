@@ -1,13 +1,4 @@
-/**
- * @file Map.cpp
- * @author Prof. Dr. David Buzatto
- * @brief Map class implementation.
- *
- * @copyright Copyright (c) 2024
- */
-//#include "Baddie.h"
 //#include "BanzaiBill.h"
-//#include "Block.h"
 #include "BlueKoopaTroopa.h"
 #include "BobOmb.h"
 #include "BulletBill.h"
@@ -70,9 +61,9 @@ Map::Map(Mario& mario, int id, bool loadTestMap, GameWorld* gw) :
     maxBackgroundId(10),
     backgroundColor(WHITE),
     backgroundTexture(Texture()),
-    //drawBlackScreen(false),
-    //drawBlackScreenFadeAcum(0),
-    //drawBlackScreenFadeTime(1.5),
+    drawBlackScreen(false),
+    drawBlackScreenFadeAcum(0),
+    drawBlackScreenFadeTime(1.5),
 
     //tileSetId(1),
     //maxTileSetId(4),
@@ -210,7 +201,6 @@ void Map::loadFromJsonFile(bool shouldLoadTestMap) {
             }
         }
     } 
-
     tileIDsUntouchable.clear();
 
     // Load touchable tiles
@@ -225,9 +215,9 @@ void Map::loadFromJsonFile(bool shouldLoadTestMap) {
             }
         }
     }
-
     tileIDsTouchable.clear();
 
+    // Load back baddies
     std::vector<int> backBaddieIDs = mapJson["layers"][1]["data"];
 
     for (int y = 0; y < height; y++){
@@ -238,7 +228,7 @@ void Map::loadFromJsonFile(bool shouldLoadTestMap) {
             Baddie* newBaddie;
 
             if (baddieID == 146) { // Piranha Plant
-                newBaddie = new PiranhaPlant({1.0f * x * TILE_WIDTH + 16, 1.0f * y * TILE_WIDTH + 36}, {32,66}, RED);
+                newBaddie = new PiranhaPlant({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {32,66}, RED);
             } 
 
             else if (baddieID == 136) { // Jumping Piranha Plant
@@ -252,6 +242,7 @@ void Map::loadFromJsonFile(bool shouldLoadTestMap) {
 
     backBaddieIDs.clear();
 
+    // Load front baddies
     std::vector<int> frontBaddieIDs = mapJson["layers"][5]["data"];
 
     for (int y = 0; y < height; y++){
@@ -339,7 +330,7 @@ void Map::draw() {
         backgroundTexture = ResourceManager::getInstance().getTexture(backgroundTextureKey);
     } else {
         backgroundTexture = Texture2D(); // Fallback to an empty texture if not found
-        std::cout << "Background texture not found: " << backgroundTextureKey << std::endl;
+        std::cerr << "Background texture not found: " << backgroundTextureKey << std::endl;
     }
 
     if (backgroundId > 0) {
@@ -357,90 +348,44 @@ void Map::draw() {
     //    backScenarioTile->draw();
     //}
 
-    //for (const auto& baddie : backBaddies) {
-    //    baddie->draw();
-    //}
+    for (const auto& baddie : backBaddies) {
+       baddie->draw();
+    }
 
     for (const auto& tile : untouchableTiles) {
         tile->draw();
     }
 
+    
+
+    for (const auto& block : blocks) {
+       block->draw();
+    }
+
+    for (const auto& item : items) {
+       item->draw();
+    }
+
+    for (const auto& staticItem : staticItems) {
+       staticItem->draw();
+    }
+
+    for (const auto& baddie : frontBaddies) {
+       baddie->draw();
+    }
+
+    mario.draw();
+
     for (const auto& tile : touchableTiles) {
         tile->draw();
     }
 
-    //for (const auto& block : blocks) {
-    //    block->draw();
-    //}
-
-    //for (const auto& item : items) {
-    //    item->draw();
-    //}
-
-    //for (const auto& staticItem : staticItems) {
-    //    staticItem->draw();
-    //}
-
-    //for (const auto& baddie : frontBaddies) {
-    //    baddie->draw();
-    //}
-
-    mario.draw();
-
-    // for (const auto& frontScenarioTile : frontScenarioTiles) {
-    //     frontScenarioTile->draw();
-    // }
-
-    //if (drawBlackScreen) {
-    //    if (drawBlackScreenFadeAcum < drawBlackScreenFadeTime) {
-    //        drawBlackScreenFadeAcum += GetFrameTime();
-    //    }
-    //    DrawRectangle(0, 0, maxWidth, maxHeight, Fade(BLACK, 0.5 * drawBlackScreenFadeAcum / drawBlackScreenFadeTime));
-    //}
-
-    //if (drawMessage) {
-
-    //    std::vector<std::string> messages = split(message, "\\n");
-    //    const Vector2 center = GetScreenToWorld2D(Vector2(GetScreenWidth() / 2, GetScreenHeight() / 2), *camera);
-    //    int currentLine = 0;
-    //    const int margin = 10;
-    //    const int vSpacing = 5;
-
-    //    int maxWidth = 0;
-    //    int maxHeight = messages.size() * getDrawMessageStringHeight() + (messages.size() - 1) * vSpacing;
-
-    //    for (const auto& m : messages) {
-    //        const int w = getDrawMessageStringWidth(m);
-    //        if (maxWidth < w) {
-    //            maxWidth = w;
-    //        }
-    //    }
-
-    //    const int xStart = center.x - maxWidth / 2 + margin;
-    //    const int yStart = center.y - maxHeight / 2 + margin - 50;
-
-    //    DrawRectangle(xStart - margin, yStart - margin, maxWidth + margin * 2, maxHeight + margin * 2, BLACK);
-
-    //    for (const auto& m : messages) {
-    //        drawMessageString(m,
-    //            xStart,
-    //            yStart + currentLine * getDrawMessageStringHeight() + (currentLine < (int)messages.size() ? currentLine * vSpacing : 0));
-    //        currentLine++;
-    //    }
-
-    //}
-
-    //if (GameWorld::debug) {
-    //    int columns = maxWidth / TILE_WIDTH;
-    //    int lines = maxHeight / TILE_WIDTH;
-    //    for (int i = 0; i < lines; i++) {
-    //        DrawLine(0, i * TILE_WIDTH, maxWidth, i * TILE_WIDTH, BLACK);
-    //    }
-    //    for (int i = 0; i < columns; i++) {
-    //        DrawLine(i * TILE_WIDTH, 0, i * TILE_WIDTH, maxHeight, BLACK);
-    //    }
-    //}
-
+    if (drawBlackScreen) {
+       if (drawBlackScreenFadeAcum < drawBlackScreenFadeTime) {
+           drawBlackScreenFadeAcum += GetFrameTime();
+       }
+       DrawRectangle(0, 0, maxWidth, maxHeight, Fade(BLACK, 0.5 * drawBlackScreenFadeAcum / drawBlackScreenFadeTime));
+    }
 }
 
 std::vector<Tile*>& Map::getTiles() {
@@ -508,20 +453,9 @@ void Map::setMarioOffset(float marioOffset) {
    this->marioOffset = marioOffset;
 }
 
-//void Map::setDrawBlackScreen(bool drawBlackScreen) {
-//    this->drawBlackScreen = drawBlackScreen;
-//}
-
-//void Map::setDrawMessage(bool drawMessage) {
-//    this->drawMessage = drawMessage;
-//    for (const auto& mb : messageBlocks) {
-//        mb->resetHit();
-//    }
-//}
-
-//void Map::setMessage(std::string message) {
-//    this->message = std::move(message);
-//}
+void Map::setDrawBlackScreen(bool drawBlackScreen) {
+   this->drawBlackScreen = drawBlackScreen;
+}
 
 void Map::setCamera(Camera2D* camera) {
     this->camera = camera;
@@ -540,8 +474,8 @@ void Map::reset() {
     maxWidth = 0;
     maxHeight = 0;
     marioOffset = 0;
-    //drawBlackScreen = false;
-    //drawBlackScreenFadeAcum = 0;
+    drawBlackScreen = false;
+    drawBlackScreenFadeAcum = 0;
 
     for (const auto& tile : untouchableTiles) {
         delete tile;
@@ -553,31 +487,20 @@ void Map::reset() {
     }
     touchableTiles.clear();
 
-    // for (const auto& backScenarioTile : backScenarioTiles) {
-    //     delete backScenarioTile;
-    // }
-    // backScenarioTiles.clear();
+    for (const auto& block : blocks) {
+       delete block;
+    }
+    blocks.clear();
 
-    // for (const auto& frontScenarioTile : frontScenarioTiles) {
-    //     delete frontScenarioTile;
-    // }
-    // frontScenarioTiles.clear();
+    for (const auto& item : items) {
+       delete item;
+    }
+    items.clear();
 
-    //for (const auto& block : blocks) {
-    //    delete block;
-    //}
-    //blocks.clear();
-    //messageBlocks.clear();
-
-    //for (const auto& item : items) {
-    //    delete item;
-    //}
-    //items.clear();
-
-    //for (const auto& staticItem : staticItems) {
-    //    delete staticItem;
-    //}
-    //staticItems.clear();
+    for (const auto& staticItem : staticItems) {
+       delete staticItem;
+    }
+    staticItems.clear();
 
     for (const auto& baddie : baddies) {
        delete baddie;
@@ -586,9 +509,9 @@ void Map::reset() {
     frontBaddies.clear();
     backBaddies.clear();
 
-//    StopMusicStream(ResourceManager::getMusics()[std::string(TextFormat("music%d", musicId))]);
+    StopMusicStream(ResourceManager::getInstance().getMusics()[std::string(TextFormat("music%d", musicId))]);
     parsed = false;
-    //parseMap();
+    loadFromJsonFile();
 
 }
 
@@ -615,20 +538,19 @@ void Map::first() {
 //    gw->pauseGame(false, false, false, true);
 //}
 
-//void Map::eraseBaddieFromDrawingVectors(Baddie* baddie) {
-//
-//    for (size_t i = 0; i < frontBaddies.size(); i++) {
-//        if (frontBaddies[i] == baddie) {
-//            frontBaddies.erase(frontBaddies.begin() + i);
-//            return;
-//        }
-//    }
-//
-//    for (size_t i = 0; i < backBaddies.size(); i++) {
-//        if (backBaddies[i] == baddie) {
-//            backBaddies.erase(backBaddies.begin() + i);
-//            return;
-//        }
-//    }
-//
-//}
+void Map::eraseBaddieFromDrawingVectors(Baddie* baddie) {
+
+   for (size_t i = 0; i < frontBaddies.size(); i++) {
+       if (frontBaddies[i] == baddie) {
+           frontBaddies.erase(frontBaddies.begin() + i);
+           return;
+       }
+   }
+
+   for (size_t i = 0; i < backBaddies.size(); i++) {
+       if (backBaddies[i] == baddie) {
+           backBaddies.erase(backBaddies.begin() + i);
+           return;
+       }
+   }
+}
