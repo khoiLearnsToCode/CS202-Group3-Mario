@@ -790,8 +790,6 @@ void Mario::playPlayerDownMusicStream() {
             }
         }
     }
-
-
 }
 
 void Mario::playGameOverMusicStream() {

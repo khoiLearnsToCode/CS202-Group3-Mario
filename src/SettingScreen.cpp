@@ -6,7 +6,7 @@
 
 #include "raygui.h"
 
-SettingScreen::SettingScreen() : Screen(), musicVolume(0.5f), sfxVolume(0.5f), isMutedMusic(false), isMutedSFX(false) {
+SettingScreen::SettingScreen() : Screen(), musicVolume(1.0f), sfxVolume(1.0f), isMutedMusic(false), isMutedSFX(false) {
     Image img = LoadImageFromTexture(textures["settingBackground"]);
     ImageResize(&img, img.width * 0.5f, img.height * 0.5f); 
     backgroundTexture = LoadTextureFromImage(img);

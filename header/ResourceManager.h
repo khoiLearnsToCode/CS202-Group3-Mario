@@ -21,7 +21,7 @@ private:
     float sfxVolume;   // Default SFX volume
 
     // Private constructor (prevents external instantiation)
-    ResourceManager() = default;
+    ResourceManager();
 
     // Private destructor
     ~ResourceManager() = default;

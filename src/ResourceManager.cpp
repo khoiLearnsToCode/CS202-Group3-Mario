@@ -1,6 +1,9 @@
 #include "ResourceManager.h"
 #include <iostream>
 
+
+ResourceManager::ResourceManager() : musicVolume(1.0f), sfxVolume(1.0f) {}
+
 // Initialize static instance pointer
 ResourceManager* ResourceManager::instance = nullptr;
 
@@ -219,21 +222,21 @@ void ResourceManager::loadTextures() {
         textures["settingBackground"] = LoadTexture("../resource/graphic/backgrounds/settingBackground.png");
 
         // items
-        //textures["coin0"] = LoadTexture("resources/images/sprites/items/Coin_0.png");
-        //textures["coin1"] = LoadTexture("resources/images/sprites/items/Coin_1.png");
-        //textures["coin2"] = LoadTexture("resources/images/sprites/items/Coin_2.png");
-        //textures["coin3"] = LoadTexture("resources/images/sprites/items/Coin_3.png");
-        //textures["1UpMushroom"] = LoadTexture("resources/images/sprites/items/1UpMushroom.png");
-        //textures["3UpMoon"] = LoadTexture("resources/images/sprites/items/3UpMoon.png");
-        //textures["courseClearToken"] = LoadTexture("resources/images/sprites/items/CourseClearToken.png");
-        //textures["fireFlower0"] = LoadTexture("resources/images/sprites/items/FireFlower_0.png");
-        //textures["fireFlower1"] = LoadTexture("resources/images/sprites/items/FireFlower_1.png");
-        //textures["mushroom"] = LoadTexture("resources/images/sprites/items/Mushroom.png");
-        //textures["star"] = LoadTexture("resources/images/sprites/items/Star.png");
-        //textures["yoshiCoin0"] = LoadTexture("resources/images/sprites/items/YoshiCoin_0.png");
-        //textures["yoshiCoin1"] = LoadTexture("resources/images/sprites/items/YoshiCoin_1.png");
-        //textures["yoshiCoin2"] = LoadTexture("resources/images/sprites/items/YoshiCoin_2.png");
-        //textures["yoshiCoin3"] = LoadTexture("resources/images/sprites/items/YoshiCoin_3.png");
+        textures["coin0"] = LoadTexture("resources/images/sprites/items/Coin_0.png");
+        textures["coin1"] = LoadTexture("resources/images/sprites/items/Coin_1.png");
+        textures["coin2"] = LoadTexture("resources/images/sprites/items/Coin_2.png");
+        textures["coin3"] = LoadTexture("resources/images/sprites/items/Coin_3.png");
+        textures["1UpMushroom"] = LoadTexture("resources/images/sprites/items/1UpMushroom.png");
+        textures["3UpMoon"] = LoadTexture("resources/images/sprites/items/3UpMoon.png");
+        textures["courseClearToken"] = LoadTexture("resources/images/sprites/items/CourseClearToken.png");
+        textures["fireFlower0"] = LoadTexture("resources/images/sprites/items/FireFlower_0.png");
+        textures["fireFlower1"] = LoadTexture("resources/images/sprites/items/FireFlower_1.png");
+        textures["mushroom"] = LoadTexture("resources/images/sprites/items/Mushroom.png");
+        textures["star"] = LoadTexture("resources/images/sprites/items/Star.png");
+        textures["yoshiCoin0"] = LoadTexture("resources/images/sprites/items/YoshiCoin_0.png");
+        textures["yoshiCoin1"] = LoadTexture("resources/images/sprites/items/YoshiCoin_1.png");
+        textures["yoshiCoin2"] = LoadTexture("resources/images/sprites/items/YoshiCoin_2.png");
+        textures["yoshiCoin3"] = LoadTexture("resources/images/sprites/items/YoshiCoin_3.png");
 
         // baddies
         textures["blueKoopaTroopa0R"] = LoadTexture("../resource/graphic/sprites/baddies/BlueKoopaTroopa_0.png");
