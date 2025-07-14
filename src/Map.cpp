@@ -92,29 +92,21 @@ Map::~Map() {
         delete tile;
     }
 
-    // for (const auto& backScenarioTile : backScenarioTiles) {
-    //     delete backScenarioTile;
-    // }
+    for (const auto& item : items) {
+       delete item;
+    }
 
-    // for (const auto& frontScenarioTile : frontScenarioTiles) {
-    //     delete frontScenarioTile;
-    // }
-
-    //for (const auto& item : items) {
-    //    delete item;
-    //}
-
-    //for (const auto& staticItem : staticItems) {
-    //    delete staticItem;
-    //}
+    for (const auto& staticItem : staticItems) {
+       delete staticItem;
+    }
 
     for (const auto& baddie : baddies) {
        delete baddie;
     }
 
-    //for (const auto& block : blocks) {
-    //    delete block;
-    //}
+    for (const auto& block : blocks) {
+       delete block;
+    }
 
 }
 
@@ -127,6 +119,7 @@ void Map::loadFromJsonFile(bool shouldLoadTestMap) {
     }
 
     loadTestMap = shouldLoadTestMap;
+    mario.setPos(100, 1688);
 
     std::string jsonFilePath;
     if (loadTestMap) {
@@ -316,6 +309,66 @@ void Map::loadFromJsonFile(bool shouldLoadTestMap) {
         }
     }
 
+    frontBaddieIDs.clear();
+
+    // Load blocks
+    std::vector<int> blockIDs = mapJson["layers"][3]["data"];
+    for (int y = 0; y < height; y++){
+        for (int x = 0; x < width; x++){
+            int blockID = blockIDs[y * width + x];
+            if (blockID == 0) continue;
+
+            if (blockID < 88 || blockID > 102) {
+                std::cerr << "Unsupported block ID: " << blockID << " at position (" << x << ", " << y << ")" << std::endl;
+                continue; // Skip unsupported blocks
+            }
+
+            Block* newBlock = nullptr;
+
+            if (blockID == 88) {
+                newBlock = new CloudBlock({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {TILE_WIDTH, TILE_WIDTH}, WHITE);
+            }
+
+            else if (blockID == 89) {
+                newBlock = new ExclamationBlock({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {TILE_WIDTH, TILE_WIDTH}, WHITE);
+            }
+
+            else if (blockID == 90) {
+                newBlock = new EyesClosedBlock({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {TILE_WIDTH, TILE_WIDTH}, WHITE);
+            }
+
+            else if (blockID == 91 || blockID == 92 || blockID == 93 || blockID == 94) {
+                newBlock = new EyesOpenedBlock({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {TILE_WIDTH, TILE_WIDTH}, WHITE);
+            }
+
+            else if (blockID == 95) {
+                newBlock = new GrassBlock({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {TILE_WIDTH, TILE_WIDTH}, WHITE);
+            }
+
+            else if (blockID == 96) {
+                std::cerr << "Unsupport message block\n";
+            }
+
+            // else if (blockID == 97 || blockID == 98 || blockID == 99 || blockID == 100) {
+            //     newBlock = new QuestionBlock({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {TILE_WIDTH, TILE_WIDTH}, WHITE);
+            // }
+
+            else if (blockID == 101) {
+                newBlock = new StoneBlock({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {TILE_WIDTH, TILE_WIDTH}, WHITE);
+            }
+
+            else if (blockID == 102) {
+                newBlock = new WoodBlock({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {TILE_WIDTH, TILE_WIDTH}, WHITE);
+            }
+
+            if (newBlock) {
+                blocks.push_back(newBlock);
+            }            
+        }
+    }
+    
+    blockIDs.clear();
+    
     parsed = true;
 
     fin.close();
@@ -374,11 +427,12 @@ void Map::draw() {
        baddie->draw();
     }
 
-    mario.draw();
-
     for (const auto& tile : touchableTiles) {
         tile->draw();
+    
     }
+    
+    mario.draw();
 
     if (drawBlackScreen) {
        if (drawBlackScreenFadeAcum < drawBlackScreenFadeTime) {
