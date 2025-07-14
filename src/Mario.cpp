@@ -222,12 +222,12 @@ void Mario::update() {
         }
         else {
 
-            if (IsKeyDown(KEY_RIGHT)) {
+            if (IsKeyDown(KEY_RIGHT) || IsKeyDown(KEY_D)) {
                 facingDirection = DIRECTION_RIGHT;
                 movingAcum += delta * 2;
                 vel.x = currentSpeedX * (movingAcum < 1 ? movingAcum : 1);
             }
-            else if (IsKeyDown(KEY_LEFT)) {
+            else if (IsKeyDown(KEY_LEFT) || IsKeyDown(KEY_A)) {
                 facingDirection = DIRECTION_LEFT;
                 movingAcum += delta * 2;
                 vel.x = -currentSpeedX * (movingAcum < 1 ? movingAcum : 1);
@@ -243,7 +243,7 @@ void Mario::update() {
             }
 
             if (state == SPRITE_STATE_ON_GROUND) {
-                if (IsKeyDown(KEY_DOWN)) {
+                if (IsKeyDown(KEY_DOWN) || IsKeyDown(KEY_S)) {
                     ducking = true;
                     vel.x = 0;
                 }
