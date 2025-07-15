@@ -1,4 +1,5 @@
 #include "SettingScreen.h"
+#include "GameWorld.h"
 
 #ifndef RAYGUI_IMPLEMENTATION
 #define RAYGUI_IMPLEMENTATION
@@ -6,7 +7,9 @@
 
 #include "raygui.h"
 
-SettingScreen::SettingScreen() : Screen(), musicVolume(1.0f), sfxVolume(1.0f), isMutedMusic(false), isMutedSFX(false) {
+SettingScreen::SettingScreen(GameWorld* gw) : Screen(), musicVolume(1.0f), sfxVolume(1.0f), 
+isMutedMusic(false), isMutedSFX(false), settingBoardIsOpenInMenuScreen(true), gw(gw) {
+
     Image img = LoadImageFromTexture(textures["settingBackground"]);
     ImageResize(&img, img.width * 0.5f, img.height * 0.5f); 
     backgroundTexture = LoadTextureFromImage(img);
@@ -24,6 +27,9 @@ SettingScreen::SettingScreen() : Screen(), musicVolume(1.0f), sfxVolume(1.0f), i
 
     buttons.emplace("MUTESFX", new ButtonTextTexture("muteButton", {border.x + 100, border.y + 175}, 2.0f));
     buttons.emplace("UNMUTESFX", new ButtonTextTexture("unmuteButton", {border.x + 100, border.y + 175}, 2.0f));
+
+    buttons.emplace("HOME", new ButtonTextTexture("homeButton", {border.x + 100, border.y + 250}, 2.0f));
+    buttons.emplace("RESET", new ButtonTextTexture("resetButton", {border.x + 100, border.y + 325}, 2.0f));
 
     GuiLoadStyle("../resource/font/candy.rgs");
 
@@ -55,13 +61,37 @@ void SettingScreen::update() {
         sfxVolume = 0.5f; // Unmute SFX
     }
 
-    //std::cout << "Music Volume: " << musicVolume << ", SFX Volume: " << sfxVolume << std::endl;
-   
+    if (buttons["HOME"]->isReleased()) {
+        settingBoardIsOpenInMenuScreen = false;
+        if (gw) {
+            gw->unpauseGame();           
+            gw->resetGame();
+            gw->state = GAME_STATE_TITLE_SCREEN;
+            gw->settingBoardIsOpen = false;
+        }
+        else {
+            std::cerr << "GameWorld pointer is null. Cannot reset game." << std::endl;
+        }
+    } 
+    
+    if (buttons["RESET"]->isReleased()) {
+        settingBoardIsOpenInMenuScreen = false;
+        if (gw) {
+            gw->unpauseGame();
+            gw->resetMap();
+            gw->settingBoardIsOpen = false;
+        } else {
+            std::cerr << "GameWorld pointer is null. Cannot reset map." << std::endl;
+        }
+    }
 }
 
 void SettingScreen::draw() {
     DrawTexture(backgroundTexture, border.x, border.y, WHITE);
     for (const auto& buttonPair : buttons) {
+        if ((buttonPair.first == "HOME" || buttonPair.first == "RESET") && settingBoardIsOpenInMenuScreen) {
+            continue;
+        }
         buttonPair.second->draw();
     }
 
@@ -117,4 +147,8 @@ void SettingScreen::updateVolume() const {
     if (sfxVolume != ResourceManager::getInstance().getSfxVolume()) {
         ResourceManager::getInstance().setSfxVolume(sfxVolume);
     }
+}
+
+void SettingScreen::setSettingBoardIsOpenInMenuScreen(bool isOpen) {
+    settingBoardIsOpenInMenuScreen = isOpen;
 }
