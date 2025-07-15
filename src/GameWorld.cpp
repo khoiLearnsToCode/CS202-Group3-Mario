@@ -697,7 +697,7 @@ void GameWorld::inputAndUpdate() {
     }
 
     else if ( state == GAME_STATE_SETTINGS_SCREEN ) {
-        if (IsKeyPressed(KEY_P)) {
+        if (IsKeyPressed(KEY_P) || settingScreen->settingBoardShouldClose()) {
             unpauseGame();
         }
     }
@@ -800,8 +800,7 @@ void GameWorld::inputAndUpdate() {
                 map.first();
                 map.reset();
                 map.loadFromJsonFile(); // Load the map immediately
-                // Set Mario to a proper starting position (e.g., 100 pixels from left, near ground level)
-                mario.setPos(100.0f, 400.0f);
+
                 // Set the time limit (400 seconds = typical Mario game time)
                 mario.setMaxTime(400.0f);
 
@@ -855,12 +854,93 @@ void GameWorld::draw() {
         menuScreen->draw();
     }
 
+    else if (state == GAME_STATE_GAME_OVER){
+        DrawRectangle( 0, 0, GetScreenWidth(), GetScreenHeight(), BLACK );
+        Texture2D* t = &textures["guiGameOver"];
+        DrawTexture( *t, GetScreenWidth() / 2 - t->width / 2, GetScreenHeight() / 2 - t->height / 2, WHITE );
+    }
+
     // Draw the map
     else {
         BeginMode2D(*camera);
         map.draw();
         EndMode2D();
         mario.drawHud();
+
+        if ( state == GAME_STATE_TIME_UP ) {
+
+            DrawRectangle( 0, 0, GetScreenWidth(), GetScreenHeight(), BLACK );
+            Texture2D* t = &textures["guiTimeUp"];
+            DrawTexture( *t, GetScreenWidth() / 2 - t->width / 2, GetScreenHeight() / 2 - t->height / 2, WHITE );
+
+        } 
+        
+        else if ( state == GAME_STATE_COUNTING_POINTS || state == GAME_STATE_OUTRO || state == GAME_STATE_GO_TO_NEXT_MAP ) {
+
+            Vector2 sc{ GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
+            DrawTexture( textures["guiMario"], sc.x - textures["guiMario"].width / 2, sc.y - 120, WHITE);
+
+            std::string message1 = "course clear!";
+            drawString( message1, sc.x - getDrawStringWidth( message1 ) / 2, sc.y - 80 );
+
+            int clockWidth = textures["guiClock"].width;
+            int remainingTimeWidth = getSmallNumberWidth( mario.getRemainingTime() );
+            int pointsPerSecondWidth = getSmallNumberWidth( 50 );
+            int timesWidth = textures["guiX"].width;
+            int equalSignWidth = getDrawStringWidth( "=" );
+            int totalTimePoints = mario.getRemainingTime() * 50;
+            int totalTimePointsWidth = getSmallNumberWidth( totalTimePoints );
+            int completeMessageWidth = clockWidth + remainingTimeWidth + pointsPerSecondWidth + timesWidth + equalSignWidth + totalTimePointsWidth;
+            int completeMessageStart = sc.x - (completeMessageWidth/2);
+            int completeMessageY = sc.y - 40;
+
+            DrawTexture( textures["guiClock"], completeMessageStart, completeMessageY, WHITE );
+            drawWhiteSmallNumber( mario.getRemainingTime(), completeMessageStart + clockWidth, completeMessageY );
+            DrawTexture( textures["guiX"], completeMessageStart + clockWidth + remainingTimeWidth, completeMessageY, WHITE );
+            drawWhiteSmallNumber( 50, completeMessageStart + clockWidth + remainingTimeWidth + timesWidth, completeMessageY );
+            drawString( "=", completeMessageStart + clockWidth + remainingTimeWidth + timesWidth + pointsPerSecondWidth, completeMessageY - 4 );
+            drawWhiteSmallNumber( totalTimePoints, completeMessageStart + clockWidth + remainingTimeWidth + timesWidth + pointsPerSecondWidth + equalSignWidth, completeMessageY );
+
+            Vector2 centerFunnel = GetWorldToScreen2D( mario.getCenter(), *camera );
+            DrawRing( centerFunnel, 
+                      sqrt( GetScreenWidth() * GetScreenWidth() + GetScreenHeight() * GetScreenHeight() ) * ( 1 -  outroAcum / outroTime ),
+                      GetScreenWidth() * 2, 
+                      0, 360, 100, BLACK );
+
+        } 
+        
+        else if ( state == GAME_STATE_FINISHED ) {
+
+            std::map<std::string, Music>& musics = ResourceManager::getInstance().getMusics();
+
+            if ( !IsMusicStreamPlaying( musics["ending"] ) ) {
+                PlayMusicStream( musics["ending"] );
+            } else {
+                UpdateMusicStream( musics["ending"] );
+            }
+
+            if ( GetKeyPressed() ) {
+                StopMusicStream( musics["ending"] );
+                resetGame();
+            }
+
+            DrawRectangle( 0, 0, GetScreenWidth(), GetScreenHeight(), Fade( RAYWHITE, 0.9 ) );
+            Texture2D* t = &textures["guiCredits"];
+            DrawTexture( *t, GetScreenWidth() / 2 - t->width / 2, 20, WHITE );
+
+            std::string message1 = "Thank you for playing!!!";
+            std::string message2 = "Press any key to restart!";
+
+            drawString( message1, GetScreenWidth() / 2 - getDrawStringWidth( message1 ) / 2, t->height + 40 );
+            drawString( message2, GetScreenWidth() / 2 - getDrawStringWidth( message2 ) / 2, t->height + 65 );
+
+        } 
+        
+        // else if ( state == GAME_STATE_PAUSED ) {
+        //     if ( showOverlayOnPause ) {
+        //         DrawRectangle( 0, 0, GetScreenWidth(), GetScreenHeight(), Fade( BLACK, 0.3 ) );
+        //     }
+        // }
     }
 
     if (settingBoardIsOpen) {
@@ -890,6 +970,7 @@ Camera2D* GameWorld::getCamera() const {
 void GameWorld::resetMap() {
     mario.reset(true);
     map.reset();
+    map.loadFromJsonFile(); 
     state = GAME_STATE_PLAYING;
 }
 
