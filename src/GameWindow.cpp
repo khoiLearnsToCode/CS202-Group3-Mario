@@ -43,7 +43,7 @@ void GameWindow::init() {
 
         GameWorld::loadResources();
 
-        gw.initScreens();
+        gw.initScreensAndButtons();
         initialized = true;
 
         camera.target = Vector2{ 0, 0 };
