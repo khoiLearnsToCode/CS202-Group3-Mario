@@ -117,15 +117,21 @@ EyesOpenedBlock::~EyesOpenedBlock() {
 void QuestionBlock::update() {
 	if (!hit) {
 		frameAcum += GetFrameTime();
-		if (frameAcum >= frameTime) {
+		if (frameAcum >= frameTime && currentFrame > 0) // Only update frames if not hit
+		{
 			frameAcum = 0;
 			currentFrame = (currentFrame + 1) % maxFrames;
+		}
+		else {
+			currentFrame = 0; // Reset to the first frame when hit
 		}
 	}
 }
 void QuestionBlock::draw() {
-	if(!hit)
-		DrawTexture(ResourceManager::getInstance().getTexture(std::string(TextFormat("block%"),97+currentFrame)), pos.x, pos.y, color);
+	if (!hit) {
+		std::string key = TextFormat("block%d", 97 + currentFrame); // Assuming block97 is the first frame
+		DrawTexture(ResourceManager::getInstance().getTexture(key), pos.x, pos.y, color);
+	}
 	else
 		DrawTexture(ResourceManager::getInstance().getTexture("block91"), pos.x, pos.y, color);
 }
