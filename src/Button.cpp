@@ -112,10 +112,6 @@ ButtonTextTexture::~ButtonTextTexture() {
 
 void ButtonTextTexture::draw() {
     update();  
-    //std::cout << "Position: " << pos.x << ", " << pos.y << std::endl;
-    //std:: cout << "Hitbox: " << hitbox.x << ", " << hitbox.y << ", " << hitbox.width << ", " << hitbox.height << std::endl;
-    //std::cout << "text: " << text << std::endl;
-    //std::cout << "fontSize: " << fontSize << std::endl;
     DrawTextureEx(*currentTexture, pos, 0.0f, 1.0f, WHITE);
     Vector2 textPos = { pos.x + (currentTexture->width - MeasureTextEx(font, text.c_str(), fontSize, 1).x) / 2.0f, pos.y + (currentTexture->height - fontSize) / 2.0f };
     DrawTextEx(font, text.c_str(), textPos, fontSize, 0, textColor);
@@ -124,18 +120,14 @@ void ButtonTextTexture::draw() {
 void ButtonTextTexture::update() {
     Vector2 mousePos = GetMousePosition();
     
-    if (CheckCollisionPointRec(mousePos, hitbox)) {
-        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) || IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
-            currentTexture = &btnTexture2;
-            pos.y = truePos.y + 2.0f;
-        } else {
-            currentTexture = &btnTexture1;
-            pos.y = truePos.y;
-        }
+    if (CheckCollisionPointRec(mousePos, hitbox) && IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
+        currentTexture = &btnTexture2;
+        pos.y = truePos.y + 2.0f;
     } 
     
     else {
         currentTexture = &btnTexture1;
         pos.y = truePos.y;
     }
+     
 }

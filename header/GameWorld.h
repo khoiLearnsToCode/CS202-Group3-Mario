@@ -5,6 +5,7 @@ class Mario;
 #include "Drawable.h"
 #include "GameState.h"
 #include "Map.h"
+#include "Button.h"
 #include "ResourceManager.h"
 #include "Screen.h"
 #include "TitleScreen.h"
@@ -23,7 +24,7 @@ class GameWorld : public virtual Drawable {
     SettingScreen* settingScreen;
 
     friend class CareTaker;
-    
+    friend class SettingScreen;
 
     Mario mario;
     Map map;
@@ -41,6 +42,13 @@ class GameWorld : public virtual Drawable {
     float outroTime;
     float outroAcum;
 
+    ButtonTextTexture* settingButton;
+    ButtonTextTexture* helpButton;
+
+    // Pause-game buttons cooldown
+    float pauseButtonsCooldownAcum;
+    float pauseButtonsCooldownTime;
+
     Memento* dataFromGameWorldToSave() const;
     void restoreDataFromMemento(const Memento* memento) const;
 
@@ -53,7 +61,7 @@ public:
     GameWorld();
     ~GameWorld() override;
 
-    void initScreens();
+    void initScreensAndButtons();
 
     /**
      * @brief Reads user input and updates the state of the game.

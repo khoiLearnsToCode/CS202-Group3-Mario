@@ -1,5 +1,4 @@
 #include "GameWorld.h"
-#include "Button.h"
 #include "Item.h"
 
 GameState GameWorld::state = GAME_STATE_TITLE_SCREEN;
@@ -21,12 +20,16 @@ GameWorld::GameWorld() :
     settingBoardIsOpen(false),
     helpingBoardIsOpen(false),
     stateBeforePause(GAME_STATE_TITLE_SCREEN),
-    remainingTimePointCount(400),
+    remainingTimePointCount(0),
     pauseMusic(false),
     pauseMario(false),
     outroFinished(false),
     outroTime(1.0f),
     outroAcum(0.0f),
+    settingButton(nullptr),
+    helpButton(nullptr),
+    pauseButtonsCooldownAcum(0.0f),
+    pauseButtonsCooldownTime(0.5f),
     titleScreen(nullptr),
     menuScreen(nullptr),
     settingScreen(nullptr)
@@ -50,6 +53,16 @@ GameWorld::~GameWorld() {
         delete settingScreen;
         settingScreen = nullptr;
     }
+
+    if (settingButton != nullptr) {
+        delete settingButton;
+        settingButton = nullptr;
+    }
+
+    if (helpButton != nullptr) {
+        delete helpButton;
+        helpButton = nullptr;
+    }
 }
 
 Memento* GameWorld::dataFromGameWorldToSave() const {
@@ -66,7 +79,7 @@ void GameWorld::restoreDataFromMemento(const Memento* memento) const {
     // map.setLives(data.lives);
 }
 
-void GameWorld::initScreens() {
+void GameWorld::initScreensAndButtons() {
     if (titleScreen == nullptr) {
         titleScreen = new TitleScreen();
     }
@@ -76,7 +89,15 @@ void GameWorld::initScreens() {
     }
 
     if (settingScreen == nullptr) {
-        settingScreen = new SettingScreen();
+        settingScreen = new SettingScreen(this);
+    }
+
+    if (settingButton == nullptr) {
+        settingButton = new ButtonTextTexture("settingButton", { 50.0f, 20.0f }, 2.0f);
+    }
+
+    if (helpButton == nullptr) {
+        helpButton = new ButtonTextTexture("helpButton", { 50.0f, 90.0f }, 2.0f);
     }
 }
 
@@ -134,11 +155,20 @@ void GameWorld::inputAndUpdate() {
 
             std::vector<int> collectedIndexes;
 
-        if ( IsKeyPressed( KEY_P ) ) {
-            pauseGame( true, true, true, true, false );
+        // Update setting button cooldown
+        if (pauseButtonsCooldownAcum > 0.0f) {
+            pauseButtonsCooldownAcum -= GetFrameTime();
+            if (pauseButtonsCooldownAcum < 0.0f) {
+                pauseButtonsCooldownAcum = 0.0f;
+            }
         }
 
-        if ( IsKeyPressed( KEY_H ) ) {
+        if ( (IsKeyPressed( KEY_P) || settingButton->isReleased()) && pauseButtonsCooldownAcum <= 0.0f ) {
+            pauseGame( true, true, true, true, false );
+            settingScreen->setSettingBoardIsOpenInMenuScreen(false);
+        }
+
+        if ( IsKeyPressed( KEY_H) || helpButton->isReleased() && pauseButtonsCooldownAcum <= 0.0f) {
             pauseGame( true, true, true, false, true );
         }
         
@@ -697,13 +727,13 @@ void GameWorld::inputAndUpdate() {
     }
 
     else if ( state == GAME_STATE_SETTINGS_SCREEN ) {
-        if (IsKeyPressed(KEY_P) || settingScreen->settingBoardShouldClose()) {
+        if ((IsKeyPressed(KEY_P) || settingScreen->settingBoardShouldClose()) && pauseButtonsCooldownAcum <= 0.0f) {
             unpauseGame();
         }
     }
 
     else if ( state == GAME_STATE_HELPING_SCREEN ) {
-        if (IsKeyPressed(KEY_H)) {
+        if ((IsKeyPressed(KEY_H) || helpButton->isReleased()) && pauseButtonsCooldownAcum <= 0.0f) {
             unpauseGame();
         }
     }
@@ -714,7 +744,15 @@ void GameWorld::inputAndUpdate() {
         settingScreen->updateVolume(); 
 
         if (settingScreen->settingBoardShouldClose()) {
-        settingBoardIsOpen = false;
+            settingBoardIsOpen = false;
+        }
+    }
+
+    // Update setting button cooldown even when not in game
+    if (pauseButtonsCooldownAcum > 0.0f) {
+        pauseButtonsCooldownAcum -= GetFrameTime();
+        if (pauseButtonsCooldownAcum < 0.0f) {
+            pauseButtonsCooldownAcum = 0.0f;
         }
     }
 
@@ -817,6 +855,7 @@ void GameWorld::inputAndUpdate() {
 
             else if (menuScreen->getButton("SETTINGS")->isReleased()) {
                 settingBoardIsOpen = true;
+                settingScreen->setSettingBoardIsOpenInMenuScreen(true);
             }
 
             else if (menuScreen->getButton("EXIT")->isReleased()) {
@@ -866,6 +905,8 @@ void GameWorld::draw() {
         map.draw();
         EndMode2D();
         mario.drawHud();
+        settingButton->draw();
+        helpButton->draw();
 
         if ( state == GAME_STATE_TIME_UP ) {
 
@@ -1008,6 +1049,12 @@ void GameWorld::unpauseGame() {
     state = stateBeforePause;
     pauseMusic = false;
     pauseMario = false;
+    
+    // Start cooldown timer if settings screen was open
+    if (settingBoardIsOpen) {
+        pauseButtonsCooldownAcum = pauseButtonsCooldownTime;
+    }
+    
     settingBoardIsOpen = false;
     helpingBoardIsOpen = false;
 }
