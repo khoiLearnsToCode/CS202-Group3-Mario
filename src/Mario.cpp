@@ -71,8 +71,8 @@ Mario::~Mario() = default;
 void Mario::update() {
     const float delta = GetFrameTime();
 
-    // Mario is running if Left Ctrl is hold and he is moving (velocity is non-zero)
-    running = (IsKeyDown(KEY_LEFT_CONTROL) && vel.x != 0.0f);
+    // Mario is running if Left Ctrl or Right Ctrl is hold and he is moving (velocity is non-zero)
+    running = ((IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL)) && vel.x != 0.0f);
 
     if (running) {
         runningAcum += delta;
@@ -488,27 +488,31 @@ CollisionType Mario::checkCollisionBaddie(Sprite* sprite) {
 }
 
 void Mario::drawHud() const {
-	std::map<std::string, Texture2D>& textures = ResourceManager::getInstance().getTextures();
+	std::map<std::string, Texture2D>& textures = ResourceManager::getInstance().getTextures(); // Getting textures from ResourceManager
 
-    DrawTexture(textures["guiMario"], 34, 32, WHITE);
-    DrawTexture(textures["guiX"], 54, 49, WHITE);
-    drawWhiteSmallNumber(lives < 0 ? 0 : lives, 68, 49);
+	// Left side of the screen
+	DrawTexture(textures["guiMario"], 34, 32, WHITE); // Draw Mario icon
+	DrawTexture(textures["guiX"], 54, 49, WHITE); // Draw "X" icon for lives
+	drawWhiteSmallNumber(lives < 0 ? 0 : lives, 68, 49); // Draw lives number
 
-    for (int i = 0; i < yoshiCoins; i++) {
+	// Draw Yoshi coins if needed
+    /*for (int i = 0; i < yoshiCoins; i++) {
         DrawTexture(textures["guiCoin"], 34 + textures["guiMario"].width + 16 + i * textures["guiCoin"].width, 32, WHITE);
-    }
+    }*/
 
-	DrawTexture(textures["guiCoin"], GetScreenWidth() - 115, 32, WHITE);
-    DrawTexture(textures["guiX"], GetScreenWidth() - 97, 34, WHITE);
-    drawWhiteSmallNumber(coins, GetScreenWidth() - 34 - getSmallNumberWidth(coins), 34);
-    drawWhiteSmallNumber(points, GetScreenWidth() - 34 - getSmallNumberWidth(points), 50);
+	int leftshift = 1225;
+	DrawTexture(textures["guiCoin"], GetScreenWidth() - 115 - leftshift, 32, WHITE); // Draw coin icon
+	DrawTexture(textures["guiX"], GetScreenWidth() - 97 - leftshift, 34, WHITE); // Draw "X" icon for coins
+	drawWhiteSmallNumber(coins, GetScreenWidth() - 34 - getSmallNumberWidth(coins) - leftshift, 34); // Draw coins number
+	drawWhiteSmallNumber(points, GetScreenWidth() - 34 - getSmallNumberWidth(points) - leftshift, 50); // Draw points number
 
 	int t = getRemainingTime();
 	t = t < 0 ? 0 : t;
 
-    DrawTexture(textures["guiTime"], GetScreenWidth() - 34 - 176, 32, WHITE);
-	drawYellowSmallNumber(t, GetScreenWidth() - 34 - 128 - getSmallNumberWidth(t), 50);
+	DrawTexture(textures["guiTime"], GetScreenWidth() - 34 - 176 - leftshift, 32, WHITE); // Draw time icon
+	drawYellowSmallNumber(t, GetScreenWidth() - 34 - 128 - getSmallNumberWidth(t) - leftshift, 50); // Draw remaining time
 
+	// Center top of the screen
     if (reservedPowerUp == MARIO_TYPE_SUPER) {
         DrawTexture(textures["mushroom"], GetScreenWidth() / 2 - textures["mushroom"].width / 2, 32, WHITE);
     } else if (reservedPowerUp == MARIO_TYPE_FLOWER) {
