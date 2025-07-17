@@ -93,11 +93,11 @@ void GameWorld::initScreensAndButtons() {
     }
 
     if (settingButton == nullptr) {
-        settingButton = new ButtonTextTexture("settingButton", { 50.0f, 20.0f }, 2.0f);
+        settingButton = new ButtonTextTexture("settingButton", { GetScreenWidth() - 80.0f, 20.0f }, 2.0f);
     }
 
     if (helpButton == nullptr) {
-        helpButton = new ButtonTextTexture("helpButton", { 50.0f, 90.0f }, 2.0f);
+        helpButton = new ButtonTextTexture("helpButton", { GetScreenWidth() - 150.0f, 20.0f }, 2.0f);
     }
 }
 
@@ -977,11 +977,6 @@ void GameWorld::draw() {
 
         } 
         
-        // else if ( state == GAME_STATE_PAUSED ) {
-        //     if ( showOverlayOnPause ) {
-        //         DrawRectangle( 0, 0, GetScreenWidth(), GetScreenHeight(), Fade( BLACK, 0.3 ) );
-        //     }
-        // }
     }
 
     if (settingBoardIsOpen) {

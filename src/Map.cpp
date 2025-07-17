@@ -350,7 +350,7 @@ void Map::loadFromJsonFile(bool shouldLoadTestMap) {
             }
 
             else if (blockID == 97 || blockID == 98 || blockID == 99 || blockID == 100) {
-                newBlock = new QuestionBlock({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {TILE_WIDTH, TILE_WIDTH}, WHITE);
+                newBlock = new QuestionBlock({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {TILE_WIDTH, TILE_WIDTH}, WHITE, 0.1f, 4);
             }
 
             else if (blockID == 101) {
@@ -409,8 +409,6 @@ void Map::draw() {
         tile->draw();
     }
 
-    
-
     for (const auto& block : blocks) {
        block->draw();
     }
@@ -433,6 +431,10 @@ void Map::draw() {
     }
     
     mario.draw();
+
+    Vector2 pos{10.0f, GetScreenHeight() - 20.0f};
+    Vector2 drawPos = GetScreenToWorld2D(pos, *camera);
+    DrawFPS(drawPos.x, drawPos.y);
 
     if (drawBlackScreen) {
        if (drawBlackScreenFadeAcum < drawBlackScreenFadeTime) {
