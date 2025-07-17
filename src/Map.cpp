@@ -349,9 +349,9 @@ void Map::loadFromJsonFile(bool shouldLoadTestMap) {
                 std::cerr << "Unsupport message block\n";
             }
 
-            // else if (blockID == 97 || blockID == 98 || blockID == 99 || blockID == 100) {
-            //     newBlock = new QuestionBlock({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {TILE_WIDTH, TILE_WIDTH}, WHITE);
-            // }
+            else if (blockID == 97 || blockID == 98 || blockID == 99 || blockID == 100) {
+                newBlock = new QuestionBlock({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {TILE_WIDTH, TILE_WIDTH}, WHITE);
+            }
 
             else if (blockID == 101) {
                 newBlock = new StoneBlock({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {TILE_WIDTH, TILE_WIDTH}, WHITE);
