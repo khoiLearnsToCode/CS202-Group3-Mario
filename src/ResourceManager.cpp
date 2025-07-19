@@ -484,6 +484,7 @@ void ResourceManager::loadFonts() {
         fonts["fixedsys"] = LoadFont("../resource/font/Fixedsys500c.ttf");
         fonts["marioKartDS"] = LoadFont("../resource/font/Mario-Kart-DS.ttf");
         fonts["marioKartF2"] = LoadFont("../resource/font/mario_kart_f2.ttf");
+        fonts["SuperMarioWorld"] = LoadFont("../resource/font/SuperMarioWorld.ttf");
     }
 }
 
