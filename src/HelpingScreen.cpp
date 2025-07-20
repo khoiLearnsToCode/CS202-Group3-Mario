@@ -28,7 +28,10 @@ void HelpingScreen::draw() {
     DrawTextEx(font, "or", { border.x + 180, border.y + 267 }, fontSize, 0.0f, BLACK);
     DrawTextEx(font, ": dodge", { border.x + 260, border.y + 267 }, fontSize, 0.0f, BLACK);
     DrawTextEx(font, ": pause", { border.x + 260, border.y + 327 }, fontSize, 0.0f, BLACK);
-    DrawTextEx(font, ": help", { border.x + 260, border.y + 389 }, fontSize, 0.0f, BLACK);
+    DrawTextEx(font, ": help", { border.x + 260, border.y + 390 }, fontSize, 0.0f, BLACK);
+    DrawTextEx(font, ": jump", { border.x + 585, border.y + 147 }, fontSize, 0.0f, BLACK);
+    DrawTextEx(font, ": shoot", { border.x + 585, border.y + 207 }, fontSize, 0.0f, BLACK);
+    DrawTextEx(font, ": sprint", { border.x + 585, border.y + 267 }, fontSize, 0.0f, BLACK);
 
 }
 
