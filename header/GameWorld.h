@@ -11,6 +11,7 @@ class Mario;
 #include "TitleScreen.h"
 #include "MenuScreen.h"
 #include "SettingScreen.h"
+#include "HelpingScreen.h"
 #include "CareTaker.h"
 #include "Memento.h"
 #include "Mario.h"
@@ -22,6 +23,7 @@ class GameWorld : public virtual Drawable {
     TitleScreen* titleScreen;
     MenuScreen* menuScreen;
     SettingScreen* settingScreen;
+    HelpingScreen* helpingScreen;
 
     friend class CareTaker;
     friend class SettingScreen;

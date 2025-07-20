@@ -43,6 +43,7 @@ void ResourceManager::unloadResources() {
     unloadMusics();
     unloadFonts();
 }
+
 // Implementation of loading textures
 void ResourceManager::loadTextures() {
 
@@ -220,6 +221,7 @@ void ResourceManager::loadTextures() {
         //textures["background9"] = LoadTexture("resources/graphics/backgrounds/background9.png");
         //textures["background10"] = LoadTexture("resources/graphics/backgrounds/background10.png");
         textures["settingBackground"] = LoadTexture("../resource/graphic/backgrounds/settingBackground.png");
+        textures["helpBackground"] = LoadTexture("../resource/graphic/backgrounds/helpBackground.png");
 
         // items
         textures["coin0"] = LoadTexture("resources/images/sprites/items/Coin_0.png");
@@ -484,7 +486,7 @@ void ResourceManager::loadFonts() {
         fonts["fixedsys"] = LoadFont("../resource/font/Fixedsys500c.ttf");
         fonts["marioKartDS"] = LoadFont("../resource/font/Mario-Kart-DS.ttf");
         fonts["marioKartF2"] = LoadFont("../resource/font/mario_kart_f2.ttf");
-        fonts["SuperMarioWorld"] = LoadFont("../resource/font/SuperMarioWorld.ttf");
+        fonts["SuperMario256"] = LoadFont("../resource/font/SuperMario256.ttf");
     }
 }
 

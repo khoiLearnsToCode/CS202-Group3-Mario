@@ -32,7 +32,8 @@ GameWorld::GameWorld() :
     pauseButtonsCooldownTime(0.5f),
     titleScreen(nullptr),
     menuScreen(nullptr),
-    settingScreen(nullptr)
+    settingScreen(nullptr),
+    helpingScreen(nullptr)
     {
         mario.setGameWorld(this);
         mario.setMap(&map);
@@ -52,6 +53,11 @@ GameWorld::~GameWorld() {
     if (settingScreen != nullptr) {
         delete settingScreen;
         settingScreen = nullptr;
+    }
+
+    if (helpingScreen != nullptr) {
+        delete helpingScreen;
+        helpingScreen = nullptr;
     }
 
     if (settingButton != nullptr) {
@@ -90,6 +96,10 @@ void GameWorld::initScreensAndButtons() {
 
     if (settingScreen == nullptr) {
         settingScreen = new SettingScreen(this);
+    }
+
+    if (helpingScreen == nullptr) {
+        helpingScreen = new HelpingScreen();
     }
 
     if (settingButton == nullptr) {
@@ -168,7 +178,7 @@ void GameWorld::inputAndUpdate() {
             settingScreen->setSettingBoardIsOpenInMenuScreen(false);
         }
 
-        if ( IsKeyPressed( KEY_H) || helpButton->isReleased() && pauseButtonsCooldownAcum <= 0.0f) {
+        if ( (IsKeyPressed( KEY_H) || helpButton->isReleased()) && pauseButtonsCooldownAcum <= 0.0f) {
             pauseGame( true, true, true, false, true );
         }
         
@@ -733,7 +743,7 @@ void GameWorld::inputAndUpdate() {
     }
 
     else if ( state == GAME_STATE_HELPING_SCREEN ) {
-        if ((IsKeyPressed(KEY_H) || helpButton->isReleased()) && pauseButtonsCooldownAcum <= 0.0f) {
+        if ((IsKeyPressed(KEY_H) || helpingScreen->helpingBoardShouldClose()) && pauseButtonsCooldownAcum <= 0.0f) {
             unpauseGame();
         }
     }
@@ -983,6 +993,10 @@ void GameWorld::draw() {
         settingScreen->draw();
     }
 
+    if (helpingBoardIsOpen) {
+        helpingScreen->draw();
+    }
+
     EndDrawing();
 }
 
@@ -1046,7 +1060,7 @@ void GameWorld::unpauseGame() {
     pauseMario = false;
     
     // Start cooldown timer if settings screen was open
-    if (settingBoardIsOpen) {
+    if (settingBoardIsOpen || helpingBoardIsOpen) {
         pauseButtonsCooldownAcum = pauseButtonsCooldownTime;
     }
     
