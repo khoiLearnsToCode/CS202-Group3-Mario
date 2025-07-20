@@ -20,7 +20,6 @@ isMutedMusic(false), isMutedSFX(false), settingBoardIsOpenInMenuScreen(true), gw
                (float)backgroundTexture.width, 
                (float)backgroundTexture.height };
 
-    std::cout << "Border: " << border.x << ", " << border.y << ", " << border.width << ", " << border.height << std::endl;
 
     buttons.emplace("MUTEMUSIC", new ButtonTextTexture("muteButton", {border.x + 100, border.y + 100}, 2.0f));
     buttons.emplace("UNMUTEMUSIC", new ButtonTextTexture("unmuteButton", {border.x + 100, border.y + 100}, 2.0f));
@@ -95,15 +94,15 @@ void SettingScreen::draw() {
         buttonPair.second->draw();
     }
 
-    Font& font = ResourceManager::getInstance().getFont("SuperMarioWorld");
-    float fontSize = 22.0f;
+    Font& font = ResourceManager::getInstance().getFont("SuperMario256");
+    float fontSize = 25.0f;
     Color textColor1 = {236, 160, 119, 255};
     Color textColor2 = {235, 114, 114, 255};
 
     Rectangle musicSliderRec = { border.x + 275, border.y + 105 + 16, 200, 20 };
     GuiSlider(musicSliderRec, "", "", &musicVolume, 0.0f, 1.0f);
     bool isMouseHoveringMusicSlider = CheckCollisionPointRec(GetMousePosition(), musicSliderRec);
-    DrawTextEx(font, "MUSIC", { musicSliderRec.x - 100, musicSliderRec.y }, fontSize, 0.0f, 
+    DrawTextEx(font, "MUSIC", { musicSliderRec.x - 95, musicSliderRec.y }, fontSize, 0.0f, 
                 isMouseHoveringMusicSlider ? textColor2 : textColor1);
     musicVolume = floor(musicVolume * 100.0f) / 100.0f;
     DrawTextEx(font, std::to_string((int)(musicVolume * 100)).c_str(),
@@ -113,7 +112,7 @@ void SettingScreen::draw() {
     Rectangle sfxSliderRec = { border.x + 275, border.y + 105 + 16 + 75, 200, 20 };
     GuiSlider(sfxSliderRec, "", "", &sfxVolume, 0.0f, 1.0f);
     bool isMouseHoveringSfxSlider = CheckCollisionPointRec(GetMousePosition(), sfxSliderRec);
-    DrawTextEx(font, "SFX", { sfxSliderRec.x - 67, sfxSliderRec.y }, fontSize, 0.0f, 
+    DrawTextEx(font, "SFX", { sfxSliderRec.x - 60, sfxSliderRec.y }, fontSize, 0.0f, 
                 isMouseHoveringSfxSlider ? textColor2 : textColor1);
     sfxVolume = floor(sfxVolume * 100.0f) / 100.0f;
     DrawTextEx(font, std::to_string((int)(sfxVolume * 100)).c_str(),
