@@ -20,7 +20,6 @@ isMutedMusic(false), isMutedSFX(false), settingBoardIsOpenInMenuScreen(true), gw
                (float)backgroundTexture.width, 
                (float)backgroundTexture.height };
 
-    std::cout << "Border: " << border.x << ", " << border.y << ", " << border.width << ", " << border.height << std::endl;
 
     buttons.emplace("MUTEMUSIC", new ButtonTextTexture("muteButton", {border.x + 100, border.y + 100}, 2.0f));
     buttons.emplace("UNMUTEMUSIC", new ButtonTextTexture("unmuteButton", {border.x + 100, border.y + 100}, 2.0f));
@@ -95,14 +94,30 @@ void SettingScreen::draw() {
         buttonPair.second->draw();
     }
 
-    Vector2 musicSliderPos = { border.x + 175, border.y + 105 + 16 };
-    GuiSlider({ musicSliderPos.x, musicSliderPos.y, 200, 20 }, "", "MUSIC", &musicVolume, 0.0f, 1.0f);
-    musicVolume = floor(musicVolume * 10.0f) / 10.0f;
-    
+    Font& font = ResourceManager::getInstance().getFont("SuperMario256");
+    float fontSize = 25.0f;
+    Color textColor1 = {236, 160, 119, 255};
+    Color textColor2 = {235, 114, 114, 255};
 
-    Vector2 sfxSliderPos = { border.x + 175, border.y + 105 + 16 + 75 };
-    GuiSlider({ sfxSliderPos.x, sfxSliderPos.y, 200, 20 }, "", "SFX", &sfxVolume, 0.0f, 1.0f);
-    sfxVolume = floor(sfxVolume * 10.0f) / 10.0f;
+    Rectangle musicSliderRec = { border.x + 275, border.y + 105 + 16, 200, 20 };
+    GuiSlider(musicSliderRec, "", "", &musicVolume, 0.0f, 1.0f);
+    bool isMouseHoveringMusicSlider = CheckCollisionPointRec(GetMousePosition(), musicSliderRec);
+    DrawTextEx(font, "MUSIC", { musicSliderRec.x - 95, musicSliderRec.y }, fontSize, 0.0f, 
+                isMouseHoveringMusicSlider ? textColor2 : textColor1);
+    musicVolume = floor(musicVolume * 100.0f) / 100.0f;
+    DrawTextEx(font, std::to_string((int)(musicVolume * 100)).c_str(),
+              { musicSliderRec.x + 210, musicSliderRec.y }, fontSize, 0.0f,
+              isMouseHoveringMusicSlider ? textColor2 : textColor1);
+
+    Rectangle sfxSliderRec = { border.x + 275, border.y + 105 + 16 + 75, 200, 20 };
+    GuiSlider(sfxSliderRec, "", "", &sfxVolume, 0.0f, 1.0f);
+    bool isMouseHoveringSfxSlider = CheckCollisionPointRec(GetMousePosition(), sfxSliderRec);
+    DrawTextEx(font, "SFX", { sfxSliderRec.x - 60, sfxSliderRec.y }, fontSize, 0.0f, 
+                isMouseHoveringSfxSlider ? textColor2 : textColor1);
+    sfxVolume = floor(sfxVolume * 100.0f) / 100.0f;
+    DrawTextEx(font, std::to_string((int)(sfxVolume * 100)).c_str(),
+              { sfxSliderRec.x + 210, sfxSliderRec.y }, fontSize, 0.0f,
+              isMouseHoveringSfxSlider ? textColor2 : textColor1);
 
     if (musicVolume != 0.0f) {
         isMutedMusic = false; // Unmute if volume is set

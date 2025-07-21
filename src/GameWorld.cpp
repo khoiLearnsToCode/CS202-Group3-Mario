@@ -32,7 +32,8 @@ GameWorld::GameWorld() :
     pauseButtonsCooldownTime(0.5f),
     titleScreen(nullptr),
     menuScreen(nullptr),
-    settingScreen(nullptr)
+    settingScreen(nullptr),
+    helpingScreen(nullptr)
     {
         mario.setGameWorld(this);
         mario.setMap(&map);
@@ -52,6 +53,11 @@ GameWorld::~GameWorld() {
     if (settingScreen != nullptr) {
         delete settingScreen;
         settingScreen = nullptr;
+    }
+
+    if (helpingScreen != nullptr) {
+        delete helpingScreen;
+        helpingScreen = nullptr;
     }
 
     if (settingButton != nullptr) {
@@ -92,12 +98,16 @@ void GameWorld::initScreensAndButtons() {
         settingScreen = new SettingScreen(this);
     }
 
+    if (helpingScreen == nullptr) {
+        helpingScreen = new HelpingScreen();
+    }
+
     if (settingButton == nullptr) {
-        settingButton = new ButtonTextTexture("settingButton", { 50.0f, 20.0f }, 2.0f);
+        settingButton = new ButtonTextTexture("settingButton", { GetScreenWidth() - 80.0f, 20.0f }, 2.0f);
     }
 
     if (helpButton == nullptr) {
-        helpButton = new ButtonTextTexture("helpButton", { 50.0f, 90.0f }, 2.0f);
+        helpButton = new ButtonTextTexture("helpButton", { GetScreenWidth() - 150.0f, 20.0f }, 2.0f);
     }
 }
 
@@ -168,7 +178,7 @@ void GameWorld::inputAndUpdate() {
             settingScreen->setSettingBoardIsOpenInMenuScreen(false);
         }
 
-        if ( IsKeyPressed( KEY_H) || helpButton->isReleased() && pauseButtonsCooldownAcum <= 0.0f) {
+        if ( (IsKeyPressed( KEY_H) || helpButton->isReleased()) && pauseButtonsCooldownAcum <= 0.0f) {
             pauseGame( true, true, true, false, true );
         }
         
@@ -733,7 +743,7 @@ void GameWorld::inputAndUpdate() {
     }
 
     else if ( state == GAME_STATE_HELPING_SCREEN ) {
-        if ((IsKeyPressed(KEY_H) || helpButton->isReleased()) && pauseButtonsCooldownAcum <= 0.0f) {
+        if ((IsKeyPressed(KEY_H) || helpingScreen->helpingBoardShouldClose()) && pauseButtonsCooldownAcum <= 0.0f) {
             unpauseGame();
         }
     }
@@ -977,15 +987,14 @@ void GameWorld::draw() {
 
         } 
         
-        // else if ( state == GAME_STATE_PAUSED ) {
-        //     if ( showOverlayOnPause ) {
-        //         DrawRectangle( 0, 0, GetScreenWidth(), GetScreenHeight(), Fade( BLACK, 0.3 ) );
-        //     }
-        // }
     }
 
     if (settingBoardIsOpen) {
         settingScreen->draw();
+    }
+
+    if (helpingBoardIsOpen) {
+        helpingScreen->draw();
     }
 
     EndDrawing();
@@ -1051,7 +1060,7 @@ void GameWorld::unpauseGame() {
     pauseMario = false;
     
     // Start cooldown timer if settings screen was open
-    if (settingBoardIsOpen) {
+    if (settingBoardIsOpen || helpingBoardIsOpen) {
         pauseButtonsCooldownAcum = pauseButtonsCooldownTime;
     }
     
