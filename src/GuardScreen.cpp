@@ -28,8 +28,8 @@ GuardScreen::GuardScreen() : Screen(),
                (float)backgroundTexture.width, 
                (float)backgroundTexture.height }; 
                
-    cancelButton = new ButtonTextTexture("cancelButton", {GetScreenWidth() / 2.0f - 50.0f - 64.0f, border.y + 300}, 2.0f);
-    acceptButton = new ButtonTextTexture("acceptButton", {GetScreenWidth() / 2.0f + 50.0f, border.y + 300}, 2.0f);
+    cancelButton = new ButtonTextTexture("cancelButton", {GetScreenWidth() / 2.0f - 65.0f - 64.0f, border.y + 300}, 2.0f);
+    acceptButton = new ButtonTextTexture("acceptButton", {GetScreenWidth() / 2.0f + 65.0f, border.y + 300}, 2.0f);
 }
 
 GuardScreen::~GuardScreen() {
@@ -48,23 +48,23 @@ void GuardScreen::draw() {
         // "Are you sure you want to return to home?"
         Vector2 textDimensions1 = MeasureTextEx(font, (messages[0] + messages[1]).c_str(), fontSize, 0.0f);
         DrawTextEx(font, (messages[0] + messages[1]).c_str(), 
-                   {(GetScreenWidth() - textDimensions1.x) / 2.0f, messageY}, fontSize, 0.0f, BLACK);
+                   {(GetScreenWidth() - textDimensions1.x) / 2.0f - 10.0f, messageY}, fontSize, 0.0f, BLACK);
         
         // "All of your progress will be lost!"
         Vector2 textDimensions2 = MeasureTextEx(font, (messages[4] + messages[6]).c_str(), fontSize, 0.0f);
         DrawTextEx(font, (messages[4] + messages[6]).c_str(), 
-                   {(GetScreenWidth() - textDimensions2.x) / 2.0f, messageY + 30.0f}, fontSize, 0.0f, BLACK);
+                   {(GetScreenWidth() - textDimensions2.x) / 2.0f - 10.0f, messageY + 30.0f}, fontSize, 0.0f, BLACK);
     }
     else if (currentAction == GUARD_ACTION_RESET) {
         // "Are you sure you want to restart this level?"
         Vector2 textDimensions1 = MeasureTextEx(font, (messages[0] + messages[2]).c_str(), fontSize, 0.0f);
         DrawTextEx(font, (messages[0] + messages[2]).c_str(), 
-                   {(GetScreenWidth() - textDimensions1.x) / 2.0f, messageY}, fontSize, 0.0f, BLACK);
+                   {(GetScreenWidth() - textDimensions1.x) / 2.0f - 10.0f, messageY}, fontSize, 0.0f, BLACK);
 
         // "All of your progress in this level will be lost!"
         Vector2 textDimensions2 = MeasureTextEx(font, (messages[4] + messages[5] + messages[6]).c_str(), fontSize, 0.0f);
         DrawTextEx(font, (messages[4] + messages[5] + messages[6]).c_str(), 
-                   {(GetScreenWidth() - textDimensions2.x) / 2.0f, messageY + 30.0f}, fontSize, 0.0f, BLACK);
+                   {(GetScreenWidth() - textDimensions2.x) / 2.0f - 10.0f, messageY + 30.0f}, fontSize, 0.0f, BLACK);
     }
 
     if (cancelButton) {
