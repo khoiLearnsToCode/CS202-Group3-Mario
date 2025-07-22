@@ -19,7 +19,6 @@ class Map : public virtual Drawable {
     std::vector<Tile*> touchableTiles;
     // std::vector<Tile*> frontScenarioTiles;
     std::vector<Block*> blocks;
-    // std::vector<Block*> messageBlocks;
     std::vector<Item*> items;
     std::vector<Item*> staticItems;
     std::vector<Baddie*> baddies;
@@ -84,6 +83,7 @@ public:
     std::vector<Item*>& getItems();
     std::vector<Item*>& getStaticItems();
     std::vector<Baddie*>& getBaddies();
+
     float getMaxWidth() const;
     float getMaxHeight() const;
 
