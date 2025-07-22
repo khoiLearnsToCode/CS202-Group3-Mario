@@ -33,7 +33,8 @@ GameWorld::GameWorld() :
     titleScreen(nullptr),
     menuScreen(nullptr),
     settingScreen(nullptr),
-    helpingScreen(nullptr)
+    helpingScreen(nullptr),
+    guardScreen(nullptr)
     {
         mario.setGameWorld(this);
         mario.setMap(&map);
@@ -58,6 +59,11 @@ GameWorld::~GameWorld() {
     if (helpingScreen != nullptr) {
         delete helpingScreen;
         helpingScreen = nullptr;
+    }
+
+    if (guardScreen != nullptr) {
+        delete guardScreen;
+        guardScreen = nullptr;
     }
 
     if (settingButton != nullptr) {
@@ -102,6 +108,10 @@ void GameWorld::initScreensAndButtons() {
         helpingScreen = new HelpingScreen();
     }
 
+    if (guardScreen == nullptr) {
+        guardScreen = new GuardScreen();
+    }
+
     if (settingButton == nullptr) {
         settingButton = new ButtonTextTexture("settingButton", { GetScreenWidth() - 80.0f, 20.0f }, 2.0f);
     }
@@ -133,7 +143,8 @@ void GameWorld::inputAndUpdate() {
          state != GAME_STATE_TITLE_SCREEN &&
          state != GAME_STATE_MENU_SCREEN &&
          state != GAME_STATE_CREDITS_SCREEN &&
-         state != GAME_STATE_FINISHED && 
+         state != GAME_STATE_FINISHED &&
+         state != GAME_STATE_GUARD_SCREEN && 
          !pauseMusic ) {
         map.playMusic();
     }
@@ -143,7 +154,8 @@ void GameWorld::inputAndUpdate() {
          state != GAME_STATE_CREDITS_SCREEN &&
          state != GAME_STATE_FINISHED &&
          state != GAME_STATE_SETTINGS_SCREEN &&
-         state != GAME_STATE_HELPING_SCREEN ) {
+         state != GAME_STATE_HELPING_SCREEN &&
+         state != GAME_STATE_GUARD_SCREEN ) {
         mario.setActivationWidth( GetScreenWidth() * 2 );
         mario.update();
     } else if ( !pauseMario && state != GAME_STATE_TITLE_SCREEN && 
@@ -161,7 +173,8 @@ void GameWorld::inputAndUpdate() {
          state != GAME_STATE_CREDITS_SCREEN &&
          state != GAME_STATE_FINISHED &&
          state != GAME_STATE_SETTINGS_SCREEN &&
-         state != GAME_STATE_HELPING_SCREEN ) {
+         state != GAME_STATE_HELPING_SCREEN &&
+         state != GAME_STATE_GUARD_SCREEN ) {
 
             std::vector<int> collectedIndexes;
 
@@ -748,6 +761,32 @@ void GameWorld::inputAndUpdate() {
         }
     }
 
+    else if ( state == GAME_STATE_GUARD_SCREEN ) {
+        if (guardScreen->getCancelButton()->isReleased()) {
+            // Cancel action, return to settings screen
+            state = GAME_STATE_SETTINGS_SCREEN;
+            settingBoardIsOpen = true;
+            pauseButtonsCooldownAcum = pauseButtonsCooldownTime;
+            // Ensure we maintain the correct pause state
+            pauseMusic = true;
+            pauseMario = true;
+        }
+        else if (guardScreen->getAcceptButton()->isReleased()) {
+            // Execute the guarded action
+            if (guardScreen->getCurrentAction() == GUARD_ACTION_HOME) {
+                resetGame();
+                state = GAME_STATE_TITLE_SCREEN;
+                settingBoardIsOpen = false;
+                pauseMusic = false;
+                pauseMario = false;
+            }
+            else if (guardScreen->getCurrentAction() == GUARD_ACTION_RESET) {
+                resetMap();
+                settingBoardIsOpen = false;
+            }
+        }
+    }
+
 
     if (settingBoardIsOpen){
         settingScreen->update();
@@ -885,6 +924,8 @@ void GameWorld::draw() {
     ClearBackground(WHITE);
     std::map<std::string, Texture2D>& textures = ResourceManager::getInstance().getTextures();
 
+    //std::cerr << "Gamestate: " << state << std::endl;
+
     if (state == GAME_STATE_TITLE_SCREEN) {
         titleScreen->draw();
     }
@@ -997,6 +1038,10 @@ void GameWorld::draw() {
         helpingScreen->draw();
     }
 
+    if (state == GAME_STATE_GUARD_SCREEN) {
+        guardScreen->draw();
+    }
+
     EndDrawing();
 }
 
@@ -1066,5 +1111,20 @@ void GameWorld::unpauseGame() {
     
     settingBoardIsOpen = false;
     helpingBoardIsOpen = false;
+}
+
+void GameWorld::showGuardScreen(GuardAction action) {
+    if (guardScreen != nullptr) {
+        // Only update stateBeforePause if we're not already in a paused state
+        if (state != GAME_STATE_SETTINGS_SCREEN && state != GAME_STATE_HELPING_SCREEN && state != GAME_STATE_GUARD_SCREEN) {
+            stateBeforePause = state;
+        }
+        state = GAME_STATE_GUARD_SCREEN;
+        guardScreen->setAction(action);
+        pauseMusic = true;
+        pauseMario = true;
+        settingBoardIsOpen = false;
+        helpingBoardIsOpen = false;
+    }
 }
 

@@ -1,5 +1,6 @@
 #include "SettingScreen.h"
 #include "GameWorld.h"
+#include "GuardScreen.h"
 
 #ifndef RAYGUI_IMPLEMENTATION
 #define RAYGUI_IMPLEMENTATION
@@ -31,8 +32,6 @@ isMutedMusic(false), isMutedSFX(false), settingBoardIsOpenInMenuScreen(true), gw
     buttons.emplace("RESET", new ButtonTextTexture("resetButton", {border.x + 100, border.y + 325}, 2.0f));
 
     GuiLoadStyle("../resource/font/candy.rgs");
-
-    GuiSetStyle(SLIDER, TEXT_ALIGNMENT_VERTICAL, TEXT_ALIGN_BOTTOM);
 }
 
 SettingScreen::~SettingScreen() {
@@ -60,27 +59,31 @@ void SettingScreen::update() {
         sfxVolume = 0.5f; // Unmute SFX
     }
 
-    if (buttons["HOME"]->isReleased()) {
-        settingBoardIsOpenInMenuScreen = false;
-        if (gw) {
-            gw->unpauseGame();           
-            gw->resetGame();
-            gw->state = GAME_STATE_TITLE_SCREEN;
-            gw->settingBoardIsOpen = false;
-        }
-        else {
-            std::cerr << "GameWorld pointer is null. Cannot reset game." << std::endl;
-        }
-    } 
-    
-    if (buttons["RESET"]->isReleased()) {
-        settingBoardIsOpenInMenuScreen = false;
-        if (gw) {
-            gw->unpauseGame();
-            gw->resetMap();
-            gw->settingBoardIsOpen = false;
-        } else {
-            std::cerr << "GameWorld pointer is null. Cannot reset map." << std::endl;
+    // Don't allow HOME and RESET buttons when guard screen is active
+    if (GameWorld::state != GAME_STATE_GUARD_SCREEN) {
+        if (buttons["HOME"]->isReleased()) {
+            settingBoardIsOpenInMenuScreen = false;
+            if (!isMutedSFX) {
+                PlaySound(ResourceManager::getInstance().getSound("pause"));
+            }
+            if (gw) {
+                gw->showGuardScreen(GUARD_ACTION_HOME);
+            }
+            else {
+                std::cerr << "GameWorld pointer is null. Cannot show guard screen." << std::endl;
+            }
+        } 
+        
+        if (buttons["RESET"]->isReleased()) {
+            settingBoardIsOpenInMenuScreen = false;
+            if (!isMutedSFX) {
+                PlaySound(ResourceManager::getInstance().getSound("pause"));
+            }
+            if (gw) {
+                gw->showGuardScreen(GUARD_ACTION_RESET);
+            } else {
+                std::cerr << "GameWorld pointer is null. Cannot show guard screen." << std::endl;
+            }
         }
     }
 }
@@ -91,6 +94,10 @@ void SettingScreen::draw() {
         if ((buttonPair.first == "HOME" || buttonPair.first == "RESET") && settingBoardIsOpenInMenuScreen) {
             continue;
         }
+        // Don't draw HOME and RESET buttons when guard screen is active
+        // if ((buttonPair.first == "HOME" || buttonPair.first == "RESET") && GameWorld::state == GAME_STATE_GUARD_SCREEN) {
+        //     continue;
+        // }
         buttonPair.second->draw();
     }
 

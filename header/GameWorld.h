@@ -12,6 +12,7 @@ class Mario;
 #include "MenuScreen.h"
 #include "SettingScreen.h"
 #include "HelpingScreen.h"
+#include "GuardScreen.h"
 #include "CareTaker.h"
 #include "Memento.h"
 #include "Mario.h"
@@ -24,6 +25,7 @@ class GameWorld : public virtual Drawable {
     MenuScreen* menuScreen;
     SettingScreen* settingScreen;
     HelpingScreen* helpingScreen;
+    GuardScreen* guardScreen;
 
     friend class CareTaker;
     friend class SettingScreen;
@@ -96,6 +98,7 @@ public:
     void nextMap();
     void pauseGame(bool playPauseSFX, bool pauseMusic, bool pauseMario, bool showSettingBoard, bool showHelpingBoard);
     void unpauseGame();
+    void showGuardScreen(GuardAction action);
 
     // bool isPauseMusicOnPause() const;
     // bool isShowOverlayOnPause() const;

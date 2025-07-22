@@ -7,9 +7,11 @@
 class HelpingScreen : public Screen {
 public:
     HelpingScreen();
-    virtual ~HelpingScreen() override;
+    HelpingScreen(const HelpingScreen&) = delete;
+    HelpingScreen& operator=(const HelpingScreen&) = delete;
+    ~HelpingScreen() override;
 
-    virtual void draw() override;
+    void draw() override;
     bool helpingBoardShouldClose() const;
 
     private:
