@@ -77,8 +77,9 @@ GameWorld::~GameWorld() {
     }
 }
 
-Memento* GameWorld::dataFromGameWorldToSave() const {
-    Data data(map.getId(), remainingTimePointCount, mario.getPoints(), mario.getLives());
+Memento* GameWorld::dataFromGameWorldToSave() {
+    Data data(map.getId(), remainingTimePointCount, mario.getPoints(), mario.getLives(),
+             map.getBlocks(), map.getBaddies(), map.getItems(), map.getStaticItems());
     return new ConcreteMemento(data);
 }
 
