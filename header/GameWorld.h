@@ -53,7 +53,7 @@ class GameWorld : public virtual Drawable {
     float pauseButtonsCooldownAcum;
     float pauseButtonsCooldownTime;
 
-    Memento* dataFromGameWorldToSave() const;
+    Memento* dataFromGameWorldToSave();
     void restoreDataFromMemento(const Memento* memento) const;
 
 public:
@@ -67,27 +67,11 @@ public:
 
     void initScreensAndButtons();
 
-    /**
-     * @brief Reads user input and updates the state of the game.
-     */
+    // get user input, update game state
     void inputAndUpdate();
-
-    /**
-     * @brief Draws the state of the game.
-     */
     void draw() override;
 
-    /**
-     * @brief Load game resources like images, textures, sounds, fonts, shaders,
-     * etc.
-     * Should be called inside the constructor.
-     */
     static void loadResources();
-
-    /**
-     * @brief Unload the once loaded game resources.
-     * Should be called inside the destructor.
-     */
     static void unloadResources();
 
     void setCamera(Camera2D* camera);

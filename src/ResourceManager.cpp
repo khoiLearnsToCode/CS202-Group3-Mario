@@ -224,21 +224,21 @@ void ResourceManager::loadTextures() {
         textures["helpBackground"] = LoadTexture("../resource/graphic/backgrounds/helpBackground.png");
 
         // items
-        textures["coin0"] = LoadTexture("resources/images/sprites/items/Coin_0.png");
-        textures["coin1"] = LoadTexture("resources/images/sprites/items/Coin_1.png");
-        textures["coin2"] = LoadTexture("resources/images/sprites/items/Coin_2.png");
-        textures["coin3"] = LoadTexture("resources/images/sprites/items/Coin_3.png");
-        textures["1UpMushroom"] = LoadTexture("resources/images/sprites/items/1UpMushroom.png");
-        textures["3UpMoon"] = LoadTexture("resources/images/sprites/items/3UpMoon.png");
-        textures["courseClearToken"] = LoadTexture("resources/images/sprites/items/CourseClearToken.png");
-        textures["fireFlower0"] = LoadTexture("resources/images/sprites/items/FireFlower_0.png");
-        textures["fireFlower1"] = LoadTexture("resources/images/sprites/items/FireFlower_1.png");
-        textures["mushroom"] = LoadTexture("resources/images/sprites/items/Mushroom.png");
-        textures["star"] = LoadTexture("resources/images/sprites/items/Star.png");
-        textures["yoshiCoin0"] = LoadTexture("resources/images/sprites/items/YoshiCoin_0.png");
-        textures["yoshiCoin1"] = LoadTexture("resources/images/sprites/items/YoshiCoin_1.png");
-        textures["yoshiCoin2"] = LoadTexture("resources/images/sprites/items/YoshiCoin_2.png");
-        textures["yoshiCoin3"] = LoadTexture("resources/images/sprites/items/YoshiCoin_3.png");
+        textures["coin0"] = LoadTexture("../resource/graphic/sprites/items/Coin_0.png");
+        textures["coin1"] = LoadTexture("../resource/graphic/sprites/items/Coin_1.png");
+        textures["coin2"] = LoadTexture("../resource/graphic/sprites/items/Coin_2.png");
+        textures["coin3"] = LoadTexture("../resource/graphic/sprites/items/Coin_3.png");
+        textures["1UpMushroom"] = LoadTexture("../resource/graphic/sprites/items/1UpMushroom.png");
+        textures["3UpMoon"] = LoadTexture("../resource/graphic/sprites/items/3UpMoon.png");
+        textures["courseClearToken"] = LoadTexture("../resource/graphic/sprites/items/CourseClearToken.png");
+        textures["fireFlower0"] = LoadTexture("../resource/graphic/sprites/items/FireFlower_0.png");
+        textures["fireFlower1"] = LoadTexture("../resource/graphic/sprites/items/FireFlower_1.png");
+        textures["mushroom"] = LoadTexture("../resource/graphic/sprites/items/Mushroom.png");
+        textures["star"] = LoadTexture("../resource/graphic/sprites/items/Star.png");
+        textures["yoshiCoin0"] = LoadTexture("../resource/graphic/sprites/items/YoshiCoin_0.png");
+        textures["yoshiCoin1"] = LoadTexture("../resource/graphic/sprites/items/YoshiCoin_1.png");
+        textures["yoshiCoin2"] = LoadTexture("../resource/graphic/sprites/items/YoshiCoin_2.png");
+        textures["yoshiCoin3"] = LoadTexture("../resource/graphic/sprites/items/YoshiCoin_3.png");
 
         // baddies
         textures["blueKoopaTroopa0R"] = LoadTexture("../resource/graphic/sprites/baddies/BlueKoopaTroopa_0.png");
@@ -373,40 +373,41 @@ void ResourceManager::loadTextures() {
         textures["gui3Up"] = LoadTexture("../resource/graphic/gui/gui3Up.png");
         textures["StartButton"] = LoadTexture("../resource/graphic/gui/StartButton.png");
         textures["credit"] = LoadTexture("../resource/graphic/gui/credit.png");
-        
+        textures["marioIcon"] = LoadTexture("../resource/graphic/gui/marioIcon.jpg");
+
 
         // UI elements
             // Mute buttons
-        textures["muteButtonBlue"] = LoadTexture("../resource/graphic/ui/MuteButtonBlue.png");
-        textures["muteButtonGreen"] = LoadTexture("../resource/graphic/ui/MuteButtonGreen.png");
-        textures["muteButtonOrange"] = LoadTexture("../resource/graphic/ui/MuteButtonOrange.png");
-        textures["muteButtonWhite"] = LoadTexture("../resource/graphic/ui/MuteButtonWhite.png");
-        textures["muteButtonYellow"] = LoadTexture("../resource/graphic/ui/MuteButtonYellow.png");
+        // textures["muteButtonBlue"] = LoadTexture("../resource/graphic/ui/MuteButtonBlue.png");
+        // textures["muteButtonGreen"] = LoadTexture("../resource/graphic/ui/MuteButtonGreen.png");
+        // textures["muteButtonOrange"] = LoadTexture("../resource/graphic/ui/MuteButtonOrange.png");
+        // textures["muteButtonWhite"] = LoadTexture("../resource/graphic/ui/MuteButtonWhite.png");
+        // textures["muteButtonYellow"] = LoadTexture("../resource/graphic/ui/MuteButtonYellow.png");
         textures["muteButtonPress"] = LoadTexture("../resource/graphic/ui/muteButtonPress.png");
         textures["muteButtonRelease"] = LoadTexture("../resource/graphic/ui/muteButtonRelease.png");
         
             // Unmute buttons
-        textures["unmuteButtonBlue"] = LoadTexture("../resource/graphic/ui/UnmuteButtonBlue.png");
-        textures["unmuteButtonGreen"] = LoadTexture("../resource/graphic/ui/UnmuteButtonGreen.png");
-        textures["unmuteButtonOrange"] = LoadTexture("../resource/graphic/ui/UnmuteButtonOrange.png");
-        textures["unmuteButtonWhite"] = LoadTexture("../resource/graphic/ui/UnmuteButtonWhite.png");
-        textures["unmuteButtonYellow"] = LoadTexture("../resource/graphic/ui/UnmuteButtonYellow.png");
+        // textures["unmuteButtonBlue"] = LoadTexture("../resource/graphic/ui/UnmuteButtonBlue.png");
+        // textures["unmuteButtonGreen"] = LoadTexture("../resource/graphic/ui/UnmuteButtonGreen.png");
+        // textures["unmuteButtonOrange"] = LoadTexture("../resource/graphic/ui/UnmuteButtonOrange.png");
+        // textures["unmuteButtonWhite"] = LoadTexture("../resource/graphic/ui/UnmuteButtonWhite.png");
+        // textures["unmuteButtonYellow"] = LoadTexture("../resource/graphic/ui/UnmuteButtonYellow.png");
         textures["unmuteButtonPress"] = LoadTexture("../resource/graphic/ui/unmuteButtonPress.png");
         textures["unmuteButtonRelease"] = LoadTexture("../resource/graphic/ui/unmuteButtonRelease.png");
         
             // Save buttons
-        textures["saveButtonBlue"] = LoadTexture("../resource/graphic/ui/SaveButtonBlue.png");
-        textures["saveButtonGreen"] = LoadTexture("../resource/graphic/ui/SaveButtonGreen.png");
-        textures["saveButtonOrange"] = LoadTexture("../resource/graphic/ui/SaveButtonOrange.png");
-        textures["saveButtonWhite"] = LoadTexture("../resource/graphic/ui/SaveButtonWhite.png");
-        textures["saveButtonYellow"] = LoadTexture("../resource/graphic/ui/SaveButtonYellow.png");
+        // textures["saveButtonBlue"] = LoadTexture("../resource/graphic/ui/SaveButtonBlue.png");
+        // textures["saveButtonGreen"] = LoadTexture("../resource/graphic/ui/SaveButtonGreen.png");
+        // textures["saveButtonOrange"] = LoadTexture("../resource/graphic/ui/SaveButtonOrange.png");
+        // textures["saveButtonWhite"] = LoadTexture("../resource/graphic/ui/SaveButtonWhite.png");
+        // textures["saveButtonYellow"] = LoadTexture("../resource/graphic/ui/SaveButtonYellow.png");
         
             // Setting buttons
-        textures["settingButtonBlue"] = LoadTexture("../resource/graphic/ui/SettingButtonBlue.png");
-        textures["settingButtonGreen"] = LoadTexture("../resource/graphic/ui/SettingButtonGreen.png");
-        textures["settingButtonOrange"] = LoadTexture("../resource/graphic/ui/SettingButtonOrange.png");
-        textures["settingButtonWhite"] = LoadTexture("../resource/graphic/ui/SettingButtonWhite.png");
-        textures["settingButtonYellow"] = LoadTexture("../resource/graphic/ui/SettingButtonYellow.png");
+        // textures["settingButtonBlue"] = LoadTexture("../resource/graphic/ui/SettingButtonBlue.png");
+        // textures["settingButtonGreen"] = LoadTexture("../resource/graphic/ui/SettingButtonGreen.png");
+        // textures["settingButtonOrange"] = LoadTexture("../resource/graphic/ui/SettingButtonOrange.png");
+        // textures["settingButtonWhite"] = LoadTexture("../resource/graphic/ui/SettingButtonWhite.png");
+        // textures["settingButtonYellow"] = LoadTexture("../resource/graphic/ui/SettingButtonYellow.png");
         textures["settingButtonPress"] = LoadTexture("../resource/graphic/ui/settingButtonPress.png");
         textures["settingButtonRelease"] = LoadTexture("../resource/graphic/ui/settingButtonRelease.png");
         

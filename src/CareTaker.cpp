@@ -44,6 +44,7 @@ CareTaker::~CareTaker() {
         j["savedGames"][i]["score"] = data.score;
         j["savedGames"][i]["lives"] = data.lives;
         j["savedGames"][i]["date"] = mementos[i]->getDate();
+    
     }
     fout << j.dump(4);
     fout.close();
@@ -67,6 +68,7 @@ void CareTaker::restore(int index) {
     }
     Memento* memento = mementos[index];
     gw->restoreDataFromMemento(memento);
+    delete memento; 
     mementos.erase(mementos.begin() + index);
     std::cout << "Game restored successfully from index " << index << "." << std::endl;
 }

@@ -313,6 +313,7 @@ void Map::loadFromJsonFile(bool shouldLoadTestMap) {
 
     // Load blocks
     std::vector<int> blockIDs = mapJson["layers"][3]["data"];
+    std::vector<int> itemIDs = mapJson["layers"][5]["data"];
     for (int y = 0; y < height; y++){
         for (int x = 0; x < width; x++){
             int blockID = blockIDs[y * width + x];
@@ -349,8 +350,37 @@ void Map::loadFromJsonFile(bool shouldLoadTestMap) {
                 std::cerr << "Unsupport message block\n";
             }
 
+            // Handle question blocks and their items
             else if (blockID == 97 || blockID == 98 || blockID == 99 || blockID == 100) {
-                newBlock = new QuestionBlock({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {TILE_WIDTH, TILE_WIDTH}, WHITE, 0.1f, 4);
+                int itemID = itemIDs[y * width + x];
+                if (itemID == 0) {
+                    newBlock = new QuestionBlock({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {TILE_WIDTH, TILE_WIDTH}, WHITE, 0.1f, 4);
+                }
+
+                else if (itemID == 103) {
+                    newBlock = new QuestionMushroomBlock({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {TILE_WIDTH, TILE_WIDTH}, WHITE, 0.1f, 4);
+                }
+
+                else if (itemID == 104) {
+                    newBlock = new QuestionThreeUpMoonBlock({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {TILE_WIDTH, TILE_WIDTH}, WHITE, 0.1f, 4);
+                }
+
+                else if (itemID == 113 || itemID == 114 ) {
+                    newBlock = new QuestionFireFlowerBlock({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {TILE_WIDTH, TILE_WIDTH}, WHITE, 0.1f, 4);
+                }
+
+                else if (itemID == 115) {
+                    newBlock = new QuestionMushroomBlock({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {TILE_WIDTH, TILE_WIDTH}, WHITE, 0.1f, 4);
+                }
+
+                else if (itemID == 116) {
+                    newBlock = new QuestionStarBlock({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {TILE_WIDTH, TILE_WIDTH}, WHITE, 0.1f, 4);
+                }
+
+                else {
+                    std::cerr << "Unsupported item ID: " << itemID << " at position (" << x << ", " << y << ")" << std::endl;
+                    continue; // Skip unsupported items
+                }
             }
 
             else if (blockID == 101) {
@@ -368,6 +398,39 @@ void Map::loadFromJsonFile(bool shouldLoadTestMap) {
     }
     
     blockIDs.clear();
+
+    // Load static items
+    std::vector<int> staticItemIDs = mapJson["layers"][4]["data"];
+    for (int y = 0; y < height; y++){
+        for (int x = 0; x < width; x++){
+            int staticItemID = staticItemIDs[y * width + x];
+            if (staticItemID == 0) continue;
+
+            Item* newStaticItem = nullptr;
+
+            if (staticItemID >= 108 && staticItemID <= 111) { // Coins
+                newStaticItem = new Coin({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {TILE_WIDTH, TILE_WIDTH}, WHITE);
+            } 
+
+            else if (staticItemID == 112) { // Course Clear Token
+                newStaticItem = new CourseClearToken({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {TILE_WIDTH, TILE_WIDTH}, WHITE);
+            } 
+
+            else if (staticItemID >= 117 && staticItemID <= 120) { // Yoshi Coins
+                newStaticItem = new YoshiCoin({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {TILE_WIDTH, TILE_WIDTH}, WHITE);
+            } 
+
+            else {
+                std::cerr << "Unsupported static item ID: " << staticItemID << " at position (" << x << ", " << y << ")" << std::endl;
+                continue; // Skip unsupported static items
+
+            }
+
+            if (newStaticItem) {
+                staticItems.push_back(newStaticItem);
+            }
+        }
+    }
     
     parsed = true;
 
