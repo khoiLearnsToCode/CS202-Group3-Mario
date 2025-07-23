@@ -34,9 +34,7 @@ StoneBlock::StoneBlock(Vector2 pos, Vector2 dim, Color color)
 	: Block(pos, dim, color) {}
 StoneBlock::StoneBlock(Vector2 pos, Vector2 dim, Color color, float frameTime, int maxFrames)
 	: Block(pos, dim, color, frameTime, maxFrames) {}
-StoneBlock::~StoneBlock() {
-	std::cout << "Destroying StoneBlock at position: " << pos.x << ", " << pos.y << std::endl;
-}
+StoneBlock::~StoneBlock() = default;
 
 // WoodBlock
 void WoodBlock::update() {
@@ -49,9 +47,7 @@ WoodBlock::WoodBlock(Vector2 pos, Vector2 dim, Color color)
 	: Block(pos, dim, color) {}
 WoodBlock::WoodBlock(Vector2 pos, Vector2 dim, Color color, float frameTime, int maxFrames)
 	: Block(pos, dim, color, frameTime, maxFrames) {}
-WoodBlock::~WoodBlock() {
-	std::cout << "Destroying WoodBlock at position: " << pos.x << ", " << pos.y << std::endl;
-}
+WoodBlock::~WoodBlock() = default;
 
 // GrassBlock
 void GrassBlock::update() {
@@ -64,9 +60,7 @@ GrassBlock::GrassBlock(Vector2 pos, Vector2 dim, Color color)
 	: Block(pos, dim, color) {}
 GrassBlock::GrassBlock(Vector2 pos, Vector2 dim, Color color, float frameTime, int maxFrames)
 	: Block(pos, dim, color, frameTime, maxFrames) {}
-GrassBlock::~GrassBlock() {
-	std::cout << "Destroying GrassBlock at position: " << pos.x << ", " << pos.y << std::endl;
-}
+GrassBlock::~GrassBlock() = default; // No specific destruction logic needed
 
 // CloudBlock
 void CloudBlock::update() {
@@ -79,9 +73,7 @@ CloudBlock::CloudBlock(Vector2 pos, Vector2 dim, Color color)
 	: Block(pos, dim, color) {}
 CloudBlock::CloudBlock(Vector2 pos, Vector2 dim, Color color, float frameTime, int maxFrames)
 	: Block(pos, dim, color, frameTime, maxFrames) {}
-CloudBlock::~CloudBlock() {
-	std::cout << "Destroying CloudBlock at position: " << pos.x << ", " << pos.y << std::endl;
-}
+CloudBlock::~CloudBlock() = default; // No specific destruction logic needed
 
 // EyesClosedBlock
 void EyesClosedBlock::update() {
@@ -115,17 +107,63 @@ EyesOpenedBlock::~EyesOpenedBlock() {
 
 // QuestionBlock
 void QuestionBlock::update() {
+
+	const float delta = GetFrameTime();
+
+	if (hit && coinAnimationRunning) {
+
+		coinAnimationAcum += delta;
+		if (coinAnimationAcum >= coinAnimationTime) {
+			coinAnimationRunning = false;
+			stardustAnimationRunning = true;
+			pointsAnimationRunning = true;
+			coinAnimationFrame++;
+			coinAnimationFrame %= maxFrames;
+		}
+
+		coinFrameAcum += delta;
+		if (coinFrameAcum > frameTime) {
+			coinFrameAcum = 0;
+			coinAnimationFrame++;
+			coinAnimationFrame %= maxFrames;
+		}
+
+		coinY += coinVelY * delta;
+		coinVelY += GameWorld::gravity;
+
+	}
+
 	if (!hit) {
 		frameAcum += GetFrameTime();
-		if (frameAcum >= frameTime && currentFrame > 0) // Only update frames if not hit
-		{
+		if (frameAcum >= frameTime) {
 			frameAcum = 0;
-			currentFrame = (currentFrame + 1) % maxFrames;
-		}
-		else {
-			currentFrame = 0; // Reset to the first frame when hit
+			currentFrame++;
+			currentFrame %= maxFrames;
 		}
 	}
+
+	if (stardustAnimationRunning) {
+
+		stardustAnimationAcum += delta;
+		if (stardustAnimationAcum >= stardustAnimationTime) {
+			stardustAnimationAcum = 0;
+			stardustAnimationFrame++;
+			if (stardustAnimationFrame == maxStartDustAnimationFrame) {
+				stardustAnimationRunning = false;
+			}
+		}
+
+	}
+
+	if (pointsAnimationRunning) {
+
+		pointsFrameAcum += delta;
+		if (pointsFrameAcum >= pointsFrameTime) {
+			pointsAnimationRunning = false;
+		}
+
+	}
+
 }
 void QuestionBlock::draw() {
 	if (!hit) {
@@ -136,45 +174,63 @@ void QuestionBlock::draw() {
 		DrawTexture(ResourceManager::getInstance().getTexture("block91"), pos.x, pos.y, color);
 }
 void QuestionBlock::doHit(Mario& mario, Map* map) {
-	if (!hit)
+	if (!hit) {
+		PlaySound(ResourceManager::getInstance().getSounds()["coin"]);
 		hit = true;
-	std::string itemType;
-	if (mario.getType() == MARIO_TYPE_SMALL) {
-		itemType = "Mushroom";
-	}
-	else if (mario.getType() == MARIO_TYPE_SUPER) {
-		itemType = "FireFlower";
-	}
-	else {
-		itemType = "";
-	}
-	if (!itemType.empty()) {
-		Vector2 itemPos = { pos.x, pos.y - dim.y };
-		Vector2 itemDim = { 32, 32 }; // Assuming a standard item size
-		Vector2 itemVel = { 0, -150 };
-		Item* item = FactoryItem::createItem(itemType, itemPos, itemDim, itemVel, WHITE, true, true, false);
-		if (item) {
-			map->getItems().push_back(item); // Add the item to the map's items vector
-		}
+		coinAnimationRunning = true;
+		coinY = pos.y;
+		mario.addCoins(1);
+		mario.addPoints(earnedPoints);
 	}
 }
-QuestionBlock::QuestionBlock(Vector2 pos, Vector2 dim, Color color)
-	: Block(pos, dim, color) {}
-QuestionBlock::QuestionBlock(Vector2 pos, Vector2 dim, Color color, float frameTime, int maxFrames)
-	: Block(pos, dim, color, frameTime, maxFrames) {}
+QuestionBlock::QuestionBlock(Vector2 pos, Vector2 dim, Color color) :
+	QuestionBlock(pos, dim, color, 0.1, 4) {}
+QuestionBlock::QuestionBlock(Vector2 pos, Vector2 dim, Color color, float frameTime, int maxFrames) :
+	Block(pos, dim, color, frameTime, maxFrames, 10),
+	coinAnimationTime(0.6),
+	coinAnimationAcum(0),
+	coinFrameAcum(0),
+	coinAnimationFrame(0),
+	coinAnimationRunning(false),
+	coinY(0),
+	coinVelY(-400),
+	stardustAnimationTime(0.1),
+	stardustAnimationAcum(0),
+	stardustAnimationFrame(0),
+	maxStartDustAnimationFrame(4),
+	stardustAnimationRunning(false),
+	pointsFrameAcum(0),
+	pointsFrameTime(0.5),
+	pointsAnimationRunning(false) {}
+
 QuestionBlock::~QuestionBlock() {
 	std::cout << "Destroying QuestionBlock at position: " << pos.x << ", " << pos.y << std::endl;
 }
 
 //QuestionMushroomBlock
 void QuestionMushroomBlock::update() {
+
+	const float delta = GetFrameTime();
+
 	if (!hit) {
-		frameAcum += GetFrameTime();
+		frameAcum += delta;
 		if (frameAcum >= frameTime) {
 			frameAcum = 0;
-			currentFrame = (currentFrame + 1) % maxFrames;
+			currentFrame++;
+			currentFrame %= maxFrames;
 		}
 	}
+
+	if (item != nullptr) {
+		item->setY(item->getY() + itemVelY * delta);
+		if (item->getY() <= itemMinY) {
+			item->setY(itemMinY);
+			item->setState(SPRITE_STATE_ACTIVE);
+			map->getItems().push_back(item);
+			item = nullptr;
+		}
+	}
+
 }
 void QuestionMushroomBlock::draw() {
 	DrawTexture(ResourceManager::getInstance().getTexture("block97"), pos.x, pos.y, color);
@@ -183,22 +239,23 @@ void QuestionMushroomBlock::doHit(Mario& mario, Map* map) {
 	if (!hit) {
 		hit = true;
 		Vector2 itemPos = { pos.x, pos.y - dim.y };
-		Vector2 itemDim = { 32, 32 };
-		Vector2 itemVel = { 0, -150 };
-		Item* item = FactoryItem::createItem("Mushroom", itemPos, itemDim, itemVel, ORANGE, true, true, false);
-		if (item) {
-			map->getItems().push_back(item); // Add the item to the map's items vector
-			if (mario.getType() != MARIO_TYPE_SMALL) {
-				item->updateMario(mario);
-			}
-		}
-		mario.addPoints(200); 
+		Vector2 itemDim = { 32, 32 }; // Assuming a standard item size
+		Vector2 itemVel = { 0, -150 }; // Initial velocity for the item
+		item = FactoryItem::createItem("Mushroom", itemPos, itemDim, itemVel, RED, true, true, false);
+		item->setFacingDirection(mario.getFacingDirection());
+		itemMinY = pos.y - 32;
+		this->map = map;
 	}
 }
-QuestionMushroomBlock::QuestionMushroomBlock(Vector2 pos, Vector2 dim, Color color)
-	: QuestionBlock(pos, dim, color) {}
-QuestionMushroomBlock::QuestionMushroomBlock(Vector2 pos, Vector2 dim, Color color, float frameTime, int maxFrames)
-	: QuestionBlock(pos, dim, color, frameTime, maxFrames) {}
+QuestionMushroomBlock::QuestionMushroomBlock(Vector2 pos, Vector2 dim, Color color) :
+	QuestionMushroomBlock(pos, dim, color, 0.1, 4) {}
+
+QuestionMushroomBlock::QuestionMushroomBlock(Vector2 pos, Vector2 dim, Color color, float frameTime, int maxFrames) :
+	Block(pos, dim, color, frameTime, maxFrames),
+	item(nullptr),
+	itemVelY(-80),
+	itemMinY(0),
+	map(nullptr) {}
 QuestionMushroomBlock::~QuestionMushroomBlock() {
 	std::cout << "Destroying QuestionMushroomBlock at position: " << pos.x << ", " << pos.y << std::endl;
 }
@@ -223,30 +280,43 @@ void QuestionFireFlowerBlock::doHit(Mario& mario, Map* map) {
 		Vector2 itemDim = { 32, 32 };
 		Vector2 itemVel = { 0, -150 };
 		Item* item = FactoryItem::createItem("FireFlower", itemPos, itemDim, itemVel, ORANGE, true, true, false);
-		if (item) {
-			map->getItems().push_back(item); // Add the item to the map's items vector
-			if (mario.getType() != MARIO_TYPE_FLOWER) {
-				item->updateMario(mario);
-			}
-		}
-		mario.addPoints(200);
+		item->setFacingDirection(mario.getFacingDirection());
+		itemMinY = pos.y - 32;
+		this->map = map;
 	}
 }
-QuestionFireFlowerBlock::QuestionFireFlowerBlock(Vector2 pos, Vector2 dim, Color color)
-	: QuestionBlock(pos, dim, color) {}
-QuestionFireFlowerBlock::QuestionFireFlowerBlock(Vector2 pos, Vector2 dim, Color color, float frameTime, int maxFrames)
-	: QuestionBlock(pos, dim, color, frameTime, maxFrames) {}
+QuestionFireFlowerBlock::QuestionFireFlowerBlock(Vector2 pos, Vector2 dim, Color color) :
+	QuestionFireFlowerBlock(pos, dim, color, 0.1, 4) {}
+
+QuestionFireFlowerBlock::QuestionFireFlowerBlock(Vector2 pos, Vector2 dim, Color color, float frameTime, int maxFrames) :
+	Block(pos, dim, color, frameTime, maxFrames),
+	item(nullptr),
+	itemVelY(-80),
+	itemMinY(0),
+	map(nullptr) {}
+
 QuestionFireFlowerBlock::~QuestionFireFlowerBlock() {
 	std::cout << "Destroying QuestionFireFlowerBlock at position: " << pos.x << ", " << pos.y << std::endl;
 }
 
 // QuestionStarBlock
 void QuestionStarBlock::update() {
+	const float delta = GetFrameTime();
 	if (!hit) {
-		frameAcum += GetFrameTime();
+		frameAcum += delta;
 		if (frameAcum >= frameTime) {
 			frameAcum = 0;
-			currentFrame = (currentFrame + 1) % maxFrames;
+			currentFrame++;
+			currentFrame %= maxFrames;
+		}
+	}
+	if (item != nullptr) {
+		item->setY(item->getY() + itemVelY * delta);
+		if (item->getY() <= itemMinY) {
+			item->setY(itemMinY);
+			item->setState(SPRITE_STATE_ACTIVE);
+			map->getItems().push_back(item);
+			item = nullptr;
 		}
 	}
 }
@@ -260,23 +330,46 @@ void QuestionStarBlock::doHit(Mario& mario, Map* map) {
 		Vector2 itemDim = { 30, 32 }; 
 		Vector2 itemVel = { 0, -150 };
 		Item* item = FactoryItem::createItem("Star", itemPos, itemDim, itemVel, YELLOW, true, true, false);
-		if (item) {
-			map->getItems().push_back(item); // Add the item to the map's items vector
-			mario.setInvincible(true); 
-		}
-		mario.addPoints(1000); 
+		item->setFacingDirection(mario.getFacingDirection());
+		itemMinY = pos.y - 32;
+		this->map = map;
 	}
 }
-QuestionStarBlock::QuestionStarBlock(Vector2 pos, Vector2 dim, Color color)
-	: QuestionBlock(pos, dim, color) {}
-QuestionStarBlock::QuestionStarBlock(Vector2 pos, Vector2 dim, Color color, float frameTime, int maxFrames)
-	: QuestionBlock(pos, dim, color, frameTime, maxFrames) {}
-QuestionStarBlock::~QuestionStarBlock() {
-	std::cout << "Destroying QuestionStarBlock at position: " << pos.x << ", " << pos.y << std::endl;
-}
+QuestionStarBlock::QuestionStarBlock(Vector2 pos, Vector2 dim, Color color) :
+	QuestionStarBlock(pos, dim, color, 0.1, 4) {}
+
+QuestionStarBlock::QuestionStarBlock(Vector2 pos, Vector2 dim, Color color, float frameTime, int maxFrames) :
+	Block(pos, dim, color, frameTime, maxFrames),
+	item(nullptr),
+	itemVelY(-80),
+	itemMinY(0),
+	map(nullptr) {}
+
+QuestionStarBlock::~QuestionStarBlock() = default;
 
 // QuestionOneUpMushroomBlock
 void QuestionOneUpMushroomBlock::update() {
+
+	const float delta = GetFrameTime();
+
+	if (!hit) {
+		frameAcum += delta;
+		if (frameAcum >= frameTime) {
+			frameAcum = 0;
+			currentFrame++;
+			currentFrame %= maxFrames;
+		}
+	}
+
+	if (item != nullptr) {
+		item->setY(item->getY() + itemVelY * delta);
+		if (item->getY() <= itemMinY) {
+			item->setY(itemMinY);
+			item->setState(SPRITE_STATE_ACTIVE);
+			map->getItems().push_back(item);
+			item = nullptr;
+		}
+	}
 
 }
 void QuestionOneUpMushroomBlock::draw() {
@@ -289,31 +382,47 @@ void QuestionOneUpMushroomBlock::doHit(Mario& mario, Map* map) {
 		Vector2 itemDim = { 32, 32 };
 		Vector2 itemVel = { 0, -150 };
 		Item* item = FactoryItem::createItem("OneUpMushroom", itemPos, itemDim, itemVel, YELLOW, true, true, false);
-		if (item) {
-			// Add the item to the game world
-			delete item; 
-			mario.addLives(1); 
-		}
-		mario.addPoints(200); 
+		item->setFacingDirection(mario.getFacingDirection());
+		itemMinY = pos.y - 32;
+		this->map = map;
 	}
 }
-QuestionOneUpMushroomBlock::QuestionOneUpMushroomBlock(Vector2 pos, Vector2 dim, Color color)
-	: QuestionBlock(pos, dim, color) {}
-QuestionOneUpMushroomBlock::QuestionOneUpMushroomBlock(Vector2 pos, Vector2 dim, Color color, float frameTime, int maxFrames)
-	: QuestionBlock(pos, dim, color, frameTime, maxFrames) {}
-QuestionOneUpMushroomBlock::~QuestionOneUpMushroomBlock() {
-	std::cout << "Destroying QuestionOneUpMushroomBlock at position: " << pos.x << ", " << pos.y << std::endl;
-}
+QuestionOneUpMushroomBlock::QuestionOneUpMushroomBlock(Vector2 pos, Vector2 dim, Color color) :
+	QuestionOneUpMushroomBlock(pos, dim, color, 0.1, 4) {}
+
+QuestionOneUpMushroomBlock::QuestionOneUpMushroomBlock(Vector2 pos, Vector2 dim, Color color, float frameTime, int maxFrames) :
+	Block(pos, dim, color, frameTime, maxFrames),
+	item(nullptr),
+	itemVelY(-80),
+	itemMinY(0),
+	map(nullptr) {}
+
+QuestionOneUpMushroomBlock::~QuestionOneUpMushroomBlock() = default;
 
 // QuestionThreeUpMoonBlock
 void QuestionThreeUpMoonBlock::update() {
+
+	const float delta = GetFrameTime();
+
 	if (!hit) {
-		frameAcum += GetFrameTime();
+		frameAcum += delta;
 		if (frameAcum >= frameTime) {
 			frameAcum = 0;
-			currentFrame = (currentFrame + 1) % maxFrames;
+			currentFrame++;
+			currentFrame %= maxFrames;
 		}
 	}
+
+	if (item != nullptr) {
+		item->setY(item->getY() + itemVelY * delta);
+		if (item->getY() <= itemMinY) {
+			item->setY(itemMinY);
+			item->setState(SPRITE_STATE_ACTIVE);
+			map->getItems().push_back(item);
+			item = nullptr;
+		}
+	}
+
 }
 void QuestionThreeUpMoonBlock::draw() {
 	DrawTexture(ResourceManager::getInstance().getTexture("block97"), pos.x, pos.y, color);
@@ -325,20 +434,22 @@ void QuestionThreeUpMoonBlock::doHit(Mario& mario, Map* map) {
 		Vector2 itemDim = { 32, 32 };
 		Vector2 itemVel = { 0, -150 };
 		Item* item = FactoryItem::createItem("ThreeUpMoon", itemPos, itemDim, itemVel, YELLOW, true, true, false);
-		if (item) {
-			map->getItems().push_back(item); // Add the item to the map's items vector
-			mario.addLives(3); 
-		}
-		mario.addPoints(500); 
+		item->setFacingDirection(mario.getFacingDirection());
+		itemMinY = pos.y - 32;
+		this->map = map;
 	}
 }
-QuestionThreeUpMoonBlock::QuestionThreeUpMoonBlock(Vector2 pos, Vector2 dim, Color color)
-	: QuestionBlock(pos, dim, color) {}
-QuestionThreeUpMoonBlock::QuestionThreeUpMoonBlock(Vector2 pos, Vector2 dim, Color color, float frameTime, int maxFrames)
-	: QuestionBlock(pos, dim, color, frameTime, maxFrames) {}
-QuestionThreeUpMoonBlock::~QuestionThreeUpMoonBlock() {
-	std::cout << "Destroying QuestionThreeUpMoonBlock at position: " << pos.x << ", " << pos.y << std::endl;
-}
+QuestionThreeUpMoonBlock::QuestionThreeUpMoonBlock(Vector2 pos, Vector2 dim, Color color) :
+	QuestionThreeUpMoonBlock(pos, dim, color, 0.1, 4) {}
+
+QuestionThreeUpMoonBlock::QuestionThreeUpMoonBlock(Vector2 pos, Vector2 dim, Color color, float frameTime, int maxFrames) :
+	Block(pos, dim, color, frameTime, maxFrames),
+	item(nullptr),
+	itemVelY(-80),
+	itemMinY(0),
+	map(nullptr) {}
+
+QuestionThreeUpMoonBlock::~QuestionThreeUpMoonBlock() = default;
 
 // ExclamationBlock
 void ExclamationBlock::update() {

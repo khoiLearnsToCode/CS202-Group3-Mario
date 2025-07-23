@@ -9,18 +9,38 @@
 
 
 // Item base class
+Item::Item() :
+    Item({0, 0}, {0, 0}, {0, 0}, BLACK, 0, 0, 0) {
+}
+
+Item::Item(Vector2 pos, Vector2 dim, Color color, int earnedPoints) :
+    Item(pos, dim, {0, 0}, color, 0, 0, earnedPoints) {
+}
+
+Item::Item(Vector2 pos, Vector2 dim, Color color, float frameTime, int maxFrames, int earnedPoints) :
+    Item(pos, dim, {0, 0}, color, frameTime, maxFrames, earnedPoints) {
+}
+
+Item::Item(Vector2 pos, Vector2 dim, Vector2 vel, Color color, int earnedPoints) :
+    Item(pos, dim, vel, color, 0, 0, earnedPoints) {
+}
+
+Item::Item(Vector2 pos, Vector2 dim, Vector2 vel, Color color, float frameTime, int maxFrames) :
+    Item(pos, dim, vel, color, frameTime, maxFrames, 0) {
+}
+
 Item::Item(Vector2 pos, Vector2 dim, Vector2 vel, Color color, float frameTime, int maxFrames, int earnedPoints) :
     Sprite(pos, dim, vel, color, frameTime, maxFrames, DIRECTION_RIGHT, 0, earnedPoints),
     onHitFrameAcum(0),
-    onHitFrameTime(0.1f),
-    maxOnHitFrame(4),
+    onHitFrameTime(1),
+    maxOnHitFrame(1),
     currentOnHitFrame(0),
     pointsFrameAcum(0),
-    pointsFrameTime(1.0f),
-    pauseGameOnHit(false) {}
+    pointsFrameTime(1),
+    pauseGameOnHit(false) {
+}
 
 Item::~Item() = default;
-
 void Item::onSouthCollision(Mario& mario) {}
 bool Item::isPauseGameOnHit() {
     return pauseGameOnHit;
@@ -28,53 +48,52 @@ bool Item::isPauseGameOnHit() {
 
 // Coin
 Coin::Coin(Vector2 pos, Vector2 dim, Color color) :
-    Item(pos, dim, Vector2{ 0, 0 }, color, 0.1f, 4, 200) {}
+    Item(pos, dim, color, 0.1, 4, 200) {
+    onHitFrameTime = 0.1;
+    maxOnHitFrame = 4;
+}
 
 Coin::~Coin() = default;
 
 void Coin::update() {
     const float delta = GetFrameTime();
-    if (state == SPRITE_STATE_ACTIVE || state == SPRITE_STATE_IDLE) {
-        frameAcum += delta;
-        if (frameAcum >= frameTime) {
-            frameAcum = 0;
-            currentFrame = (currentFrame + 1) % maxFrames;
-        }
+    frameAcum += delta;
+    if (frameAcum >= frameTime) {
+        frameAcum = 0;
+        currentFrame++;
+        currentFrame %= maxFrames;
     }
-    else if (state == SPRITE_STATE_HIT) {
+    if (state == SPRITE_STATE_HIT) {
         onHitFrameAcum += delta;
         if (onHitFrameAcum >= onHitFrameTime) {
             onHitFrameAcum = 0;
             currentOnHitFrame++;
-            if (currentOnHitFrame >= maxOnHitFrame) {
+            if (currentOnHitFrame == maxOnHitFrame) {
                 state = SPRITE_STATE_TO_BE_REMOVED;
             }
         }
-        pointsFrameAcum = std::min(pointsFrameAcum + delta, pointsFrameTime);
+        pointsFrameAcum += delta;
+        if (pointsFrameAcum >= pointsFrameTime) {
+            pointsFrameAcum = pointsFrameTime;
+        }
     }
 }
 
 void Coin::draw() {
-    auto& textures = ResourceManager::getInstance().getTextures();
+    std::map<std::string, Texture2D>& textures = ResourceManager::getInstance().getTextures();
+
     if (state == SPRITE_STATE_ACTIVE || state == SPRITE_STATE_IDLE) {
-        std::string key = TextFormat("coin%d", currentFrame);
-        if (textures.find(key) != textures.end()) {
-            DrawTexture(textures[key], pos.x, pos.y, WHITE);
-        }
+        DrawTexture(ResourceManager::getInstance().getTextures()[std::string(TextFormat("coin%d", currentFrame))], pos.x, pos.y, WHITE);
     }
     else if (state == SPRITE_STATE_HIT) {
-        std::string stardustKey = TextFormat("stardust%d", currentOnHitFrame);
-        std::string pointsKey = TextFormat("guiPoints%d", earnedPoints);
-        if (textures.find(stardustKey) != textures.end()) {
-            DrawTexture(textures[stardustKey], pos.x, pos.y, WHITE);
-        }
-        if (textures.find(pointsKey) != textures.end()) {
-            DrawTexture(textures[pointsKey],
-                pos.x + dim.x / 2 - textures[pointsKey].width / 2,
-                pos.y - textures[pointsKey].height - (50 * pointsFrameAcum / pointsFrameTime),
-                WHITE);
-        }
+        DrawTexture(textures[std::string(TextFormat("stardust%d", currentOnHitFrame))], pos.x, pos.y, WHITE);
+        const std::string pointsStr = TextFormat("guiPoints%d", earnedPoints);
+        DrawTexture(textures[pointsStr],
+            pos.x + dim.x / 2 - textures[pointsStr].width / 2,
+            pos.y - textures[pointsStr].height - (50 * pointsFrameAcum / pointsFrameTime),
+            WHITE);
     }
+
     if (false) {
         cpN.draw();
         cpS.draw();
@@ -88,9 +107,12 @@ void Coin::playCollisionSound() {
 }
 
 void Coin::updateMario(Mario& mario) {
-	mario.addCoins(1);
-    mario.addPoints(100);
-	state = SPRITE_STATE_HIT;
+    mario.addCoins(1);
+    mario.addPoints(earnedPoints);
+    if (mario.getCoins() >= 100) {
+        mario.addLives(1);
+        mario.setCoins(mario.getCoins() - 100);
+    }
 }
 
 CollisionType Coin::checkCollision(Sprite* sprite) {
@@ -98,16 +120,21 @@ CollisionType Coin::checkCollision(Sprite* sprite) {
 }
 
 
-
 // Mushroom
+Mushroom::Mushroom(Vector2 pos, Vector2 dim, Vector2 vel, Color color) :
+    Mushroom(pos, dim, vel, color, true, false, false) {
+}
+
 Mushroom::Mushroom(Vector2 pos, Vector2 dim, Vector2 vel, Color color, bool applyGravity, bool doCollisionOnGround, bool blinking) :
-    Item(pos, dim, vel, color, 0.1f, 4, 1000),
+    Item(pos, dim, vel, color, 0, 0, 1000),
     applyGravity(applyGravity),
     doCollisionOnGround(doCollisionOnGround),
     blinking(blinking),
     blinkingAcum(0),
-    blinkingTime(0.5f),
-    doBlink(false) {}
+    blinkingTime(0.1),
+    doBlink(false) {
+    pauseGameOnHit = true;
+}
 
 Mushroom::~Mushroom() = default;
 
@@ -153,7 +180,7 @@ void Mushroom::update() {
 void Mushroom::draw() {
     auto& textures = ResourceManager::getInstance().getTextures();
     if (state == SPRITE_STATE_ACTIVE || state == SPRITE_STATE_IDLE) {
-        std::string key = TextFormat("mushroom%d", currentFrame);
+        std::string key = "mushroom";
         if (textures.find(key) != textures.end() && (!blinking || doBlink)) {
             DrawTexture(textures[key], pos.x, pos.y, WHITE);
         }
@@ -184,24 +211,51 @@ void Mushroom::playCollisionSound() {
 }
 
 void Mushroom::updateMario(Mario& mario) {
-    if (mario.getType() == MARIO_TYPE_SMALL) {
-        mario.changeToSuper();
-		state = SPRITE_STATE_HIT;
-		//play sound
-	}
-    else if (mario.getType() == MARIO_TYPE_SUPER) {
-        mario.changeToFlower();
-        state = SPRITE_STATE_HIT;
-        //play sound
+
+    mario.addPoints(earnedPoints);
+
+    switch (mario.getType()) {
+    case MARIO_TYPE_SMALL:
+        mario.setY(mario.getY() - 16);
+        mario.setLastStateBeforeTransition(mario.getState());
+        mario.setState(SPRITE_STATE_TRANSITIONING_SMALL_TO_SUPER);
+        break;
+    case MARIO_TYPE_SUPER:
+        switch (mario.getReservedPowerUp()) {
+        case MARIO_TYPE_SMALL:
+            mario.setReservedPowerUp(MARIO_TYPE_SUPER);
+            break;
+        case MARIO_TYPE_SUPER:
+            break;
+        case MARIO_TYPE_FLOWER:
+            break;
+        }
+        mario.getGameWorld()->unpauseGame();
+        break;
+    case MARIO_TYPE_FLOWER:
+        switch (mario.getReservedPowerUp()) {
+        case MARIO_TYPE_SMALL:
+            mario.setReservedPowerUp(MARIO_TYPE_SUPER);
+            break;
+        case MARIO_TYPE_SUPER:
+            break;
+        case MARIO_TYPE_FLOWER:
+            break;
+        }
+        mario.getGameWorld()->unpauseGame();
+        break;
     }
-    else if (mario.getType() == MARIO_TYPE_FLOWER) {
-        state = SPRITE_STATE_HIT;
-        //play sound
-    }
+
 }
 
 void Mushroom::onSouthCollision(Mario& mario) {
-  
+    if (doCollisionOnGround) {
+        vel.x = 200;
+        facingDirection = mario.getFacingDirection();
+        blinking = false;
+        doBlink = false;
+        doCollisionOnGround = false;
+    }
 }
 
 
@@ -211,6 +265,7 @@ OneUpMushroom::OneUpMushroom(Vector2 pos, Vector2 dim, Vector2 vel, Color color)
     Item(pos, dim, vel, color, 0, 0, 1) {}
 
 OneUpMushroom::~OneUpMushroom() = default;
+
 
 void OneUpMushroom::update() {
     const float delta = GetFrameTime();
@@ -266,12 +321,16 @@ void OneUpMushroom::updateMario(Mario& mario) {
 
 
 // FireFlower
+FireFlower::FireFlower(Vector2 pos, Vector2 dim, Color color) :
+    FireFlower(pos, dim,{0,0}, color, false, false) {
+}
+
 FireFlower::FireFlower(Vector2 pos, Vector2 dim, Vector2 vel, Color color, bool doCollisionOnGround, bool blinking) :
-    Item(pos, dim, vel, color, 0.2f, 2, 1000),
+    Item(pos, dim, vel, color, 0.2, 2, 1000),
     doCollisionOnGround(doCollisionOnGround),
     blinking(blinking),
     blinkingAcum(0),
-    blinkingTime(0.1f),
+    blinkingTime(0.1),
     doBlink(false) {
     pauseGameOnHit = true;
 }
@@ -339,13 +398,51 @@ void FireFlower::playCollisionSound() {
 }
 
 void FireFlower::updateMario(Mario& mario) {
-    mario.changeToFlower(); 
-    state = SPRITE_STATE_HIT; 
-	//play sound
+
+    mario.addPoints(earnedPoints);
+
+    switch (mario.getType()) {
+    case MARIO_TYPE_SMALL:
+        mario.setY(mario.getY() - 16);
+        mario.setLastStateBeforeTransition(mario.getState());
+        mario.setState(SPRITE_STATE_TRANSITIONING_SMALL_TO_FLOWER);
+        break;
+    case MARIO_TYPE_SUPER:
+        mario.setLastStateBeforeTransition(mario.getState());
+        mario.setState(SPRITE_STATE_TRANSITIONING_SUPER_TO_FLOWER);
+        switch (mario.getReservedPowerUp()) {
+        case MARIO_TYPE_SMALL:
+            mario.setReservedPowerUp(MARIO_TYPE_SUPER);
+            break;
+        case MARIO_TYPE_SUPER:
+            break;
+        case MARIO_TYPE_FLOWER:
+            break;
+        }
+        break;
+    case MARIO_TYPE_FLOWER:
+        switch (mario.getReservedPowerUp()) {
+        case MARIO_TYPE_SMALL:
+            mario.setReservedPowerUp(MARIO_TYPE_FLOWER);        
+            break;
+        case MARIO_TYPE_SUPER:
+            mario.setReservedPowerUp(MARIO_TYPE_FLOWER);           
+            break;
+        case MARIO_TYPE_FLOWER:
+            break;
+        }
+        mario.getGameWorld()->unpauseGame();
+        break;
+    }
+
 }
 
 void FireFlower::onSouthCollision(Mario& mario) {
-
+    if (doCollisionOnGround) {
+        blinking = false;
+        doBlink = false;
+        doCollisionOnGround = false;
+    }
 }
 
 
@@ -408,7 +505,7 @@ void Star::updateMario(Mario& mario) {
 }
 
 void Star::onSouthCollision(Mario& mario) {
-
+    vel.y = -400;
 }
 
 
@@ -551,7 +648,12 @@ void YoshiCoin::playCollisionSound() {
 }
 
 void YoshiCoin::updateMario(Mario& mario) {
-
+    mario.addYoshiCoins(1);
+    mario.addPoints(earnedPoints);
+    if (mario.getYoshiCoins() == 5) {
+        mario.addLives(1);
+        mario.setYoshiCoins(0);
+    }
 }
 
 CollisionType YoshiCoin::checkCollision(Sprite* sprite) {
@@ -620,6 +722,8 @@ void CourseClearToken::playCollisionSound() {
 }
 
 void CourseClearToken::updateMario(Mario& mario) {
+    mario.addPoints(earnedPoints);
+    mario.setState(SPRITE_STATE_VICTORY);
 }
 
 CollisionType CourseClearToken::checkCollision(Sprite* sprite) {

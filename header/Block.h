@@ -1,4 +1,6 @@
 #pragma once
+#include "Item.h"
+#include "Map.h"
 #include "raylib.h"
 #include "Sprite.h"
 #include "Mario.h"
@@ -21,7 +23,7 @@ public:
 	void draw() override = 0;
 	virtual void doHit(Mario& mario, Map* map);
 	void resetHit();
-
+	bool isHit() const;
 	virtual std::string getType() const = 0;
 };
 
@@ -104,6 +106,23 @@ public:
 };
 
 class QuestionBlock : public Block {
+	float coinAnimationTime;
+	float coinAnimationAcum;
+	float coinFrameAcum;
+	int coinAnimationFrame;
+	bool coinAnimationRunning;
+	float coinY;
+	float coinVelY;
+
+	float stardustAnimationTime;
+	float stardustAnimationAcum;
+	int stardustAnimationFrame;
+	int maxStartDustAnimationFrame;
+	bool stardustAnimationRunning;
+
+	float pointsFrameAcum;
+	float pointsFrameTime;
+	bool pointsAnimationRunning;
 public:
 	QuestionBlock(Vector2 pos, Vector2 dim, Color color);
 	QuestionBlock(Vector2 pos, Vector2 dim, Color color, float frameTime, int maxFrames);
@@ -118,7 +137,12 @@ public:
 	}
 };
 
-class QuestionMushroomBlock : public QuestionBlock {
+class QuestionMushroomBlock : public Block {
+private:
+	Item* item;
+	float itemVelY;
+	float itemMinY;
+	Map* map;
 public:
 	QuestionMushroomBlock(Vector2 pos, Vector2 dim, Color color);
 	QuestionMushroomBlock(Vector2 pos, Vector2 dim, Color color, float frameTime, int maxFrames);
@@ -133,7 +157,12 @@ public:
 	}
 };
 
-class QuestionFireFlowerBlock : public QuestionBlock {
+class QuestionFireFlowerBlock : public Block {
+private:
+	Item* item;
+	float itemVelY;
+	float itemMinY;
+	Map* map;
 public:
 	QuestionFireFlowerBlock(Vector2 pos, Vector2 dim, Color color);
 	QuestionFireFlowerBlock(Vector2 pos, Vector2 dim, Color color, float frameTime, int maxFrames);
@@ -148,7 +177,12 @@ public:
 	}
 };
 
-class QuestionStarBlock : public QuestionBlock {
+class QuestionStarBlock : public Block {
+private:
+	Item* item;
+	float itemVelY;
+	float itemMinY;
+	Map* map;
 public:
 	QuestionStarBlock(Vector2 pos, Vector2 dim, Color color);
 	QuestionStarBlock(Vector2 pos, Vector2 dim, Color color, float frameTime, int maxFrames);
@@ -163,7 +197,12 @@ public:
 	}
 };
 
-class QuestionOneUpMushroomBlock : public QuestionBlock {
+class QuestionOneUpMushroomBlock : public Block {
+private:
+	Item* item;
+	float itemVelY;
+	float itemMinY;
+	Map* map;
 public:
 	QuestionOneUpMushroomBlock(Vector2 pos, Vector2 dim, Color color);
 	QuestionOneUpMushroomBlock(Vector2 pos, Vector2 dim, Color color, float frameTime, int maxFrames);
@@ -178,7 +217,12 @@ public:
 	}
 };
 
-class QuestionThreeUpMoonBlock : public QuestionBlock {
+class QuestionThreeUpMoonBlock : public Block {
+private:
+	Item* item;
+	float itemVelY;
+	float itemMinY;
+	Map* map;
 public:
 	QuestionThreeUpMoonBlock(Vector2 pos, Vector2 dim, Color color);
 	QuestionThreeUpMoonBlock(Vector2 pos, Vector2 dim, Color color, float frameTime, int maxFrames);
