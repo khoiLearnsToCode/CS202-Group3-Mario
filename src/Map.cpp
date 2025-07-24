@@ -431,49 +431,6 @@ void Map::loadFromJsonFile(bool shouldLoadTestMap) {
             }
         }
     }
-    
-	// Load items
-	std::vector<int> itemIDs = mapJson["layers"][4]["data"];
-    for (int y = 0; y < height; y++){
-        for (int x = 0; x < width; x++) {
-            int itemID = itemIDs[y * width + x];
-            if (itemID == 0) continue;
-            if(itemID < 103 || itemID > 120) {
-                std::cerr << "Unsupported item ID: " << itemID << " at position (" << x << ", " << y << ")" << std::endl;
-                continue; // Skip unsupported items
-			}
-            Item* newItem = nullptr;
-            //if (itemID == 103) {
-            //    newItem = new OneUpMushroom({ 1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH }, { TILE_WIDTH }, { TILE_WIDTH
-            //        }, YELLOW);
-            //}
-            //else if (itemID == 104) {
-            //    newItem = new ThreeUpMoon({ 1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH }, { TILE_WIDTH }, { TILE_WIDTH
-            //        }, WHITE);
-            //}
-            if (itemID == 108 || itemID == 109 || itemID == 110 || itemID == 111) {
-                newItem = new Coin({ 1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH }, { TILE_WIDTH }, YELLOW);
-            }
-            else if (itemID == 112) {
-                newItem = new CourseClearToken({ 1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH }, { TILE_WIDTH }, YELLOW);
-            }
-            //else if (itemID == 113 || itemID == 114) {
-            //    newItem = new FireFlower({ 1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH }, { TILE_WIDTH }, RED);
-            //}
-            //else if (itemID == 115) {
-            //    newItem = new Mushroom({ 1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH }, { TILE_WIDTH }, { TILE_WIDTH }, WHITE);
-            //}
-            //else if (itemID == 116) {
-            //    newItem = new Star({ 1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH }, { TILE_WIDTH }, { TILE_WIDTH }, YELLOW);
-            //}
-            else if (itemID == 117 || itemID == 118 || itemID == 119 || itemID == 120) {
-                newItem = new YoshiCoin({ 1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH }, { TILE_WIDTH }, YELLOW);
-            }
-            if (newItem) {
-                items.push_back(newItem);
-            }
-        }
-	}
 
     parsed = true;
 
