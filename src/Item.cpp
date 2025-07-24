@@ -144,7 +144,10 @@ void Mushroom::update() {
         frameAcum += delta;
         if (frameAcum >= frameTime) {
             frameAcum = 0;
-            currentFrame = (currentFrame + 1) % maxFrames;
+            if (maxFrames > 0)
+                currentFrame = (currentFrame + 1) % maxFrames;
+            else
+                currentFrame = 0;
         }
         if (applyGravity) {
             vel.y += GameWorld::gravity * delta;

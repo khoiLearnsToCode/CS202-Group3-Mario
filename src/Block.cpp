@@ -203,9 +203,7 @@ QuestionBlock::QuestionBlock(Vector2 pos, Vector2 dim, Color color, float frameT
 	pointsFrameTime(0.5),
 	pointsAnimationRunning(false) {}
 
-QuestionBlock::~QuestionBlock() {
-	std::cout << "Destroying QuestionBlock at position: " << pos.x << ", " << pos.y << std::endl;
-}
+QuestionBlock::~QuestionBlock() = default;
 
 //QuestionMushroomBlock
 void QuestionMushroomBlock::update() {
@@ -256,9 +254,7 @@ QuestionMushroomBlock::QuestionMushroomBlock(Vector2 pos, Vector2 dim, Color col
 	itemVelY(-80),
 	itemMinY(0),
 	map(nullptr) {}
-QuestionMushroomBlock::~QuestionMushroomBlock() {
-	std::cout << "Destroying QuestionMushroomBlock at position: " << pos.x << ", " << pos.y << std::endl;
-}
+QuestionMushroomBlock::~QuestionMushroomBlock() = default;
 
 // QuestionFireFlowerBlock
 void QuestionFireFlowerBlock::update() {
@@ -295,9 +291,7 @@ QuestionFireFlowerBlock::QuestionFireFlowerBlock(Vector2 pos, Vector2 dim, Color
 	itemMinY(0),
 	map(nullptr) {}
 
-QuestionFireFlowerBlock::~QuestionFireFlowerBlock() {
-	std::cout << "Destroying QuestionFireFlowerBlock at position: " << pos.x << ", " << pos.y << std::endl;
-}
+QuestionFireFlowerBlock::~QuestionFireFlowerBlock() = default;
 
 // QuestionStarBlock
 void QuestionStarBlock::update() {
@@ -481,9 +475,7 @@ ExclamationBlock::ExclamationBlock(Vector2 pos, Vector2 dim, Color color)
 	: Block(pos, dim, color) {}
 ExclamationBlock::ExclamationBlock(Vector2 pos, Vector2 dim, Color color, float frameTime, int maxFrames)
 	: Block(pos, dim, color, frameTime, maxFrames) {}
-ExclamationBlock::~ExclamationBlock() {
-	std::cout << "Destroying ExclamationBlock at position: " << pos.x << ", " << pos.y << std::endl;
-}
+ExclamationBlock::~ExclamationBlock() = default; // No specific destruction logic needed
 
 //InvisibleBlock
 void InvisibleBlock::update() {
@@ -510,9 +502,7 @@ InvisibleBlock::InvisibleBlock(Vector2 pos, Vector2 dim, Color color)
 	: Block(pos, dim, color) {}
 InvisibleBlock::InvisibleBlock(Vector2 pos, Vector2 dim, Color color, float frameTime, int maxFrames)
 	: Block(pos, dim, color, frameTime, maxFrames) {}
-InvisibleBlock::~InvisibleBlock() {
-	std::cout << "Destroying InvisibleBlock at position: " << pos.x << ", " << pos.y << std::endl;
-}
+InvisibleBlock::~InvisibleBlock() = default; // No specific destruction logic needed
 
 // MessageBlock
 void MessageBlock::update() {
@@ -532,9 +522,7 @@ MessageBlock::MessageBlock(Vector2 pos, Vector2 dim, Color color)
 	: Block(pos, dim, color) {}
 MessageBlock::MessageBlock(Vector2 pos, Vector2 dim, Color color, float frameTime, int maxFrames)
 	: Block(pos, dim, color, frameTime, maxFrames) {}
-MessageBlock::~MessageBlock() {
-	std::cout << "Destroying MessageBlock at position: " << pos.x << ", " << pos.y << std::endl;
-}
+MessageBlock::~MessageBlock() = default; // No specific destruction logic needed
 
 
 //Factory pattern for Block creation
