@@ -40,7 +40,16 @@ ButtonTexture::~ButtonTexture() {
 
 void ButtonTexture::draw() {
     update();
-    DrawTextureEx(btnTexture, pos, 0.0f, btnScale, WHITE);
+    
+    // Calculate offset to center the scaled texture
+    float scaledWidth = btnTexture.width * btnScale;
+    float scaledHeight = btnTexture.height * btnScale;
+    float offsetX = (btnTexture.width - scaledWidth) / 2.0f;
+    float offsetY = (btnTexture.height - scaledHeight) / 2.0f;
+    
+    Vector2 centeredPos = { pos.x + offsetX, pos.y + offsetY };
+    
+    DrawTextureEx(btnTexture, centeredPos, 0.0f, btnScale, WHITE);
 }
 
 void ButtonTexture::update() {
@@ -60,7 +69,17 @@ ButtonText::ButtonText(const std::string& text, Vector2 position, float scale, C
 
 void ButtonText::draw() {
     update();
-    DrawTextEx(font, text.c_str(), pos, fontSize * btnScale, 1, textColor);
+    
+    // Calculate offset to center the scaled text
+    Vector2 textSize = MeasureTextEx(font, text.c_str(), fontSize, 1);
+    float scaledWidth = textSize.x * btnScale;
+    float scaledHeight = textSize.y * btnScale;
+    float offsetX = (textSize.x - scaledWidth) / 2.0f;
+    float offsetY = (textSize.y - scaledHeight) / 2.0f;
+    
+    Vector2 centeredPos = { pos.x + offsetX, pos.y + offsetY };
+    
+    DrawTextEx(font, text.c_str(), centeredPos, fontSize * btnScale, 1, textColor);
 }
 
 void ButtonText::update() {
