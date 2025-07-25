@@ -8,6 +8,7 @@ private:
     ButtonTexture marioButton;
     ButtonTexture luigiButton;
     ButtonTextTexture homeButton;
+    Texture2D selectYourCharacterLogo;
 
 public:
     SelectCharacterScreen();
