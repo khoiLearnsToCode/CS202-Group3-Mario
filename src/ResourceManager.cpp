@@ -52,9 +52,9 @@ void ResourceManager::loadTextures() {
         // load textures...
 
         // Mario and Luigi textures
-        textures["Mario"] = LoadTexture("../resource/graphic/sprites/mario/Mario.png");
-        Texture temp = LoadTexture("../resource/graphic/sprites/luigi/Luigi.png");
-        textures["Luigi"] = texture2DFlipHorizontal(temp);
+        textures["Luigi"] = LoadTexture("../resource/graphic/sprites/luigi/Luigi.png");
+        Texture temp = LoadTexture("../resource/graphic/sprites/mario/Mario.png");
+        textures["Mario"] = texture2DFlipHorizontal(temp);
         UnloadTexture(temp);
 
         // small mario
@@ -218,6 +218,7 @@ void ResourceManager::loadTextures() {
         UnloadImage(titleScreenImage);
         Image selectCharacterImage = LoadImage("../resource/graphic/backgrounds/select_character_screen.png");
         ImageResize(&selectCharacterImage, GetScreenWidth(), GetScreenHeight());
+        ImageFlipHorizontal(&selectCharacterImage);
         textures["select_character_screen"] = LoadTextureFromImage(selectCharacterImage);
         UnloadImage(selectCharacterImage);
         textures["background1"] = LoadTexture("../resource/graphic/backgrounds/background1.png");
@@ -388,6 +389,7 @@ void ResourceManager::loadTextures() {
         textures["setting"] = LoadTexture("../resource/graphic/gui/setting.png");
         textures["victory"] = LoadTexture("../resource/graphic/gui/victory.png");
         textures["creditButton"] = LoadTexture("../resource/graphic/gui/creditButton.png");
+        textures["selectYourCharacter"] = LoadTexture("../resource/graphic/gui/selectYourCharacter.png");
 
 
         // UI elements
