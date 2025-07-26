@@ -16,6 +16,7 @@ public:
 
     private:
     Texture2D backgroundTexture;
+    Texture2D helpingLogo;
     Rectangle border;
     Font& font;
     float fontSize;

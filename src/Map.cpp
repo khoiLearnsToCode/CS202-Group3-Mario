@@ -431,7 +431,7 @@ void Map::loadFromJsonFile(bool shouldLoadTestMap) {
             }
         }
     }
-
+ 
     parsed = true;
 
     fin.close();

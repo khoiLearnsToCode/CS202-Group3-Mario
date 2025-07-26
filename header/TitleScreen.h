@@ -9,8 +9,7 @@
 
 class TitleScreen : public Screen {
     ButtonTexture startButton;
-    ButtonText credit;
-    ButtonTextTexture temp;
+    ButtonTexture credit;
 
     public:
     TitleScreen();
@@ -20,5 +19,5 @@ class TitleScreen : public Screen {
     
     void draw() override;
     ButtonTexture& getStartButton();
-    ButtonText& getCreditButton();
+    ButtonTexture& getCreditButton();
 };
