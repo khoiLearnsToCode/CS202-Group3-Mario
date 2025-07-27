@@ -28,8 +28,10 @@ Mario::Mario( Vector2 pos, Vector2 dim, Vector2 vel, Color color, float speedX, 
     activationWidth(0),
     lives(5),
     coins(0),
+    coinsFromPreviousMap(0),
     yoshiCoins(0),
     points(0),
+    pointsFromPreviousMap(0),
     maxTime(400.0f),  // Set default time limit to 400 seconds (typical Mario game time)
     ellapsedTime(0.0f),
     type(MARIO_TYPE_SMALL),
@@ -107,6 +109,12 @@ void Mario::update() {
         state != SPRITE_STATE_DYING &&
         state != SPRITE_STATE_VICTORY &&
         state != SPRITE_STATE_WAITING_TO_NEXT_MAP) {
+        
+        // Add elapsed time to total played time before Mario dies from timeout
+        if (gw != nullptr) {
+            gw->addToTotalPlayedTime(ellapsedTime);
+        }
+        
         state = SPRITE_STATE_DYING;
         playPlayerDownMusicStream();
 		removeLives(1);
@@ -610,6 +618,10 @@ void Mario::setCoins(int coins) {
     this->coins = coins;
 }
 
+void Mario::setCoinsFromPreviousMap(int coinsFromPreviousMap) {
+    this->coinsFromPreviousMap = coinsFromPreviousMap;
+}
+
 void Mario::setYoshiCoins(int yoshiCoins) {
     this->yoshiCoins = yoshiCoins;
 }
@@ -618,8 +630,16 @@ void Mario::setPoints(int points) {
     this->points = points;
 }
 
+void Mario::setPointsFromPreviousMap(int pointsFromPreviousMap) {
+    this->pointsFromPreviousMap = pointsFromPreviousMap;
+}
+
 int Mario::getRemainingTime() const {
     return static_cast<int>(maxTime - ellapsedTime);
+}
+
+float Mario::getEllapsedTime() const {
+    return ellapsedTime;
 }
 
 void Mario::setMaxTime(float maxTime) {
@@ -654,12 +674,20 @@ int Mario::getCoins() const {
     return coins;
 }
 
+int Mario::getCoinsFromPreviousMap() const {
+    return coinsFromPreviousMap;
+}
+
 int Mario::getYoshiCoins() const {
     return yoshiCoins;
 }
 
 int Mario::getPoints() const {
     return points;
+}
+
+int Mario::getPointsFromPreviousMap() const {
+    return pointsFromPreviousMap;
 }
 
 void Mario::addLives(int lives) {
@@ -746,6 +774,10 @@ bool Mario::isTransitioning() const {
 }
 
 void Mario::reset(bool removePowerUps) {
+    reset(removePowerUps, true);
+}
+
+void Mario::reset(bool removePowerUps, bool resetPointsToSaved) {
 
     if (removePowerUps) {
         changeToSmall();
@@ -764,14 +796,23 @@ void Mario::reset(bool removePowerUps) {
     invulnerableTimeAcum = 0;
     invulnerableBlink = false;
     yoshiCoins = 0;
+    
+    // Reset points and coins to saved values from previous maps only when Mario dies (resetPointsToSaved = true)
+    // When advancing to next map, keep current points and coins (resetPointsToSaved = false)
+    if (resetPointsToSaved) {
+        points = pointsFromPreviousMap;
+        coins = coinsFromPreviousMap;
+    }
 
 }
 
 void Mario::resetAll() {
     lives = 5;
     coins = 0;
+    coinsFromPreviousMap = 0;
     yoshiCoins = 0;
     points = 0;
+    pointsFromPreviousMap = 0;
     reset(true);
 }
 

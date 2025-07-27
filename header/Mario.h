@@ -37,8 +37,10 @@ class Mario : public Sprite {
 
 	int lives;
 	int coins;
+	int coinsFromPreviousMap;
 	int yoshiCoins;
 	int points;
+    int pointsFromPreviousMap; 
 	float maxTime;
 	float ellapsedTime;
 
@@ -102,8 +104,10 @@ public:
 
     void setLives(int lives);
     void setCoins(int coins);
+    void setCoinsFromPreviousMap(int coinsFromPreviousMap);
     void setYoshiCoins(int yoshiCoins);
     void setPoints(int points);
+    void setPointsFromPreviousMap(int pointsFromPreviousMap);
     void setMaxTime(float maxTime);
     void setLastStateBeforeTransition(SpriteState lastStateBeforeTransition);
 
@@ -115,9 +119,12 @@ public:
 
     int getLives() const;
     int getCoins() const;
+    int getCoinsFromPreviousMap() const;
     int getYoshiCoins() const;
     int getPoints() const;
+    int getPointsFromPreviousMap() const;
     int getRemainingTime() const;
+    float getEllapsedTime() const;
 
     void addLives(int lives);
     void removeLives(int lives);
@@ -145,6 +152,7 @@ public:
     bool isTransitioning() const;
 
     void reset(bool removePowerUps);
+    void reset(bool removePowerUps, bool resetPointsToSaved);
     void resetAll();
 
     void playPlayerDownMusicStream();

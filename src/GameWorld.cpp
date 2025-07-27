@@ -21,6 +21,7 @@ GameWorld::GameWorld() :
     helpingBoardIsOpen(false),
     stateBeforePause(GAME_STATE_TITLE_SCREEN),
     remainingTimePointCount(0),
+    totalPlayedTime(0),
     pauseMusic(false),
     pauseMario(false),
     outroFinished(false),
@@ -953,7 +954,7 @@ void GameWorld::draw() {
     ClearBackground(WHITE);
     std::map<std::string, Texture2D>& textures = ResourceManager::getInstance().getTextures();
 
-    //std::cerr << "Gamestate: " << state << std::endl;
+    // std:: cerr << "Total played time: " << totalPlayedTime << " seconds" << std::endl;
 
     if (state == GAME_STATE_TITLE_SCREEN) {
         titleScreen->draw();
@@ -1095,6 +1096,14 @@ Camera2D* GameWorld::getCamera() const {
     return this->camera;
 }
 
+int GameWorld::getTotalPlayedTime() const {
+    return totalPlayedTime;
+}
+
+void GameWorld::addToTotalPlayedTime(float timeToAdd) {
+    totalPlayedTime += static_cast<int>(timeToAdd);
+}
+
 void GameWorld::resetMap() {
     mario.reset(true);
     map.reset();
@@ -1106,14 +1115,18 @@ void GameWorld::resetGame() {
     mario.resetAll();
     map.first();
     map.reset();
+    totalPlayedTime = 0; // Reset total played time when starting a new game
     state = GAME_STATE_TITLE_SCREEN;
 }
 
 void GameWorld::nextMap() {
     if (map.hasNext()) {
         state = GAME_STATE_PLAYING;
-        // reset state but keep the power-up
-        mario.reset(false);
+        // Add Mario's elapsed time to total played time when map is completed
+        totalPlayedTime += static_cast<int>(mario.getEllapsedTime());
+        mario.setPointsFromPreviousMap(mario.getPoints());
+        mario.setCoinsFromPreviousMap(mario.getCoins());
+        mario.reset(false, false);
     } else {
         state = GAME_STATE_FINISHED;
     }
