@@ -39,6 +39,7 @@ class GameWorld : public virtual Drawable {
     bool helpingBoardIsOpen;
     GameState stateBeforePause;
     int remainingTimePointCount;
+    int totalPlayedTime;
 
     bool pauseMusic;
     bool pauseMario;
@@ -78,6 +79,10 @@ public:
 
     void setCamera(Camera2D* camera);
     Camera2D* getCamera() const;
+
+    int getTotalPlayedTime() const;
+
+    void addToTotalPlayedTime(float timeToAdd);
 
     void resetMap();
     void resetGame();

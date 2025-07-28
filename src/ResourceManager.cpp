@@ -390,6 +390,7 @@ void ResourceManager::loadTextures() {
         textures["victory"] = LoadTexture("../resource/graphic/gui/victory.png");
         textures["creditButton"] = LoadTexture("../resource/graphic/gui/creditButton.png");
         textures["selectYourCharacter"] = LoadTexture("../resource/graphic/gui/selectYourCharacter.png");
+        textures["leaderboard"] = LoadTexture("../resource/graphic/gui/leaderboard.png");
 
 
         // UI elements
