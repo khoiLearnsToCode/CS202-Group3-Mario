@@ -51,6 +51,12 @@ void ResourceManager::loadTextures() {
 
         // load textures...
 
+        // Mario and Luigi textures
+        textures["Luigi"] = LoadTexture("../resource/graphic/sprites/luigi/Luigi.png");
+        Texture temp = LoadTexture("../resource/graphic/sprites/mario/Mario.png");
+        textures["Mario"] = texture2DFlipHorizontal(temp);
+        UnloadTexture(temp);
+
         // small mario
         textures["smallMario0R"] = LoadTexture("../resource/graphic/sprites/mario/SmallMario_0.png");
         textures["smallMario1R"] = LoadTexture("../resource/graphic/sprites/mario/SmallMario_1.png");
@@ -210,6 +216,11 @@ void ResourceManager::loadTextures() {
         ImageResize(&titleScreenImage, GetScreenWidth(), GetScreenHeight());
         textures["title_screen"] = LoadTextureFromImage(titleScreenImage);
         UnloadImage(titleScreenImage);
+        Image selectCharacterImage = LoadImage("../resource/graphic/backgrounds/select_character_screen.png");
+        ImageResize(&selectCharacterImage, GetScreenWidth(), GetScreenHeight());
+        ImageFlipHorizontal(&selectCharacterImage);
+        textures["select_character_screen"] = LoadTextureFromImage(selectCharacterImage);
+        UnloadImage(selectCharacterImage);
         textures["background1"] = LoadTexture("../resource/graphic/backgrounds/background1.png");
         //textures["background2"] = LoadTexture("resources/graphics/backgrounds/background2.png");
         //textures["background3"] = LoadTexture("resources/graphics/backgrounds/background3.png");
@@ -374,6 +385,12 @@ void ResourceManager::loadTextures() {
         textures["StartButton"] = LoadTexture("../resource/graphic/gui/StartButton.png");
         textures["credit"] = LoadTexture("../resource/graphic/gui/credit.png");
         textures["marioIcon"] = LoadTexture("../resource/graphic/gui/marioIcon.jpg");
+        textures["help"] = LoadTexture("../resource/graphic/gui/help.png");
+        textures["setting"] = LoadTexture("../resource/graphic/gui/setting.png");
+        textures["victory"] = LoadTexture("../resource/graphic/gui/victory.png");
+        textures["creditButton"] = LoadTexture("../resource/graphic/gui/creditButton.png");
+        textures["selectYourCharacter"] = LoadTexture("../resource/graphic/gui/selectYourCharacter.png");
+        textures["leaderboard"] = LoadTexture("../resource/graphic/gui/leaderboard.png");
 
 
         // UI elements

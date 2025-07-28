@@ -31,6 +31,7 @@ public:
 private:
     std::unordered_map<std::string, Button*> buttons;
     Texture2D backgroundTexture;
+    Texture2D settingLogo;
     Rectangle border;
 
     GameWorld* gw;

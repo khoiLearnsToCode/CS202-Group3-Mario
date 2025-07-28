@@ -16,6 +16,11 @@ isMutedMusic(false), isMutedSFX(false), settingBoardIsOpenInMenuScreen(true), gw
     backgroundTexture = LoadTextureFromImage(img);
     UnloadImage(img);
 
+    Image settingLogoImage = LoadImageFromTexture(textures["setting"]);
+    ImageResize(&settingLogoImage, settingLogoImage.width * 0.4f, settingLogoImage.height * 0.4f);
+    settingLogo = LoadTextureFromImage(settingLogoImage);
+    UnloadImage(settingLogoImage);
+
     border = { (GetScreenWidth() - backgroundTexture.width) / 2.0f, 
                (GetScreenHeight() - backgroundTexture.height) / 2.0f, 
                (float)backgroundTexture.width, 
@@ -90,6 +95,11 @@ void SettingScreen::update() {
 
 void SettingScreen::draw() {
     DrawTexture(backgroundTexture, border.x, border.y, WHITE);
+
+    // draw setting logo in the top middle of the border
+    Vector2 logoPos = { border.x + (border.width - settingLogo.width) / 2.0f, 
+                        border.y - 60.0f };
+    DrawTexture(settingLogo, logoPos.x, logoPos.y, WHITE);
     for (const auto& buttonPair : buttons) {
         if ((buttonPair.first == "HOME" || buttonPair.first == "RESET") && settingBoardIsOpenInMenuScreen) {
             continue;

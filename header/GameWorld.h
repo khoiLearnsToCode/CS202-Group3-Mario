@@ -10,6 +10,7 @@ class Mario;
 #include "Screen.h"
 #include "TitleScreen.h"
 #include "MenuScreen.h"
+#include "SelectCharacterScreen.h"
 #include "SettingScreen.h"
 #include "HelpingScreen.h"
 #include "GuardScreen.h"
@@ -23,6 +24,7 @@ class GameWorld : public virtual Drawable {
 
     TitleScreen* titleScreen;
     MenuScreen* menuScreen;
+    SelectCharacterScreen* selectCharacterScreen;
     SettingScreen* settingScreen;
     HelpingScreen* helpingScreen;
     GuardScreen* guardScreen;
@@ -37,6 +39,7 @@ class GameWorld : public virtual Drawable {
     bool helpingBoardIsOpen;
     GameState stateBeforePause;
     int remainingTimePointCount;
+    int totalPlayedTime;
 
     bool pauseMusic;
     bool pauseMario;
@@ -76,6 +79,10 @@ public:
 
     void setCamera(Camera2D* camera);
     Camera2D* getCamera() const;
+
+    int getTotalPlayedTime() const;
+
+    void addToTotalPlayedTime(float timeToAdd);
 
     void resetMap();
     void resetGame();

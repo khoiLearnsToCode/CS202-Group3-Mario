@@ -9,6 +9,11 @@ HelpingScreen::HelpingScreen() : Screen(),
     backgroundTexture = LoadTextureFromImage(img);
     UnloadImage(img);
 
+    Image helpingLogoImage = LoadImageFromTexture(textures["help"]);
+    ImageResize(&helpingLogoImage, helpingLogoImage.width * 0.25f, helpingLogoImage.height * 0.25f);
+    helpingLogo = LoadTextureFromImage(helpingLogoImage);
+    UnloadImage(helpingLogoImage);
+
     border = { (GetScreenWidth() - backgroundTexture.width) / 2.0f, 
                (GetScreenHeight() - backgroundTexture.height) / 2.0f, 
                (float)backgroundTexture.width, 
@@ -21,6 +26,12 @@ HelpingScreen::~HelpingScreen() {
 
 void HelpingScreen::draw() {
     DrawTexture(backgroundTexture, border.x, border.y, WHITE);
+
+    // draw helping logo in the top middle of the border
+    Vector2 logoPos = { border.x + (border.width - helpingLogo.width) / 2.0f, 
+                        border.y - 60.0f };
+    DrawTexture(helpingLogo, logoPos.x, logoPos.y, WHITE);
+
     DrawTextEx(font, "or", { border.x + 180, border.y + 147 }, fontSize, 0.0f, BLACK);
     DrawTextEx(font, ": move left", { border.x + 260, border.y + 147 }, fontSize, 0.0f, BLACK);
     DrawTextEx(font, "or", { border.x + 180, border.y + 207 }, fontSize, 0.0f, BLACK);

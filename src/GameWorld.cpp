@@ -21,6 +21,7 @@ GameWorld::GameWorld() :
     helpingBoardIsOpen(false),
     stateBeforePause(GAME_STATE_TITLE_SCREEN),
     remainingTimePointCount(0),
+    totalPlayedTime(0),
     pauseMusic(false),
     pauseMario(false),
     outroFinished(false),
@@ -32,6 +33,7 @@ GameWorld::GameWorld() :
     pauseButtonsCooldownTime(0.5f),
     titleScreen(nullptr),
     menuScreen(nullptr),
+    selectCharacterScreen(nullptr),
     settingScreen(nullptr),
     helpingScreen(nullptr),
     guardScreen(nullptr)
@@ -49,6 +51,11 @@ GameWorld::~GameWorld() {
     if (menuScreen != nullptr) {
         delete menuScreen;
         menuScreen = nullptr;
+    }
+
+    if (selectCharacterScreen != nullptr) {
+        delete selectCharacterScreen;
+        selectCharacterScreen = nullptr;
     }
 
     if (settingScreen != nullptr) {
@@ -101,6 +108,10 @@ void GameWorld::initScreensAndButtons() {
         menuScreen = new MenuScreen();
     }
 
+    if (selectCharacterScreen == nullptr) {
+        selectCharacterScreen = new SelectCharacterScreen();
+    }
+
     if (settingScreen == nullptr) {
         settingScreen = new SettingScreen(this);
     }
@@ -143,6 +154,7 @@ void GameWorld::inputAndUpdate() {
          mario.getState() != SPRITE_STATE_WAITING_TO_NEXT_MAP &&
          state != GAME_STATE_TITLE_SCREEN &&
          state != GAME_STATE_MENU_SCREEN &&
+         state != GAME_STATE_SELECT_CHARACTER_SCREEN &&
          state != GAME_STATE_CREDITS_SCREEN &&
          state != GAME_STATE_FINISHED &&
          state != GAME_STATE_GUARD_SCREEN && 
@@ -152,6 +164,7 @@ void GameWorld::inputAndUpdate() {
 
     if ( state != GAME_STATE_TITLE_SCREEN &&
          state != GAME_STATE_MENU_SCREEN &&
+         state != GAME_STATE_SELECT_CHARACTER_SCREEN &&
          state != GAME_STATE_CREDITS_SCREEN &&
          state != GAME_STATE_FINISHED &&
          state != GAME_STATE_SETTINGS_SCREEN &&
@@ -161,6 +174,7 @@ void GameWorld::inputAndUpdate() {
         mario.update();
     } else if ( !pauseMario && state != GAME_STATE_TITLE_SCREEN && 
         state != GAME_STATE_MENU_SCREEN && 
+        state != GAME_STATE_SELECT_CHARACTER_SCREEN &&
         state != GAME_STATE_CREDITS_SCREEN) {
 
         mario.update();
@@ -171,6 +185,7 @@ void GameWorld::inputAndUpdate() {
          mario.getState() != SPRITE_STATE_WAITING_TO_NEXT_MAP &&
          state != GAME_STATE_TITLE_SCREEN &&
          state != GAME_STATE_MENU_SCREEN &&
+         state != GAME_STATE_SELECT_CHARACTER_SCREEN &&
          state != GAME_STATE_CREDITS_SCREEN &&
          state != GAME_STATE_FINISHED &&
          state != GAME_STATE_SETTINGS_SCREEN &&
@@ -845,6 +860,7 @@ void GameWorld::inputAndUpdate() {
 
     if (state == GAME_STATE_TITLE_SCREEN || 
         state == GAME_STATE_MENU_SCREEN || 
+        state == GAME_STATE_SELECT_CHARACTER_SCREEN ||
         state == GAME_STATE_CREDITS_SCREEN) {
 
         if (!IsMusicStreamPlaying(musics["title"])) {
@@ -884,18 +900,7 @@ void GameWorld::inputAndUpdate() {
             }
 
             if (menuScreen->getButton("NEW GAME")->isReleased()) {
-                mario.resetAll();
-                map.first();
-                map.reset();
-                map.loadFromJsonFile(); // Load the map immediately
-
-                // Set the time limit (400 seconds = typical Mario game time)
-                mario.setMaxTime(400.0f);
-
-                if (IsMusicStreamPlaying(musics["title"])) {
-                    StopMusicStream(musics["title"]);
-                }            
-                state = GAME_STATE_PLAYING;
+                state = GAME_STATE_SELECT_CHARACTER_SCREEN;
             }
 
             else if (menuScreen->getButton("LOAD GAME")->isReleased()) {
@@ -912,6 +917,30 @@ void GameWorld::inputAndUpdate() {
                 state = GAME_STATE_TITLE_SCREEN;
             }
         }
+
+        else if (state == GAME_STATE_SELECT_CHARACTER_SCREEN) {
+            if (selectCharacterScreen->getMarioButton().isReleased()) {
+                // Mario selected - start the game
+                mario.resetAll();
+                map.loadFromJsonFile(); // Load the map immediately
+                mario.setMaxTime(400.0f); // Set the time limit (400 seconds = typical Mario game time)
+                
+                if (IsMusicStreamPlaying(musics["title"])) {
+                    StopMusicStream(musics["title"]);
+                }            
+                state = GAME_STATE_PLAYING;
+            }
+
+            else if (selectCharacterScreen->getLuigiButton().isReleased()) {
+                // Luigi selected - implement later
+                std::cout << "Luigi button pressed. Luigi functionality will be implemented later." << std::endl;
+            }
+
+            else if (selectCharacterScreen->getHomeButton().isReleased()) {
+                // Go back to menu
+                state = GAME_STATE_MENU_SCREEN;
+            }
+        }
     }
 
     else if ( state == GAME_STATE_GAME_OVER ) {
@@ -925,7 +954,7 @@ void GameWorld::draw() {
     ClearBackground(WHITE);
     std::map<std::string, Texture2D>& textures = ResourceManager::getInstance().getTextures();
 
-    //std::cerr << "Gamestate: " << state << std::endl;
+    // std:: cerr << "Total played time: " << totalPlayedTime << " seconds" << std::endl;
 
     if (state == GAME_STATE_TITLE_SCREEN) {
         titleScreen->draw();
@@ -943,6 +972,10 @@ void GameWorld::draw() {
 
     else if (state == GAME_STATE_MENU_SCREEN) {
         menuScreen->draw();
+    }
+
+    else if (state == GAME_STATE_SELECT_CHARACTER_SCREEN) {
+        selectCharacterScreen->draw();
     }
 
     else if (state == GAME_STATE_GAME_OVER){
@@ -1063,6 +1096,14 @@ Camera2D* GameWorld::getCamera() const {
     return this->camera;
 }
 
+int GameWorld::getTotalPlayedTime() const {
+    return totalPlayedTime;
+}
+
+void GameWorld::addToTotalPlayedTime(float timeToAdd) {
+    totalPlayedTime += static_cast<int>(timeToAdd);
+}
+
 void GameWorld::resetMap() {
     mario.reset(true);
     map.reset();
@@ -1074,14 +1115,18 @@ void GameWorld::resetGame() {
     mario.resetAll();
     map.first();
     map.reset();
+    totalPlayedTime = 0; // Reset total played time when starting a new game
     state = GAME_STATE_TITLE_SCREEN;
 }
 
 void GameWorld::nextMap() {
     if (map.hasNext()) {
         state = GAME_STATE_PLAYING;
-        // reset state but keep the power-up
-        mario.reset(false);
+        // Add Mario's elapsed time to total played time when map is completed
+        totalPlayedTime += static_cast<int>(mario.getEllapsedTime());
+        mario.setPointsFromPreviousMap(mario.getPoints());
+        mario.setCoinsFromPreviousMap(mario.getCoins());
+        mario.reset(false, false);
     } else {
         state = GAME_STATE_FINISHED;
     }
