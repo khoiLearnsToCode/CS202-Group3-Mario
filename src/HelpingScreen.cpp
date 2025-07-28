@@ -22,6 +22,7 @@ HelpingScreen::HelpingScreen() : Screen(),
 
 HelpingScreen::~HelpingScreen() {
     UnloadTexture(backgroundTexture);
+    UnloadTexture(helpingLogo);
 }
 
 void HelpingScreen::draw() {

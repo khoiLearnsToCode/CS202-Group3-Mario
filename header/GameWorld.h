@@ -14,6 +14,7 @@ class Mario;
 #include "SettingScreen.h"
 #include "HelpingScreen.h"
 #include "GuardScreen.h"
+#include "LeaderBoardScreen.h"
 #include "CareTaker.h"
 #include "Memento.h"
 #include "Mario.h"
@@ -28,6 +29,7 @@ class GameWorld : public virtual Drawable {
     SettingScreen* settingScreen;
     HelpingScreen* helpingScreen;
     GuardScreen* guardScreen;
+    LeaderBoardScreen* leaderBoardScreen;
 
     friend class CareTaker;
     friend class SettingScreen;
@@ -37,6 +39,7 @@ class GameWorld : public virtual Drawable {
     Camera2D* camera;
     bool settingBoardIsOpen;
     bool helpingBoardIsOpen;
+    bool leaderBoardIsOpen;
     GameState stateBeforePause;
     int remainingTimePointCount;
     int totalPlayedTime;
@@ -58,6 +61,8 @@ class GameWorld : public virtual Drawable {
 
     Memento* dataFromGameWorldToSave();
     void restoreDataFromMemento(const Memento* memento) const;
+
+    Memento* dataFromGameWorldToLeaderboard();
 
 public:
 

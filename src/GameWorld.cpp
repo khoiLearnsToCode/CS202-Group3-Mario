@@ -85,9 +85,10 @@ GameWorld::~GameWorld() {
 }
 
 Memento* GameWorld::dataFromGameWorldToSave() {
-    Data data(map.getId(), remainingTimePointCount, mario.getPoints(), mario.getLives(),
-             map.getBlocks(), map.getBaddies(), map.getItems(), map.getStaticItems());
-    return new ConcreteMemento(data);
+    // Data data(map.getId(), remainingTimePointCount, mario.getPoints(), mario.getLives(),
+    //          map.getBlocks(), map.getBaddies(), map.getItems(), map.getStaticItems());
+    // return new ConcreteMemento(data);
+    return nullptr;
 }
 
 void GameWorld::restoreDataFromMemento(const Memento* memento) const {
@@ -97,6 +98,18 @@ void GameWorld::restoreDataFromMemento(const Memento* memento) const {
     // map.setRemainingTime(data.remainingTime);
     // map.setScore(data.score);
     // map.setLives(data.lives);
+}
+
+Memento* GameWorld::dataFromGameWorldToLeaderboard() {
+    Data data(
+        map.getId(),
+        mario.getPoints(),
+        mario.getLives(),
+        mario.getCoins(),
+        mario.getYoshiCoins(),
+        mario.getType()
+    );
+    return new ConcreteMemento(data);
 }
 
 void GameWorld::initScreensAndButtons() {

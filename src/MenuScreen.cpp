@@ -7,7 +7,8 @@ MenuScreen::MenuScreen() : Screen() {
     buttons.emplace("NEW GAME", new ButtonTextTexture("NEW GAME", "longButton", {GetScreenWidth() / 2.0f - 128.0f, GetScreenHeight() / 2.0f}, 2.0f, WHITE, font, 40.0f));
     buttons.emplace("LOAD GAME", new ButtonTextTexture("LOAD GAME", "longButton", {GetScreenWidth() / 2.0f - 128.0f, GetScreenHeight() / 2.0f + 75.0f}, 2.0f, WHITE, font, 40.0f));
     buttons.emplace("SETTINGS", new ButtonTextTexture("SETTINGS", "longButton", {GetScreenWidth() / 2.0f - 128.0f, GetScreenHeight() / 2.0f + 150.0f}, 2.0f, WHITE, font, 40.0f));
-    buttons.emplace("EXIT", new ButtonTextTexture("","homeButton", { 100.0f, GetScreenHeight() - 100.0f }, 2.0f, WHITE, font, 40.0f));
+    buttons.emplace("EXIT", new ButtonTextTexture("homeButton", { 100.0f, GetScreenHeight() - 100.0f }, 2.0f));
+    buttons.emplace("LEADERBOARD", new ButtonTextTexture("leaderButton", { 100.0f, GetScreenHeight() - 170.0f }, 2.0f));
 
     backgroundTexture = ResourceManager::getInstance().getTexture("title_screen");
 }
