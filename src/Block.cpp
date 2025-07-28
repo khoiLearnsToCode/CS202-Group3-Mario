@@ -462,17 +462,18 @@ void ExclamationBlock::draw() {
 	DrawTexture(ResourceManager::getInstance().getTexture("block89"), pos.x, pos.y, color);
 }
 void ExclamationBlock::doHit(Mario& mario, Map* map) {
-	if (!hit)
+	if (!hit) {
 		hit = true;
-	Vector2 itemPos = { pos.x, pos.y - dim.y };
-	Vector2 itemDim = { 32, 32 }; // Assuming a standard item size
-	Vector2 itemVel = { 0, -150 };
-	Item* item = FactoryItem::createItem("Coin", itemPos, itemDim, itemVel, YELLOW, true, true, false);
-	if (item) {
-		map->getItems().push_back(item); // Add the item to the map's items vector
+		Vector2 itemPos = { pos.x, pos.y - dim.y };
+		Vector2 itemDim = { 32, 32 }; // Assuming a standard item size
+		Vector2 itemVel = { 0, -150 };
+		Item* item = FactoryItem::createItem("Coin", itemPos, itemDim, itemVel, YELLOW, true, true, false);
+		if (item) {
+			map->getItems().push_back(item); // Add the item to the map's items vector
+		}
+		mario.addPoints(100);
+		mario.addCoins(1);
 	}
-	mario.addPoints(100);
-	mario.addCoins(1);
 }
 ExclamationBlock::ExclamationBlock(Vector2 pos, Vector2 dim, Color color)
 	: Block(pos, dim, color) {}
