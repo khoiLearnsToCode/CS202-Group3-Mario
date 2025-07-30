@@ -38,7 +38,7 @@ void FlyingGoomba::update() {
         pos.x = pos.x + vel.x * delta;
         pos.y = pos.y + vel.y * delta;
 
-        vel.y += GameWorld::gravity;
+        
 
     } else if ( state == SPRITE_STATE_HIT ) {
 
