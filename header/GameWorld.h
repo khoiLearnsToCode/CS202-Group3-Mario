@@ -59,6 +59,9 @@ class GameWorld : public virtual Drawable {
     float pauseButtonsCooldownAcum;
     float pauseButtonsCooldownTime;
 
+    // Distance-based collision detection threshold
+    const float maxDistForCollisionCheck;
+
     Memento* dataFromGameWorldToSave();
     void restoreDataFromMemento(const Memento* memento) const;
 
@@ -95,6 +98,9 @@ public:
     void pauseGame(bool playPauseSFX, bool pauseMusic, bool pauseMario, bool showSettingBoard, bool showHelpingBoard);
     void unpauseGame();
     void showGuardScreen(GuardAction action);
+
+    // Distance threshold getter for collision optimization
+    float getMaxDistForCollisionCheck() const;
 
     // bool isPauseMusicOnPause() const;
     // bool isShowOverlayOnPause() const;
