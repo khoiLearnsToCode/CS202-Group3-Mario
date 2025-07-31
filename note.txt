@@ -42,3 +42,9 @@ Still needs to implement HUD display and other features.
 ****************** PMK 10/07/25 ******************
 Might use unordered map for resourceManager later.
 
+****************** PMK 10/07/25 ******************
+1   -> 87 : tiles
+88  -> 102: blocks
+103 -> 120: items
+121 -> 159: baddies
+

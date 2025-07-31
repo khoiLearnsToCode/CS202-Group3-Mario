@@ -313,7 +313,7 @@ void Map::loadFromJsonFile(bool shouldLoadTestMap) {
 
     // Load blocks
     std::vector<int> blockIDs = mapJson["layers"][3]["data"];
-    std::vector<int> itemIDs = mapJson["layers"][5]["data"];
+    std::vector<int> itemIDs = mapJson["layers"][4]["data"];
     for (int y = 0; y < height; y++){
         for (int x = 0; x < width; x++){
             int blockID = blockIDs[y * width + x];
@@ -400,10 +400,10 @@ void Map::loadFromJsonFile(bool shouldLoadTestMap) {
     blockIDs.clear();
 
     // Load static items
-    std::vector<int> staticItemIDs = mapJson["layers"][4]["data"];
+    // std::vector<int> staticItemIDs = mapJson["layers"][4]["data"];
     for (int y = 0; y < height; y++){
         for (int x = 0; x < width; x++){
-            int staticItemID = staticItemIDs[y * width + x];
+            int staticItemID = itemIDs[y * width + x];
             if (staticItemID == 0) continue;
 
             Item* newStaticItem = nullptr;
@@ -431,6 +431,8 @@ void Map::loadFromJsonFile(bool shouldLoadTestMap) {
             }
         }
     }
+
+    itemIDs.clear();
  
     parsed = true;
 
