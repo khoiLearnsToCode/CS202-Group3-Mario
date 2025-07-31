@@ -353,7 +353,6 @@ void ResourceManager::loadTextures() {
         textures["guiAlfaLowerUpper"] = LoadTexture("../resource/graphic/gui/guiAlfaLowerUpper.png");
         textures["guiClock"] = LoadTexture("../resource/graphic/gui/guiClock.png");
         textures["guiCoin"] = LoadTexture("../resource/graphic/gui/guiCoin.png");
-        textures["guiCredits"] = LoadTexture("../resource/graphic/gui/guiCredits.png");
         textures["guiGameOver"] = LoadTexture("../resource/graphic/gui/guiGameOver.png");
         textures["guiLetters"] = LoadTexture("../resource/graphic/gui/guiLetters.png");
         textures["guiMario"] = LoadTexture("../resource/graphic/gui/guiMario.png");
@@ -394,21 +393,10 @@ void ResourceManager::loadTextures() {
 
 
         // UI elements
-            // Mute buttons
-        // textures["muteButtonBlue"] = LoadTexture("../resource/graphic/ui/MuteButtonBlue.png");
-        // textures["muteButtonGreen"] = LoadTexture("../resource/graphic/ui/MuteButtonGreen.png");
-        // textures["muteButtonOrange"] = LoadTexture("../resource/graphic/ui/MuteButtonOrange.png");
-        // textures["muteButtonWhite"] = LoadTexture("../resource/graphic/ui/MuteButtonWhite.png");
-        // textures["muteButtonYellow"] = LoadTexture("../resource/graphic/ui/MuteButtonYellow.png");
         textures["muteButtonPress"] = LoadTexture("../resource/graphic/ui/muteButtonPress.png");
         textures["muteButtonRelease"] = LoadTexture("../resource/graphic/ui/muteButtonRelease.png");
         
             // Unmute buttons
-        // textures["unmuteButtonBlue"] = LoadTexture("../resource/graphic/ui/UnmuteButtonBlue.png");
-        // textures["unmuteButtonGreen"] = LoadTexture("../resource/graphic/ui/UnmuteButtonGreen.png");
-        // textures["unmuteButtonOrange"] = LoadTexture("../resource/graphic/ui/UnmuteButtonOrange.png");
-        // textures["unmuteButtonWhite"] = LoadTexture("../resource/graphic/ui/UnmuteButtonWhite.png");
-        // textures["unmuteButtonYellow"] = LoadTexture("../resource/graphic/ui/UnmuteButtonYellow.png");
         textures["unmuteButtonPress"] = LoadTexture("../resource/graphic/ui/unmuteButtonPress.png");
         textures["unmuteButtonRelease"] = LoadTexture("../resource/graphic/ui/unmuteButtonRelease.png");
         
@@ -420,11 +408,6 @@ void ResourceManager::loadTextures() {
         // textures["saveButtonYellow"] = LoadTexture("../resource/graphic/ui/SaveButtonYellow.png");
         
             // Setting buttons
-        // textures["settingButtonBlue"] = LoadTexture("../resource/graphic/ui/SettingButtonBlue.png");
-        // textures["settingButtonGreen"] = LoadTexture("../resource/graphic/ui/SettingButtonGreen.png");
-        // textures["settingButtonOrange"] = LoadTexture("../resource/graphic/ui/SettingButtonOrange.png");
-        // textures["settingButtonWhite"] = LoadTexture("../resource/graphic/ui/SettingButtonWhite.png");
-        // textures["settingButtonYellow"] = LoadTexture("../resource/graphic/ui/SettingButtonYellow.png");
         textures["settingButtonPress"] = LoadTexture("../resource/graphic/ui/settingButtonPress.png");
         textures["settingButtonRelease"] = LoadTexture("../resource/graphic/ui/settingButtonRelease.png");
         
