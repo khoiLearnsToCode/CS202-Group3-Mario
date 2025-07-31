@@ -8,7 +8,7 @@
 
 
 
-// Item base class
+////////////////////////////////////////// Item base class //////////////////////////////////////////
 Item::Item() :
     Item({0, 0}, {0, 0}, {0, 0}, BLACK, 0, 0, 0) {
 }
@@ -46,7 +46,7 @@ bool Item::isPauseGameOnHit() {
     return pauseGameOnHit;
 }
 
-// Coin
+////////////////////////////////////////// Coin //////////////////////////////////////////
 Coin::Coin(Vector2 pos, Vector2 dim, Color color) :
     Item(pos, dim, color, 0.1, 4, 200) {
     onHitFrameTime = 0.1;
@@ -120,7 +120,7 @@ CollisionType Coin::checkCollision(Sprite* sprite) {
 }
 
 
-// Mushroom
+////////////////////////////////////////// Mushroom //////////////////////////////////////////
 Mushroom::Mushroom(Vector2 pos, Vector2 dim, Vector2 vel, Color color) :
     Mushroom(pos, dim, vel, color, true, false, false) {
 }
@@ -140,24 +140,14 @@ Mushroom::~Mushroom() = default;
 
 void Mushroom::update() {
     const float delta = GetFrameTime();
-    if (state == SPRITE_STATE_ACTIVE || state == SPRITE_STATE_IDLE) {
-        frameAcum += delta;
-        if (frameAcum >= frameTime) {
-            frameAcum = 0;
-            if (maxFrames > 0)
-                currentFrame = (currentFrame + 1) % maxFrames;
-            else
-                currentFrame = 0;
-        }
-        if (applyGravity) {
-            vel.y += GameWorld::gravity * delta;
-        }
-        pos.x += vel.x * delta;
+    if (state == SPRITE_STATE_ACTIVE) {
+        if (facingDirection == DIRECTION_RIGHT)
+            pos.x += vel.x * delta;
+        else 
+            pos.x -= vel.x * delta;
         pos.y += vel.y * delta;
-        if (doCollisionOnGround && pos.y + dim.y > GetScreenHeight()) {
-            pos.y = GetScreenHeight() - dim.y;
-            vel.y = 0;
-        }
+        if (applyGravity) 
+            vel.y += GameWorld::gravity;
         if (blinking) {
             blinkingAcum += delta;
             if (blinkingAcum >= blinkingTime) {
@@ -170,12 +160,12 @@ void Mushroom::update() {
         onHitFrameAcum += delta;
         if (onHitFrameAcum >= onHitFrameTime) {
             onHitFrameAcum = 0;
-            currentOnHitFrame++;
-            if (currentOnHitFrame >= maxOnHitFrame) {
-                state = SPRITE_STATE_TO_BE_REMOVED;
-            }
+            state = SPRITE_STATE_TO_BE_REMOVED;
         }
-        pointsFrameAcum = std::min(pointsFrameAcum + delta, pointsFrameTime);
+        pointsFrameAcum += delta;
+        if (pointsFrameAcum >= pointsFrameTime) {
+            pointsFrameAcum = pointsFrameTime;
+        }
     }
     updateCollisionProbes();
 }
@@ -263,7 +253,7 @@ void Mushroom::onSouthCollision(Mario& mario) {
 
 
 
-// OneUpMushroom
+////////////////////////////////////////// OneUpMushroom //////////////////////////////////////////
 OneUpMushroom::OneUpMushroom(Vector2 pos, Vector2 dim, Vector2 vel, Color color) :
     Item(pos, dim, vel, color, 0, 0, 1) {}
 
@@ -273,9 +263,12 @@ OneUpMushroom::~OneUpMushroom() = default;
 void OneUpMushroom::update() {
     const float delta = GetFrameTime();
     if (state == SPRITE_STATE_ACTIVE) {
-        pos.x += vel.x * delta * (facingDirection == DIRECTION_RIGHT ? 1 : -1);
+        if (facingDirection == DIRECTION_RIGHT) 
+            pos.x += vel.x * delta;
+        else 
+            pos.x -= vel.x * delta;
         pos.y += vel.y * delta;
-        vel.y += GameWorld::gravity * delta;
+        vel.y += GameWorld::gravity;
     }
     else if (state == SPRITE_STATE_HIT) {
         onHitFrameAcum += delta;
@@ -283,13 +276,16 @@ void OneUpMushroom::update() {
             onHitFrameAcum = 0;
             state = SPRITE_STATE_TO_BE_REMOVED;
         }
-        pointsFrameAcum = std::min(pointsFrameAcum + delta, pointsFrameTime);
+        pointsFrameAcum += delta;
+        if (pointsFrameAcum >= pointsFrameTime) {
+            pointsFrameAcum = pointsFrameTime;
+        }
     }
     updateCollisionProbes();
 }
 
 void OneUpMushroom::draw() {
-    auto& textures = ResourceManager::getInstance().getTextures();
+    std::map<std::string,Texture2D>& textures = ResourceManager::getInstance().getTextures();
     if (state == SPRITE_STATE_ACTIVE || state == SPRITE_STATE_IDLE) {
         if (textures.find("1UpMushroom") != textures.end()) {
             DrawTexture(textures["1UpMushroom"], pos.x, pos.y, WHITE);
@@ -323,7 +319,7 @@ void OneUpMushroom::updateMario(Mario& mario) {
 }
 
 
-// FireFlower
+////////////////////////////////////////// FireFlower //////////////////////////////////////////
 FireFlower::FireFlower(Vector2 pos, Vector2 dim, Color color) :
     FireFlower(pos, dim,{0,0}, color, false, false) {
 }
@@ -372,7 +368,7 @@ void FireFlower::update() {
 }
 
 void FireFlower::draw() {
-    auto& textures = ResourceManager::getInstance().getTextures();
+    std::map<std::string, Texture2D>& textures = ResourceManager::getInstance().getTextures();
     if (state == SPRITE_STATE_ACTIVE || state == SPRITE_STATE_IDLE) {
         std::string key = TextFormat("fireFlower%d", currentFrame);
         if (textures.find(key) != textures.end() && !doBlink) {
@@ -449,7 +445,7 @@ void FireFlower::onSouthCollision(Mario& mario) {
 }
 
 
-// Star
+////////////////////////////////////////// Star //////////////////////////////////////////
 Star::Star(Vector2 pos, Vector2 dim, Vector2 vel, Color color) :
     Item(pos, dim, vel, color, 0, 0, 1000) {}
 
@@ -458,9 +454,12 @@ Star::~Star() = default;
 void Star::update() {
     const float delta = GetFrameTime();
     if (state == SPRITE_STATE_ACTIVE) {
-        pos.x += vel.x * delta * (facingDirection == DIRECTION_RIGHT ? 1 : -1);
+        if (facingDirection == DIRECTION_RIGHT) 
+            pos.x += vel.x * delta;
+        else 
+            pos.x -= vel.x * delta;      
         pos.y += vel.y * delta;
-        vel.y += GameWorld::gravity * delta;
+        vel.y += GameWorld::gravity;
     }
     else if (state == SPRITE_STATE_HIT) {
         onHitFrameAcum += delta;
@@ -468,13 +467,16 @@ void Star::update() {
             onHitFrameAcum = 0;
             state = SPRITE_STATE_TO_BE_REMOVED;
         }
-        pointsFrameAcum = std::min(pointsFrameAcum + delta, pointsFrameTime);
+        pointsFrameAcum += delta;
+        if (pointsFrameAcum >= pointsFrameTime) {
+            pointsFrameAcum = pointsFrameTime;
+        }
     }
     updateCollisionProbes();
 }
 
 void Star::draw() {
-    auto& textures = ResourceManager::getInstance().getTextures();
+    std::map<std::string, Texture2D>& textures = ResourceManager::getInstance().getTextures();
     if (state == SPRITE_STATE_ACTIVE || state == SPRITE_STATE_IDLE) {
         if (textures.find("star") != textures.end()) {
             DrawTexture(textures["star"], pos.x, pos.y, WHITE);
@@ -513,7 +515,7 @@ void Star::onSouthCollision(Mario& mario) {
 
 
 
-// ThreeUpMoon
+////////////////////////////////////////// ThreeUpMoon //////////////////////////////////////////
 ThreeUpMoon::ThreeUpMoon(Vector2 pos, Vector2 dim, Vector2 vel, Color color) :
     Item(pos, dim, vel, color, 0, 0, 3) {}
 
@@ -538,7 +540,7 @@ void ThreeUpMoon::update() {
 }
 
 void ThreeUpMoon::draw() {
-    auto& textures = ResourceManager::getInstance().getTextures();
+    std::map<std::string, Texture2D>& textures = ResourceManager::getInstance().getTextures();
     if (state == SPRITE_STATE_ACTIVE || state == SPRITE_STATE_IDLE) {
         if (textures.find("3UpMoon") != textures.end()) {
             DrawTexture(textures["3UpMoon"], pos.x, pos.y, WHITE);
@@ -573,7 +575,7 @@ void ThreeUpMoon::updateMario(Mario& mario) {
 
 
 
-// YoshiCoin
+////////////////////////////////////////// YoshiCoin //////////////////////////////////////////
 YoshiCoin::YoshiCoin(Vector2 pos, Vector2 dim, Color color) :
     Item(pos, dim, Vector2{ 0, 0 }, color, 0.1f, 4, 1000), countingUp(true) {
     onHitFrameTime = 0.1f;
@@ -617,7 +619,7 @@ void YoshiCoin::update() {
 }
 
 void YoshiCoin::draw() {
-    auto& textures = ResourceManager::getInstance().getTextures();
+    std::map<std::string, Texture2D>& textures = ResourceManager::getInstance().getTextures();
     if (state == SPRITE_STATE_ACTIVE || state == SPRITE_STATE_IDLE) {
         std::string key = TextFormat("yoshiCoin%d", currentFrame);
         if (textures.find(key) != textures.end()) {
@@ -664,7 +666,7 @@ CollisionType YoshiCoin::checkCollision(Sprite* sprite) {
 }
 
 
-// CourseClearToken
+////////////////////////////////////////// CourseClearToken //////////////////////////////////////////
 CourseClearToken::CourseClearToken(Vector2 pos, Vector2 dim, Color color) :
     Item(pos, dim, Vector2{ 0, 0 }, color, 0, 0, 10000)
 {
@@ -692,7 +694,7 @@ void CourseClearToken::update() {
 }
 
 void CourseClearToken::draw() {
-    auto& textures = ResourceManager::getInstance().getTextures();
+    std::map<std::string, Texture2D>& textures = ResourceManager::getInstance().getTextures();
     if (state == SPRITE_STATE_ACTIVE || state == SPRITE_STATE_IDLE) {
         if (textures.find("courseClearToken") != textures.end()) {
             DrawTexture(textures["courseClearToken"], pos.x, pos.y, WHITE);
@@ -735,7 +737,7 @@ CollisionType CourseClearToken::checkCollision(Sprite* sprite) {
 
 
 
-// ItemFactory
+////////////////////////////////////////// ItemFactory //////////////////////////////////////////
 Item* FactoryItem::createItem(const std::string& type, Vector2 pos, Vector2 dim, Vector2 vel, Color color, bool applyGravity, bool doCollisionOnGround, bool blinking) {
     if (type == "Coin") return new Coin(pos, dim, color);
     if (type == "Mushroom") return new Mushroom(pos, dim, vel, color, applyGravity, doCollisionOnGround, blinking);

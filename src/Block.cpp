@@ -23,7 +23,7 @@ void Block::doHit(Mario& mario, Map* map) {
 		hit = true;
 }
 
-// StoneBlock
+////////////////////////////////////////// StoneBlock //////////////////////////////////////////
 void StoneBlock::update() {
 
 }
@@ -36,7 +36,7 @@ StoneBlock::StoneBlock(Vector2 pos, Vector2 dim, Color color, float frameTime, i
 	: Block(pos, dim, color, frameTime, maxFrames) {}
 StoneBlock::~StoneBlock() = default;
 
-// WoodBlock
+////////////////////////////////////////// WoodBlock //////////////////////////////////////////
 void WoodBlock::update() {
 
 }
@@ -49,7 +49,7 @@ WoodBlock::WoodBlock(Vector2 pos, Vector2 dim, Color color, float frameTime, int
 	: Block(pos, dim, color, frameTime, maxFrames) {}
 WoodBlock::~WoodBlock() = default;
 
-// GrassBlock
+////////////////////////////////////////// GrassBlock //////////////////////////////////////////
 void GrassBlock::update() {
 
 }
@@ -62,7 +62,7 @@ GrassBlock::GrassBlock(Vector2 pos, Vector2 dim, Color color, float frameTime, i
 	: Block(pos, dim, color, frameTime, maxFrames) {}
 GrassBlock::~GrassBlock() = default; // No specific destruction logic needed
 
-// CloudBlock
+////////////////////////////////////////// CloudBlock //////////////////////////////////////////
 void CloudBlock::update() {
 
 }
@@ -75,7 +75,7 @@ CloudBlock::CloudBlock(Vector2 pos, Vector2 dim, Color color, float frameTime, i
 	: Block(pos, dim, color, frameTime, maxFrames) {}
 CloudBlock::~CloudBlock() = default; // No specific destruction logic needed
 
-// EyesClosedBlock
+////////////////////////////////////////// EyesClosedBlock //////////////////////////////////////////
 void EyesClosedBlock::update() {
 
 }
@@ -88,7 +88,7 @@ EyesClosedBlock::EyesClosedBlock(Vector2 pos, Vector2 dim, Color color, float fr
 	: Block(pos, dim, color, frameTime, maxFrames) {}
 EyesClosedBlock::~EyesClosedBlock() = default;
 
-// EyesOpenedBlock
+////////////////////////////////////////// EyesOpenedBlock //////////////////////////////////////////
 void EyesOpenedBlock::update() {
 
 }
@@ -101,7 +101,7 @@ EyesOpenedBlock::EyesOpenedBlock(Vector2 pos, Vector2 dim, Color color, float fr
 	: Block(pos, dim, color, frameTime, maxFrames) {}
 EyesOpenedBlock::~EyesOpenedBlock() = default;
 
-// QuestionBlock
+////////////////////////////////////////// QuestionBlock //////////////////////////////////////////
 void QuestionBlock::update() {
 
 	const float delta = GetFrameTime();
@@ -224,7 +224,7 @@ QuestionBlock::QuestionBlock(Vector2 pos, Vector2 dim, Color color, float frameT
 
 QuestionBlock::~QuestionBlock() = default;
 
-//QuestionMushroomBlock
+////////////////////////////////////////// QuestionMushroomBlock //////////////////////////////////////////
 void QuestionMushroomBlock::update() {
 
 	const float delta = GetFrameTime();
@@ -288,8 +288,8 @@ QuestionMushroomBlock::QuestionMushroomBlock(Vector2 pos, Vector2 dim, Color col
 	itemMinY(0),
 	map(nullptr) {}
 QuestionMushroomBlock::~QuestionMushroomBlock() = default;
-
-// QuestionFireFlowerBlock
+ 
+////////////////////////////////////////// QuestionFireFlowerBlock //////////////////////////////////////////
 void QuestionFireFlowerBlock::update() {
 	/*if (!hit) {
 		frameAcum += GetFrameTime();
@@ -360,7 +360,7 @@ QuestionFireFlowerBlock::QuestionFireFlowerBlock(Vector2 pos, Vector2 dim, Color
 
 QuestionFireFlowerBlock::~QuestionFireFlowerBlock() = default;
 
-// QuestionStarBlock
+////////////////////////////////////////// QuestionStarBlock //////////////////////////////////////////
 void QuestionStarBlock::update() {
 	const float delta = GetFrameTime();
 	if (!hit) {
@@ -422,7 +422,7 @@ QuestionStarBlock::QuestionStarBlock(Vector2 pos, Vector2 dim, Color color, floa
 
 QuestionStarBlock::~QuestionStarBlock() = default;
 
-// QuestionOneUpMushroomBlock
+////////////////////////////////////////// QuestionOneUpMushroomBlock //////////////////////////////////////////
 void QuestionOneUpMushroomBlock::update() {
 
 	const float delta = GetFrameTime();
@@ -470,7 +470,7 @@ void QuestionOneUpMushroomBlock::doHit(Mario& mario, Map* map) {
 		Vector2 itemPos = { pos.x, pos.y - dim.y };
 		Vector2 itemDim = { 32, 32 };
 		Vector2 itemVel = { 0, -150 };
-		Item* item = FactoryItem::createItem("OneUpMushroom", itemPos, itemDim, itemVel, YELLOW, true, true, false);
+		this->item = FactoryItem::createItem("OneUpMushroom", itemPos, itemDim, itemVel, YELLOW, true, true, false);
 		item->setFacingDirection(mario.getFacingDirection());
 		itemMinY = pos.y - 32;
 		this->map = map;
@@ -488,8 +488,8 @@ QuestionOneUpMushroomBlock::QuestionOneUpMushroomBlock(Vector2 pos, Vector2 dim,
 
 QuestionOneUpMushroomBlock::~QuestionOneUpMushroomBlock() = default;
 
-// QuestionThreeUpMoonBlock
-void QuestionThreeUpMoonBlock::update() {
+////////////////////////////////////////// QuestionThreeUpMoonBlock //////////////////////////////////////////
+void QuestionThreeUpMoonBlock::update() { 
 
 	const float delta = GetFrameTime();
 
@@ -554,7 +554,7 @@ QuestionThreeUpMoonBlock::QuestionThreeUpMoonBlock(Vector2 pos, Vector2 dim, Col
 
 QuestionThreeUpMoonBlock::~QuestionThreeUpMoonBlock() = default;
 
-// ExclamationBlock
+////////////////////////////////////////// ExclamationBlock //////////////////////////////////////////
 void ExclamationBlock::update() {
 	const float delta = GetFrameTime();
 	if (hit && coinAnimationRunning) {
@@ -666,7 +666,7 @@ ExclamationBlock::ExclamationBlock(Vector2 pos, Vector2 dim, Color color, float 
 }
 ExclamationBlock::~ExclamationBlock() = default;
 
-//InvisibleBlock
+////////////////////////////////////////// InvisibleBlock //////////////////////////////////////////
 void InvisibleBlock::update() {
 
 }
@@ -693,7 +693,7 @@ InvisibleBlock::InvisibleBlock(Vector2 pos, Vector2 dim, Color color, float fram
 	: Block(pos, dim, color, frameTime, maxFrames) {}
 InvisibleBlock::~InvisibleBlock() = default; // No specific destruction logic needed
 
-// MessageBlock
+////////////////////////////////////////// MessageBlock //////////////////////////////////////////
 void MessageBlock::update() {
 
 }
@@ -714,7 +714,7 @@ MessageBlock::MessageBlock(Vector2 pos, Vector2 dim, Color color, float frameTim
 MessageBlock::~MessageBlock() = default; // No specific destruction logic needed
 
 
-//Factory pattern for Block creation
+////////////////////////////////////////// Factory pattern for Block creation //////////////////////////////////////////
 Block* BlockFactory::createBlock(const std::string& type, Vector2 pos, Vector2 dim, Color color, float frameTime, int maxFrames) {
 	if (type == "StoneBlock") {
 		return new StoneBlock(pos, dim, color, frameTime, maxFrames);
