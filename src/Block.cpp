@@ -342,7 +342,7 @@ void QuestionFireFlowerBlock::doHit(Mario& mario, Map* map) {
 		Vector2 itemPos = { pos.x, pos.y - dim.y };
 		Vector2 itemDim = { 32, 32 };
 		Vector2 itemVel = { 0, -150 };
-		Item* item = FactoryItem::createItem("FireFlower", itemPos, itemDim, itemVel, ORANGE, true, true, false);
+		this -> item = FactoryItem::createItem("FireFlower", itemPos, itemDim, itemVel, ORANGE, true, true, false);
 		item->setFacingDirection(mario.getFacingDirection());
 		itemMinY = pos.y - 32;
 		this->map = map;
@@ -404,7 +404,7 @@ void QuestionStarBlock::doHit(Mario& mario, Map* map) {
 		Vector2 itemPos = { pos.x, pos.y - dim.y };
 		Vector2 itemDim = { 30, 32 }; 
 		Vector2 itemVel = { 0, -150 };
-		Item* item = FactoryItem::createItem("Star", itemPos, itemDim, itemVel, YELLOW, true, true, false);
+		this -> item = FactoryItem::createItem("Star", itemPos, itemDim, itemVel, YELLOW, true, true, false);
 		item->setFacingDirection(mario.getFacingDirection());
 		itemMinY = pos.y - 32;
 		this->map = map;
@@ -536,7 +536,7 @@ void QuestionThreeUpMoonBlock::doHit(Mario& mario, Map* map) {
 		Vector2 itemPos = { pos.x, pos.y - dim.y };
 		Vector2 itemDim = { 32, 32 };
 		Vector2 itemVel = { 0, -150 };
-		Item* item = FactoryItem::createItem("ThreeUpMoon", itemPos, itemDim, itemVel, YELLOW, true, true, false);
+		this-> item = FactoryItem::createItem("ThreeUpMoon", itemPos, itemDim, itemVel, YELLOW, true, true, false);
 		item->setFacingDirection(mario.getFacingDirection());
 		itemMinY = pos.y - 32;
 		this->map = map;

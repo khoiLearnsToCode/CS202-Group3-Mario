@@ -313,7 +313,7 @@ void Map::loadFromJsonFile(bool shouldLoadTestMap) {
 
     // Load blocks
     std::vector<int> blockIDs = mapJson["layers"][3]["data"];
-    std::vector<int> itemIDs = mapJson["layers"][5]["data"];
+    std::vector<int> itemIDs = mapJson["layers"][4]["data"];
     for (int y = 0; y < height; y++){
         for (int x = 0; x < width; x++){
             int blockID = blockIDs[y * width + x];
