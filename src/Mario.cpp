@@ -99,7 +99,7 @@ void Mario::update() {
     }
 
     // If walking: speedX, if running but not in full animation: maxSpeedX, if running in full animation: maxSpeedX * 1.3f
-    const float currentSpeedX = running ? (drawRunningFrames ? maxSpeedX * 1.3f : maxSpeedX) : speedX;
+    const float currentSpeedX = running ? (drawRunningFrames ? maxSpeedX * 1.1f : maxSpeedX) : speedX;
 
     const float currentFrameTime = running && state != SPRITE_STATE_DYING ? frameTimeRunning : frameTimeWalking;
 
