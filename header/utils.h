@@ -32,3 +32,9 @@ int getDrawMessageStringHeight();
 
 std::vector<std::string> split(std::string s, std::string delimiter = "\n");
 std::vector<std::string> split(const std::string& s, char delim);
+
+// Distance-based collision detection utilities
+float calculateDistance(Vector2 pos1, Vector2 pos2);
+float calculateDistanceSquared(Vector2 pos1, Vector2 pos2);
+bool isWithinDistance(Vector2 pos1, Vector2 pos2, float maxDistance);
+bool shouldCheckCollision(Vector2 pos1, Vector2 dim1, Vector2 pos2, Vector2 dim2, float maxDistance);

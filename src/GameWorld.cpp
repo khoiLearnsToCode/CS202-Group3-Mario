@@ -1,5 +1,6 @@
 #include "GameWorld.h"
 #include "Item.h"
+#include "utils.h"
 
 GameState GameWorld::state = GAME_STATE_TITLE_SCREEN;
 float GameWorld::gravity = 20;
@@ -15,7 +16,7 @@ GameWorld::GameWorld() :
         -600,           // jumpSpeed
         false           
     ),
-    map(mario, 1, true, this),
+    map(mario, 3, true, this),
     camera(nullptr),
     settingBoardIsOpen(false),
     helpingBoardIsOpen(false),
@@ -31,6 +32,7 @@ GameWorld::GameWorld() :
     helpButton(nullptr),
     pauseButtonsCooldownAcum(0.0f),
     pauseButtonsCooldownTime(0.5f),
+    maxDistForCollisionCheck(150.0f),
     titleScreen(nullptr),
     menuScreen(nullptr),
     selectCharacterScreen(nullptr),
@@ -148,11 +150,13 @@ void GameWorld::initScreensAndButtons() {
 
 void GameWorld::inputAndUpdate() {
 
-    map.loadFromJsonFile();
+    map.loadFromJsonFile(); 
 
-    std::map<std::string, Sound>& sounds = ResourceManager::getInstance().getSounds();
-    std::map<std::string, Music>& musics = ResourceManager::getInstance().getMusics();
+    // OPTIMIZATION: Cache resource references to avoid repeated lookups
+    static std::map<std::string, Sound>& sounds = ResourceManager::getInstance().getSounds();
+    static std::map<std::string, Music>& musics = ResourceManager::getInstance().getMusics();
 
+    // OPTIMIZATION: Cache vector references
     std::vector<Tile*>& Tiles = map.getTiles();
     std::vector<Block*>& Blocks = map.getBlocks();
     std::vector<Baddie*>& Baddies = map.getBaddies();
@@ -162,6 +166,7 @@ void GameWorld::inputAndUpdate() {
 
     // std::cerr << "Mario state: " << mario.getState() << std::endl;
     // std::cerr << "GameWorld state: " << state << std::endl;
+    // std::cerr << "gravity: " << gravity << std::endl;
     if ( mario.getState() != SPRITE_STATE_DYING && 
          mario.getState() != SPRITE_STATE_VICTORY &&
          mario.getState() != SPRITE_STATE_WAITING_TO_NEXT_MAP &&
@@ -225,6 +230,7 @@ void GameWorld::inputAndUpdate() {
         }
         
 
+        // OPTIMIZATION: Update collision probes once per entity per frame, not multiple times
         for ( const auto& block : Blocks ) {
             block->update();
         }
@@ -240,120 +246,132 @@ void GameWorld::inputAndUpdate() {
         for ( const auto& baddie : Baddies ) {
             baddie->update();
             baddie->followTheLeader( &mario );
+            // OPTIMIZATION: Update collision probes once per baddie
+            baddie->updateCollisionProbes();
+        }
+
+        // OPTIMIZATION: Update item collision probes once
+        for ( const auto& item : Items ) {
+            item->updateCollisionProbes();
         }
 
         // tiles collision resolution
         mario.updateCollisionProbes();
         for ( const auto& tile : Tiles ) {
 
-            // mario x tiles
-            CollisionType col = mario.checkCollision( tile );
+            // mario x tiles - Distance-based collision optimization
+            if (shouldCheckCollision(mario.getPos(), mario.getDim(), tile->getPos(), tile->getDim(), maxDistForCollisionCheck)) {
+                CollisionType col = mario.checkCollision( tile );
 
-            if ( tile->getType() == TILE_TYPE_SOLID ) {
-                switch ( col ) {
-                    case COLLISION_TYPE_NORTH:
-                        mario.setY( tile->getY() + tile->getHeight() );
-                        mario.setVelY( 0 );
-                        mario.updateCollisionProbes();
-                        break;
-                    case COLLISION_TYPE_SOUTH:
+                if ( tile->getType() == TILE_TYPE_SOLID ) {
+                    switch ( col ) {
+                        case COLLISION_TYPE_NORTH:
+                            mario.setY( tile->getY() + tile->getHeight() );
+                            mario.setVelY( 0 );
+                            mario.updateCollisionProbes();
+                            break;
+                        case COLLISION_TYPE_SOUTH:
+                            mario.setY( tile->getY() - mario.getHeight() );
+                            mario.setVelY( 0 );
+                            mario.setState( SPRITE_STATE_ON_GROUND );
+                            mario.updateCollisionProbes();
+                            break;
+                        case COLLISION_TYPE_EAST:
+                            mario.setX( tile->getX() - mario.getWidth() );
+                            mario.setVelX( 0 );
+                            mario.updateCollisionProbes();
+                            break;
+                        case COLLISION_TYPE_WEST:
+                            mario.setX( tile->getX() + tile->getWidth() );
+                            mario.setVelX( 0 );
+                            mario.updateCollisionProbes();
+                            break;
+                        default:
+                            break;
+                    }
+                } else if ( tile->getType() == TILE_TYPE_SOLID_FROM_ABOVE ) {
+                    if ( col == COLLISION_TYPE_SOUTH && mario.getState() == SPRITE_STATE_FALLING ) {
                         mario.setY( tile->getY() - mario.getHeight() );
                         mario.setVelY( 0 );
                         mario.setState( SPRITE_STATE_ON_GROUND );
                         mario.updateCollisionProbes();
-                        break;
-                    case COLLISION_TYPE_EAST:
-                        mario.setX( tile->getX() - mario.getWidth() );
-                        mario.setVelX( 0 );
-                        mario.updateCollisionProbes();
-                        break;
-                    case COLLISION_TYPE_WEST:
-                        mario.setX( tile->getX() + tile->getWidth() );
-                        mario.setVelX( 0 );
-                        mario.updateCollisionProbes();
-                        break;
-                    default:
-                        break;
-                }
-            } else if ( tile->getType() == TILE_TYPE_SOLID_FROM_ABOVE ) {
-                if ( col == COLLISION_TYPE_SOUTH && mario.getState() == SPRITE_STATE_FALLING ) {
-                    mario.setY( tile->getY() - mario.getHeight() );
-                    mario.setVelY( 0 );
-                    mario.setState( SPRITE_STATE_ON_GROUND );
-                    mario.updateCollisionProbes();
+                    }
                 }
             }
 
-            // baddies x tiles
+            // baddies x tiles - OPTIMIZATION: Skip redundant updateCollisionProbes + Distance check
             for ( const auto& baddie : Baddies ) {
-
-                baddie->updateCollisionProbes();
 
                 if ( baddie->getState() != SPRITE_STATE_DYING && 
                      baddie->getState() != SPRITE_STATE_TO_BE_REMOVED &&
                      ( tile->getType() == TILE_TYPE_SOLID || 
                        tile->getType() == TILE_TYPE_SOLID_ONLY_FOR_BADDIES ||
                        tile->getType() == TILE_TYPE_SOLID_FROM_ABOVE ) ) {
-                    switch ( baddie->checkCollision( tile ) ) {
-                        case COLLISION_TYPE_NORTH:
-                            baddie->setY( tile->getY() + tile->getHeight() );
-                            baddie->setVelY( 0 );
-                            baddie->updateCollisionProbes();
-                            break;
-                        case COLLISION_TYPE_SOUTH:
-                            baddie->setY( tile->getY() - baddie->getHeight() );
-                            baddie->setVelY( 0 );
-                            baddie->onSouthCollision();
-                            baddie->updateCollisionProbes();
-                            break;
-                        case COLLISION_TYPE_EAST:
-                            baddie->setX( tile->getX() - baddie->getWidth() );
-                            baddie->setVelX( -baddie->getVelX() );
-                            baddie->updateCollisionProbes();
-                            break;
-                        case COLLISION_TYPE_WEST:
-                            baddie->setX( tile->getX() + tile->getWidth() );
-                            baddie->setVelX( -baddie->getVelX() );
-                            baddie->updateCollisionProbes();
-                            break;
-                        default:
-                            break;
+                    
+                    // Distance-based collision optimization: Only check collision if objects are nearby
+                    if (shouldCheckCollision(baddie->getPos(), baddie->getDim(), tile->getPos(), tile->getDim(), maxDistForCollisionCheck)) {
+                        switch ( baddie->checkCollision( tile ) ) {
+                            case COLLISION_TYPE_NORTH:
+                                baddie->setY( tile->getY() + tile->getHeight() );
+                                baddie->setVelY( 0 );
+                                baddie->updateCollisionProbes();
+                                break;
+                            case COLLISION_TYPE_SOUTH:
+                                baddie->setY( tile->getY() - baddie->getHeight() );
+                                baddie->setVelY( 0 );
+                                baddie->onSouthCollision();
+                                baddie->updateCollisionProbes();
+                                break;
+                            case COLLISION_TYPE_EAST:
+                                baddie->setX( tile->getX() - baddie->getWidth() );
+                                baddie->setVelX( -baddie->getVelX() );
+                                baddie->updateCollisionProbes();
+                                break;
+                            case COLLISION_TYPE_WEST:
+                                baddie->setX( tile->getX() + tile->getWidth() );
+                                baddie->setVelX( -baddie->getVelX() );
+                                baddie->updateCollisionProbes();
+                                break;
+                            default:
+                                break;
+                        }
                     }
                 }
 
             }
 
-            // items x tiles
+            // items x tiles - OPTIMIZATION: Skip redundant updateCollisionProbes + Distance check
             for ( const auto& item : Items ) {
 
                 if ( tile->getType() == TILE_TYPE_SOLID || tile->getType() == TILE_TYPE_SOLID_FROM_ABOVE ) {
 
-                    item->updateCollisionProbes();
-
-                    switch ( item->checkCollision( tile ) ) {
-                        case COLLISION_TYPE_NORTH:
-                            item->setY( tile->getY() + tile->getHeight() );
-                            item->setVelY( 0 );
-                            item->updateCollisionProbes();
-                            break;
-                        case COLLISION_TYPE_SOUTH:
-                            item->setY( tile->getY() - item->getHeight() );
-                            item->setVelY( 0 );
-                            item->onSouthCollision( mario );
-                            item->updateCollisionProbes();
-                            break;
-                        case COLLISION_TYPE_EAST:
-                            item->setX( tile->getX() - item->getWidth() );
-                            item->setVelX( -item->getVelX() );
-                            item->updateCollisionProbes();
-                            break;
-                        case COLLISION_TYPE_WEST:
-                            item->setX( tile->getX() + tile->getWidth() );
-                            item->setVelX( -item->getVelX() );
-                            item->updateCollisionProbes();
-                            break;
-                        default:
-                            break;
+                    // Distance-based collision optimization: Only check collision if objects are nearby
+                    if (shouldCheckCollision(item->getPos(), item->getDim(), tile->getPos(), tile->getDim(), maxDistForCollisionCheck)) {
+                        switch ( item->checkCollision( tile ) ) {
+                            case COLLISION_TYPE_NORTH:
+                                item->setY( tile->getY() + tile->getHeight() );
+                                item->setVelY( 0 );
+                                item->updateCollisionProbes();
+                                break;
+                            case COLLISION_TYPE_SOUTH:
+                                item->setY( tile->getY() - item->getHeight() );
+                                item->setVelY( 0 );
+                                item->onSouthCollision( mario );
+                                item->updateCollisionProbes();
+                                break;
+                            case COLLISION_TYPE_EAST:
+                                item->setX( tile->getX() - item->getWidth() );
+                                item->setVelX( -item->getVelX() );
+                                item->updateCollisionProbes();
+                                break;
+                            case COLLISION_TYPE_WEST:
+                                item->setX( tile->getX() + tile->getWidth() );
+                                item->setVelX( -item->getVelX() );
+                                item->updateCollisionProbes();
+                                break;
+                            default:
+                                break;
+                        }
                     }
 
                 }
@@ -367,62 +385,100 @@ void GameWorld::inputAndUpdate() {
 
         for ( const auto& block : Blocks ) {
 
-            // mario x blocks
-            switch ( mario.checkCollision( block ) ) {
-                case COLLISION_TYPE_NORTH:
-                    mario.setY( block->getY() + block->getHeight() );
-                    mario.setVelY( 0 );
-                    mario.updateCollisionProbes();
-                    block->doHit( mario, &map );
-                    break;
-                case COLLISION_TYPE_SOUTH:
-                    mario.setY( block->getY() - mario.getHeight() );
-                    mario.setVelY( 0 );
-                    mario.setState( SPRITE_STATE_ON_GROUND );
-                    mario.updateCollisionProbes();
-                    break;
-                case COLLISION_TYPE_EAST:
-                    mario.setX( block->getX() - mario.getWidth() );
-                    mario.setVelX( 0 );
-                    mario.updateCollisionProbes();
-                    break;
-                case COLLISION_TYPE_WEST:
-                    mario.setX( block->getX() + block->getWidth() );
-                    mario.setVelX( 0 );
-                    mario.updateCollisionProbes();
-                    break;
-                default:
-                    break;
+            // mario x blocks - Distance-based collision optimization
+            if (shouldCheckCollision(mario.getPos(), mario.getDim(), block->getPos(), block->getDim(), maxDistForCollisionCheck)) {
+                switch ( mario.checkCollision( block ) ) {
+                    case COLLISION_TYPE_NORTH:
+                        mario.setY( block->getY() + block->getHeight() );
+                        mario.setVelY( 0 );
+                        mario.updateCollisionProbes();
+                        block->doHit( mario, &map );
+                        break;
+                    case COLLISION_TYPE_SOUTH:
+                        mario.setY( block->getY() - mario.getHeight() );
+                        mario.setVelY( 0 );
+                        mario.setState( SPRITE_STATE_ON_GROUND );
+                        mario.updateCollisionProbes();
+                        break;
+                    case COLLISION_TYPE_EAST:
+                        mario.setX( block->getX() - mario.getWidth() );
+                        mario.setVelX( 0 );
+                        mario.updateCollisionProbes();
+                        break;
+                    case COLLISION_TYPE_WEST:
+                        mario.setX( block->getX() + block->getWidth() );
+                        mario.setVelX( 0 );
+                        mario.updateCollisionProbes();
+                        break;
+                    default:
+                        break;
+                }
             }
 
-            // baddies x blocks
+            // baddies x blocks - OPTIMIZATION: Skip redundant updateCollisionProbes + Distance check
             for ( const auto& baddie : Baddies ) {
-
-                baddie->updateCollisionProbes();
 
                 if ( baddie->getState() != SPRITE_STATE_DYING && 
                      baddie->getState() != SPRITE_STATE_TO_BE_REMOVED ) {
-                    switch ( baddie->checkCollision( block ) ) {
+                    
+                    // Distance-based collision optimization: Only check collision if objects are nearby
+                    if (shouldCheckCollision(baddie->getPos(), baddie->getDim(), block->getPos(), block->getDim(), maxDistForCollisionCheck)) {
+                        switch ( baddie->checkCollision( block ) ) {
+                            case COLLISION_TYPE_NORTH:
+                                baddie->setY( block->getY() + block->getHeight() );
+                                baddie->setVelY( 0 );
+                                baddie->updateCollisionProbes();
+                                break;
+                            case COLLISION_TYPE_SOUTH:
+                                baddie->setY( block->getY() - baddie->getHeight() );
+                                baddie->setVelY( 0 );
+                                baddie->onSouthCollision();
+                                baddie->updateCollisionProbes();
+                                break;
+                            case COLLISION_TYPE_EAST:
+                                baddie->setX( block->getX() - baddie->getWidth() );
+                                baddie->setVelX( -baddie->getVelX() );
+                                baddie->updateCollisionProbes();
+                                break;
+                            case COLLISION_TYPE_WEST:
+                                baddie->setX( block->getX() + block->getWidth() );
+                                baddie->setVelX( -baddie->getVelX() );
+                                baddie->updateCollisionProbes();
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                }
+
+            }
+
+            // items x blocks - OPTIMIZATION: Skip redundant updateCollisionProbes + Distance check  
+            for ( const auto& item : Items ) {
+
+                // Distance-based collision optimization: Only check collision if objects are nearby
+                if (shouldCheckCollision(item->getPos(), item->getDim(), block->getPos(), block->getDim(), maxDistForCollisionCheck)) {
+                    switch ( item->checkCollision( block ) ) {
                         case COLLISION_TYPE_NORTH:
-                            baddie->setY( block->getY() + block->getHeight() );
-                            baddie->setVelY( 0 );
-                            baddie->updateCollisionProbes();
+                            item->setY( block->getY() + block->getHeight() );
+                            item->setVelY( 0 );
+                            item->updateCollisionProbes();
                             break;
                         case COLLISION_TYPE_SOUTH:
-                            baddie->setY( block->getY() - baddie->getHeight() );
-                            baddie->setVelY( 0 );
-                            baddie->onSouthCollision();
-                            baddie->updateCollisionProbes();
+                            item->setY( block->getY() - item->getHeight() );
+                            item->setVelY( 0 );
+                            item->onSouthCollision( mario );
+                            item->updateCollisionProbes();
                             break;
                         case COLLISION_TYPE_EAST:
-                            baddie->setX( block->getX() - baddie->getWidth() );
-                            baddie->setVelX( -baddie->getVelX() );
-                            baddie->updateCollisionProbes();
+                            item->setX( block->getX() - item->getWidth() );
+                            item->setVelX( -item->getVelX() );
+                            item->updateCollisionProbes();
                             break;
                         case COLLISION_TYPE_WEST:
-                            baddie->setX( block->getX() + block->getWidth() );
-                            baddie->setVelX( -baddie->getVelX() );
-                            baddie->updateCollisionProbes();
+                            item->setX( block->getX() + block->getWidth() );
+                            item->setVelX( -item->getVelX() );
+                            item->updateCollisionProbes();
                             break;
                         default:
                             break;
@@ -431,56 +487,27 @@ void GameWorld::inputAndUpdate() {
 
             }
 
-            // items x blocks
-            for ( const auto& item : Items ) {
-
-                item->updateCollisionProbes();
-
-                switch ( item->checkCollision( block ) ) {
-                    case COLLISION_TYPE_NORTH:
-                        item->setY( block->getY() + block->getHeight() );
-                        item->setVelY( 0 );
-                        item->updateCollisionProbes();
-                        break;
-                    case COLLISION_TYPE_SOUTH:
-                        item->setY( block->getY() - item->getHeight() );
-                        item->setVelY( 0 );
-                        item->onSouthCollision( mario );
-                        item->updateCollisionProbes();
-                        break;
-                    case COLLISION_TYPE_EAST:
-                        item->setX( block->getX() - item->getWidth() );
-                        item->setVelX( -item->getVelX() );
-                        item->updateCollisionProbes();
-                        break;
-                    case COLLISION_TYPE_WEST:
-                        item->setX( block->getX() + block->getWidth() );
-                        item->setVelX( -item->getVelX() );
-                        item->updateCollisionProbes();
-                        break;
-                    default:
-                        break;
-                }
-
-            }
-
         }
 
-        // mario x items collision resolution and offscreen items removal
+        // mario x items collision resolution and offscreen items removal with distance optimization
         for ( size_t i = 0; i < Items.size(); i++ ) {
 
             Item* item = Items[i];
 
             if ( item->getState() != SPRITE_STATE_HIT &&
                  item->getState() != SPRITE_STATE_TO_BE_REMOVED ) {
-                if ( item->checkCollision( &mario ) != COLLISION_TYPE_NONE ) {
-                    if ( !mario.isTransitioning() ) {
-                        item->setState( SPRITE_STATE_HIT );
-                        item->playCollisionSound();
-                        if ( item->isPauseGameOnHit() ) {
-                            pauseGame( false, false, false, false, false );
+                
+                // Distance-based collision optimization: Only check collision if Mario is close to the item
+                if (shouldCheckCollision(mario.getPos(), mario.getDim(), item->getPos(), item->getDim(), maxDistForCollisionCheck)) {
+                    if ( item->checkCollision( &mario ) != COLLISION_TYPE_NONE ) {
+                        if ( !mario.isTransitioning() ) {
+                            item->setState( SPRITE_STATE_HIT );
+                            item->playCollisionSound();
+                            if ( item->isPauseGameOnHit() ) {
+                                pauseGame( false, false, false, false, false );
+                            }
+                            item->updateMario( mario );
                         }
-                        item->updateMario( mario );
                     }
                 } else if ( item->getY() > map.getMaxHeight() ) {
                     item->setState( SPRITE_STATE_TO_BE_REMOVED );
@@ -498,7 +525,7 @@ void GameWorld::inputAndUpdate() {
             Items.erase( Items.begin() + collectedIndexes[i] );
         }
         
-        // mario x static items collision resolution
+        // mario x static items collision resolution with distance optimization
         collectedIndexes.clear();
         for ( size_t i = 0; i < StaticItems.size(); i++ ) {
 
@@ -506,10 +533,14 @@ void GameWorld::inputAndUpdate() {
 
             if ( item->getState() != SPRITE_STATE_HIT &&
                  item->getState() != SPRITE_STATE_TO_BE_REMOVED ) {
-                if ( item->checkCollision( &mario ) != COLLISION_TYPE_NONE ) {
-                    item->setState( SPRITE_STATE_HIT );
-                    item->playCollisionSound();
-                    item->updateMario( mario );
+                
+                // Distance-based collision optimization: Only check collision if Mario is close to the static item
+                if (shouldCheckCollision(mario.getPos(), mario.getDim(), item->getPos(), item->getDim(), maxDistForCollisionCheck)) {
+                    if ( item->checkCollision( &mario ) != COLLISION_TYPE_NONE ) {
+                        item->setState( SPRITE_STATE_HIT );
+                        item->playCollisionSound();
+                        item->updateMario( mario );
+                    }
                 } else if ( item->getY() > map.getMaxHeight() ) {
                     item->setState( SPRITE_STATE_TO_BE_REMOVED );
                 }
@@ -546,32 +577,34 @@ void GameWorld::inputAndUpdate() {
                 if ( baddie->getState() != SPRITE_STATE_DYING && 
                      baddie->getState() != SPRITE_STATE_TO_BE_REMOVED ) {
 
-                    const CollisionType col = mario.checkCollisionBaddie( baddie );
+                    // Distance-based collision optimization: Only check collision if Mario is close to the baddie
+                    if (shouldCheckCollision(mario.getPos(), mario.getDim(), baddie->getPos(), baddie->getDim(), maxDistForCollisionCheck)) {
+                        const CollisionType col = mario.checkCollisionBaddie( baddie );
 
-                    if ( mario.isInvincible() && col ) {
-                        baddie->onHit();
-                        PlaySound( sounds["stomp"] );
-                        mario.addPoints( baddie->getEarnedPoints() );
-                    } else {
+                        if ( mario.isInvincible() && col ) {
+                            baddie->onHit();
+                            PlaySound( sounds["stomp"] );
+                            mario.addPoints( baddie->getEarnedPoints() );
+                        } else {
 
-                        if ( baddie->getAuxiliaryState() != SPRITE_STATE_INVULNERABLE ) {
+                            if ( baddie->getAuxiliaryState() != SPRITE_STATE_INVULNERABLE ) {
 
-                            // mario and fireballs x baddies collision resolution and offscreen baddies removal
-                            switch ( col ) {
-                                case COLLISION_TYPE_NORTH:
-                                case COLLISION_TYPE_EAST:
-                                case COLLISION_TYPE_WEST:
-                                    if ( !mario.isImmortal() && !mario.isInvulnerable() ) {
-                                        switch ( mario.getType() ) {
-                                            case MARIO_TYPE_SMALL:
-                                                mario.setState( SPRITE_STATE_DYING );
-                                                mario.playPlayerDownMusicStream();
-                                                mario.removeLives( 1 );
-                                                break;
-                                            case MARIO_TYPE_SUPER:
-                                                PlaySound( sounds["pipe"] );
-                                                mario.setLastStateBeforeTransition( mario.getState() );
-                                                mario.setState( SPRITE_STATE_TRANSITIONING_SUPER_TO_SMALL );
+                                // mario and fireballs x baddies collision resolution and offscreen baddies removal
+                                switch ( col ) {
+                                    case COLLISION_TYPE_NORTH:
+                                    case COLLISION_TYPE_EAST:
+                                    case COLLISION_TYPE_WEST:
+                                        if ( !mario.isImmortal() && !mario.isInvulnerable() ) {
+                                            switch ( mario.getType() ) {
+                                                case MARIO_TYPE_SMALL:
+                                                    mario.setState( SPRITE_STATE_DYING );
+                                                    mario.playPlayerDownMusicStream();
+                                                    mario.removeLives( 1 );
+                                                    break;
+                                                case MARIO_TYPE_SUPER:
+                                                    PlaySound( sounds["pipe"] );
+                                                    mario.setLastStateBeforeTransition( mario.getState() );
+                                                    mario.setState( SPRITE_STATE_TRANSITIONING_SUPER_TO_SMALL );
                                                 mario.setInvulnerable( true );
                                                 break;
                                             case MARIO_TYPE_FLOWER:
@@ -667,6 +700,8 @@ void GameWorld::inputAndUpdate() {
                         }
 
                     }
+                    
+                    } // Close distance check bracket
 
                     if ( baddie->getX() + baddie->getWidth() < 0 ||
                          baddie->getX() > map.getMaxWidth() ||
@@ -1064,14 +1099,12 @@ void GameWorld::draw() {
             }
 
             DrawRectangle( 0, 0, GetScreenWidth(), GetScreenHeight(), Fade( RAYWHITE, 0.9 ) );
-            Texture2D* t = &textures["guiCredits"];
-            DrawTexture( *t, GetScreenWidth() / 2 - t->width / 2, 20, WHITE );
 
             std::string message1 = "Thank you for playing!!!";
             std::string message2 = "Press any key to restart!";
 
-            drawString( message1, GetScreenWidth() / 2 - getDrawStringWidth( message1 ) / 2, t->height + 40 );
-            drawString( message2, GetScreenWidth() / 2 - getDrawStringWidth( message2 ) / 2, t->height + 65 );
+            drawString( message1, GetScreenWidth() / 2 - getDrawStringWidth( message1 ) / 2, 40 );
+            drawString( message2, GetScreenWidth() / 2 - getDrawStringWidth( message2 ) / 2, 65 );
 
         } 
         
@@ -1187,3 +1220,7 @@ void GameWorld::showGuardScreen(GuardAction action) {
     }
 }
 
+// Distance threshold getter and setter
+float GameWorld::getMaxDistForCollisionCheck() const {
+    return maxDistForCollisionCheck;
+}

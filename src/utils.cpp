@@ -5,6 +5,7 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <cmath>
 
 double toRadians(double degrees) {
     return degrees * PI / 180.0;
@@ -317,4 +318,34 @@ std::vector<std::string> split(const std::string& s, char delim) {
     }
 
     return result;
+}
+
+// Distance-based collision detection utilities
+float calculateDistance(Vector2 pos1, Vector2 pos2) {
+    float dx = pos2.x - pos1.x;
+    float dy = pos2.y - pos1.y;
+    return sqrtf(dx * dx + dy * dy);
+}
+
+float calculateDistanceSquared(Vector2 pos1, Vector2 pos2) {
+    float dx = pos2.x - pos1.x;
+    float dy = pos2.y - pos1.y;
+    return dx * dx + dy * dy;
+}
+
+bool isWithinDistance(Vector2 pos1, Vector2 pos2, float maxDistance) {
+    // Use squared distance to avoid expensive sqrt calculation
+    float maxDistanceSquared = maxDistance * maxDistance;
+    return calculateDistanceSquared(pos1, pos2) <= maxDistanceSquared;
+}
+
+bool shouldCheckCollision(Vector2 pos1, Vector2 dim1, Vector2 pos2, Vector2 dim2, float maxDistance) {
+    // Calculate center points of both objects
+    Vector2 center1 = { pos1.x + dim1.x / 2.0f, pos1.y + dim1.y / 2.0f };
+    Vector2 center2 = { pos2.x + dim2.x / 2.0f, pos2.y + dim2.y / 2.0f };
+    
+    // Add object dimensions to collision distance for better accuracy
+    float adjustedMaxDistance = maxDistance + (dim1.x + dim1.y + dim2.x + dim2.y) / 4.0f;
+    
+    return isWithinDistance(center1, center2, adjustedMaxDistance);
 }
