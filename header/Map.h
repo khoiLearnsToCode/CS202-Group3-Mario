@@ -46,8 +46,9 @@ class Map : public virtual Drawable {
     float drawBlackScreenFadeAcum;
     float drawBlackScreenFadeTime;
 
+    // Near sight vision effect for map3
+    Vector2 lastValidMarioPos;
     
-
     //bool parseBlocks;
     //bool parseItems;
     //bool parseBaddies;
@@ -73,8 +74,6 @@ public:
 
     void setMarioOffset(float marioOffset);
     void setDrawBlackScreen(bool drawBlackScreen);
-    // void setDrawMessage(bool drawMessage);
-    // void setMessage(std::string message);
     void setCamera(Camera2D* camera);
     void setGameWorld(GameWorld* gw);
 
@@ -83,6 +82,7 @@ public:
     std::vector<Item*>& getItems();
     std::vector<Item*>& getStaticItems();
     std::vector<Baddie*>& getBaddies();
+    static const std::vector<Color> backgroundColorPallete;
 
     float getMaxWidth() const;
     float getMaxHeight() const;
