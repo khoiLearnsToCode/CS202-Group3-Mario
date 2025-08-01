@@ -99,7 +99,7 @@ void Mario::update() {
     }
 
     // If walking: speedX, if running but not in full animation: maxSpeedX, if running in full animation: maxSpeedX * 1.3f
-    const float currentSpeedX = running ? (drawRunningFrames ? maxSpeedX * 1.3f : maxSpeedX) : speedX;
+    const float currentSpeedX = running ? (drawRunningFrames ? maxSpeedX * 1.1f : maxSpeedX) : speedX;
 
     const float currentFrameTime = running && state != SPRITE_STATE_DYING ? frameTimeRunning : frameTimeWalking;
 
@@ -137,7 +137,7 @@ void Mario::update() {
     if (state == SPRITE_STATE_DYING) {
 		pos.y += dyingVelY * delta;
 		updateCollisionProbes();
-        dyingVelY += GameWorld::gravity;
+        dyingVelY += GameWorld::gravity * delta;
 	}
 
     if (invulnerable) {
@@ -294,7 +294,7 @@ void Mario::update() {
             pos.x = pos.x + vel.x * delta;
             pos.y = pos.y + vel.y * delta;
 
-            vel.y += GameWorld::gravity;
+            vel.y += GameWorld::gravity * delta;
 
             if (static_cast<int>(lastPos.y) < static_cast<int>(pos.y)) {
                 state = SPRITE_STATE_FALLING;

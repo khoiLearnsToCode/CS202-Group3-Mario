@@ -3,7 +3,7 @@
 #include "utils.h"
 
 GameState GameWorld::state = GAME_STATE_TITLE_SCREEN;
-float GameWorld::gravity = 20;
+float GameWorld::gravity = 1200;
 
 GameWorld::GameWorld() :
     mario( 
