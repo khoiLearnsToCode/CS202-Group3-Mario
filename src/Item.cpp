@@ -147,7 +147,7 @@ void Mushroom::update() {
             pos.x -= vel.x * delta;
         pos.y += vel.y * delta;
         if (applyGravity) 
-            vel.y += GameWorld::gravity;
+            vel.y += GameWorld::gravity * delta;
         if (blinking) {
             blinkingAcum += delta;
             if (blinkingAcum >= blinkingTime) {
@@ -268,7 +268,7 @@ void OneUpMushroom::update() {
         else 
             pos.x -= vel.x * delta;
         pos.y += vel.y * delta;
-        vel.y += GameWorld::gravity;
+        vel.y += GameWorld::gravity * delta;
     }
     else if (state == SPRITE_STATE_HIT) {
         onHitFrameAcum += delta;
@@ -459,7 +459,7 @@ void Star::update() {
         else 
             pos.x -= vel.x * delta;      
         pos.y += vel.y * delta;
-        vel.y += GameWorld::gravity;
+        vel.y += GameWorld::gravity * delta;
     }
     else if (state == SPRITE_STATE_HIT) {
         onHitFrameAcum += delta;

@@ -44,7 +44,7 @@ void BanzaiBill::update() {
         pos.x = pos.x + vel.x * delta;
         pos.y = pos.y + vel.y * delta;
 
-        vel.y += GameWorld::gravity;
+        vel.y += GameWorld::gravity * delta;
 
         dyingFrameAcum += delta;
         if ( dyingFrameAcum >= dyingFrameTime ) {

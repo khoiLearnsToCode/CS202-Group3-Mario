@@ -137,7 +137,7 @@ void Mario::update() {
     if (state == SPRITE_STATE_DYING) {
 		pos.y += dyingVelY * delta;
 		updateCollisionProbes();
-        dyingVelY += GameWorld::gravity;
+        dyingVelY += GameWorld::gravity * delta;
 	}
 
     if (invulnerable) {
@@ -294,7 +294,7 @@ void Mario::update() {
             pos.x = pos.x + vel.x * delta;
             pos.y = pos.y + vel.y * delta;
 
-            vel.y += GameWorld::gravity;
+            vel.y += GameWorld::gravity * delta;
 
             if (static_cast<int>(lastPos.y) < static_cast<int>(pos.y)) {
                 state = SPRITE_STATE_FALLING;
