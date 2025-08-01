@@ -46,6 +46,11 @@
 #include <string>
 #include <vector>
 
+const std::vector<Color> Map::backgroundColorPallete = {
+    { 62, 191, 255, 255 },  // Sky blue
+    { 255, 255, 225, 255 }, // Light yellow
+    { 2, 38, 83, 255 },     // Dark blue
+};
 
 Map::Map(Mario& mario, int id, bool loadTestMap, GameWorld* gw) :
 
@@ -58,12 +63,15 @@ Map::Map(Mario& mario, int id, bool loadTestMap, GameWorld* gw) :
     mario(mario),
     marioOffset(0),
     backgroundId(1),
-    maxBackgroundId(10),
+    maxBackgroundId(3),
     backgroundColor(WHITE),
     backgroundTexture(Texture()),
     drawBlackScreen(false),
     drawBlackScreenFadeAcum(0),
     drawBlackScreenFadeTime(1.5),
+
+    // Near sight vision effect for map3
+    lastValidMarioPos({0, 0}),
 
     //tileSetId(1),
     //maxTileSetId(4),
@@ -128,6 +136,8 @@ void Map::loadFromJsonFile(bool shouldLoadTestMap) {
     
     else {
         jsonFilePath = "../resource/maps/map" + std::to_string(id) + ".json";
+        backgroundId = id;
+        backgroundColor = backgroundColorPallete[id - 1];
     }
 
     std::ifstream fin(jsonFilePath);
@@ -165,9 +175,8 @@ void Map::loadFromJsonFile(bool shouldLoadTestMap) {
         } else if (backgroundId > maxBackgroundId) {
             backgroundId = maxBackgroundId;
         }
-    } else {
-        backgroundId = 1; // Default value
     }
+    // backgroundId is already set to map id by default if not loading test map
 
     // Set music ID
     if (mapJson.contains("musicId")) {
@@ -358,7 +367,7 @@ void Map::loadFromJsonFile(bool shouldLoadTestMap) {
                 }
 
                 else if (itemID == 103) {
-                    newBlock = new QuestionMushroomBlock({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {TILE_WIDTH, TILE_WIDTH}, WHITE, 0.1f, 4);
+                    newBlock = new QuestionOneUpMushroomBlock({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {TILE_WIDTH, TILE_WIDTH}, WHITE, 0.1f, 4);
                 }
 
                 else if (itemID == 104) {
@@ -501,6 +510,18 @@ void Map::draw() {
 
     Vector2 pos{10.0f, GetScreenHeight() - 20.0f};
     Vector2 drawPos = GetScreenToWorld2D(pos, *camera);
+    
+    if (id == 3) {  // Near sight vision effect for map3
+        // Update last valid Mario position when he's not dying
+        if (mario.getState() != SPRITE_STATE_DYING) {
+            lastValidMarioPos = mario.getPos();
+        }
+        
+        for (float radius = 0; radius < GetScreenWidth() * 1.5f; radius += GetScreenWidth() / 100.0f) {
+            DrawRing(lastValidMarioPos, radius, GetScreenWidth() * 1.5f, 0.0f, 360.0f, 32, Fade(BLACK, 0.07f));
+        }
+    }
+
     DrawFPS(drawPos.x, drawPos.y);
 
     if (drawBlackScreen) {
@@ -600,6 +621,9 @@ void Map::reset() {
     drawBlackScreen = false;
     drawBlackScreenFadeAcum = 0;
 
+    // Reset near sight vision position
+    lastValidMarioPos = {0, 0};
+
     for (const auto& tile : untouchableTiles) {
         delete tile;
     }
@@ -656,10 +680,6 @@ bool Map::hasNext() {
 void Map::first() {
     id = 1;
 }
-
-//void Map::pauseGameToShowMessage() const {
-//    gw->pauseGame(false, false, false, true);
-//}
 
 void Map::eraseBaddieFromDrawingVectors(Baddie* baddie) {
 
