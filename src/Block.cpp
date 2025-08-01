@@ -125,7 +125,7 @@ void QuestionBlock::update() {
 		}
 
 		coinY += coinVelY * delta;
-		coinVelY += GameWorld::gravity;
+		coinVelY += GameWorld::gravity * delta;
 
 	}
 
@@ -573,7 +573,7 @@ void ExclamationBlock::update() {
 			coinAnimationFrame %= maxFrames;
 		}
 		coinY += coinVelY * delta;
-		coinVelY += GameWorld::gravity;
+		coinVelY += GameWorld::gravity * delta;
 	}
 	if (!hit) {
 		frameAcum += GetFrameTime();

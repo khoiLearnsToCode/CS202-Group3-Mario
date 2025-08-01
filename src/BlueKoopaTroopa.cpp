@@ -37,7 +37,7 @@ void BlueKoopaTroopa::update() {
         pos.x = pos.x + vel.x * delta;
         pos.y = pos.y + vel.y * delta;
 
-        vel.y += GameWorld::gravity;
+        vel.y += GameWorld::gravity * delta;
 
     } else if ( state == SPRITE_STATE_DYING ) {
 
