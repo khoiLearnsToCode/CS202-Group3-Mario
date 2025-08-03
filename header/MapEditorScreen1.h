@@ -38,7 +38,6 @@ private:
     void loadAvailableMaps();
     void loadUserDesignedMapsFromFilesystem();
     void drawScrollableMapList();
-    void createNewMapFromTemplate(int templateIndex);
     void loadUserDesignedMap(int mapIndex);
     void saveMapToFile(const UserMapData& mapData, const std::string& filename);
     UserMapData loadMapFromFile(const std::string& filepath);

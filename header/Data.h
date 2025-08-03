@@ -43,8 +43,8 @@ struct UserMapData {
     std::string filename;
     std::string displayName;
     std::vector<int> entitiesID;
-    std::array<int, 4> backgroundColor;
+    Color backgroundColor;
     int backgroundID;
     
-    UserMapData() : entitiesID(12000, 0), backgroundColor({255, 255, 255, 0}), backgroundID(1) {}
+    UserMapData() : entitiesID(12000, 0), backgroundColor({255, 255, 255, 255}), backgroundID(1) {}
 };

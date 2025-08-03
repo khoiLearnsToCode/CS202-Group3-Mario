@@ -8,7 +8,7 @@
 using json = nlohmann::json;
 
 MapEditorScreen1::MapEditorScreen1() : Screen(), 
-                                       font(ResourceManager::getInstance().getFont("fixedsys")),
+                                       font(ResourceManager::getInstance().getFont("SuperMario256")),
                                        fontSize(40.0f),
                                        showSavedMapDialog(false),
                                        scrollOffset({0, 0}),
@@ -16,35 +16,36 @@ MapEditorScreen1::MapEditorScreen1() : Screen(),
                                        lastClickedIndex(-1),
                                        lastClickTime(0.0f) {
     
-    try {
+    
         // Create buttons for map editor options
-        buttons.emplace("NEW MAP", new ButtonTextTexture("NEW MAP", "longButton", 
-                        {GetScreenWidth() / 2.0f - 128.0f, GetScreenHeight() / 2.0f - 50.0f}, 
-                        2.0f, WHITE, font, fontSize));
+    buttons.emplace("NEW MAP", new ButtonTextTexture("NEW MAP", "longButton", 
+                    {GetScreenWidth() / 2.0f - 128.0f, GetScreenHeight() / 2.0f - 50.0f}, 
+                    2.0f, WHITE, font, fontSize));
         
-        buttons.emplace("SAVED MAP", new ButtonTextTexture("SAVED MAP", "longButton", 
-                        {GetScreenWidth() / 2.0f - 128.0f, GetScreenHeight() / 2.0f + 25.0f}, 
-                        2.0f, WHITE, font, fontSize));
+    buttons.emplace("SAVED MAP", new ButtonTextTexture("SAVED MAP", "longButton", 
+                    {GetScreenWidth() / 2.0f - 128.0f, GetScreenHeight() / 2.0f + 25.0f}, 
+                    2.0f, WHITE, font, fontSize));
+    
+    buttons.emplace("BACK TO MENU", new ButtonTextTexture("returnButton", 
+                    { 100.0f, GetScreenHeight() - 100.0f }, 2.0f));
         
-        buttons.emplace("BACK TO MENU", new ButtonTextTexture("returnButton", 
-                        { 100.0f, GetScreenHeight() - 100.0f }, 2.0f));
-        
-        // Initialize dialog box (centered on screen)
-        dialogBox = {
-            GetScreenWidth() / 2.0f - 400.0f,
-            GetScreenHeight() / 2.0f - 250.0f,
-            800.0f,
-            500.0f
-        };
+    // Initialize dialog box (centered on screen)
+    dialogBox = {
+        GetScreenWidth() / 2.0f - 400.0f,
+        GetScreenHeight() / 2.0f - 250.0f,
+        800.0f,
+        500.0f
+    };
         
         // Initialize scroll view rectangle (inside the dialog box)
         scrollViewRec = {
-            dialogBox.x + 20.0f,
-            dialogBox.y + 80.0f,
-            dialogBox.width - 40.0f,
-            dialogBox.height - 140.0f
-        };
-        
+        dialogBox.x + 20.0f,
+        dialogBox.y + 80.0f,
+        dialogBox.width - 40.0f,
+        dialogBox.height - 140.0f
+    };
+
+    try {    
         // Load available maps
         loadAvailableMaps();
         
@@ -103,16 +104,9 @@ void MapEditorScreen1::update() {
                 // Check for double-click: same item clicked within time window
                 if (clickedIndex == lastClickedIndex && 
                     currentTime - lastClickTime < doubleClickTimeWindow) {
-                    // Double-click detected - handle based on selection type
-                    if (clickedIndex < 4) {
-                        // Template selection - create new map from template
-                        createNewMapFromTemplate(clickedIndex);
-                    } else {
-                        // User-designed map selection
-                        int userMapIndex = clickedIndex - 4;
-                        if (userMapIndex < userDesignedMaps.size()) {
-                            loadUserDesignedMap(userMapIndex);
-                        }
+                    // Double-click detected - load user-designed map
+                    if (clickedIndex < userDesignedMaps.size()) {
+                        loadUserDesignedMap(clickedIndex);
                     }
                     showSavedMapDialog = false;
                     selectedMapIndex = -1;
@@ -171,7 +165,7 @@ void MapEditorScreen1::draw() {
         DrawRectangleLinesEx(dialogBox, 3.0f, BLACK);
         
         // Draw dialog title
-        const char* dialogTitle = "AVAILABLE MAPS";
+        const char* dialogTitle = "SAVED MAPS";
         Vector2 titleSize = MeasureTextEx(font, dialogTitle, fontSize, 0.0f);
         DrawTextEx(font, dialogTitle, 
                    {dialogBox.x + (dialogBox.width - titleSize.x) / 2.0f, dialogBox.y + 20.0f}, 
@@ -209,17 +203,11 @@ Button* MapEditorScreen1::getButton(const std::string& key) const {
 void MapEditorScreen1::loadAvailableMaps() {
     availableMaps.clear();
     
-    // First, add predefined map templates
-    availableMaps.push_back("Template: Basic Map");
-    availableMaps.push_back("Template: Advanced Map");
-    availableMaps.push_back("Template: Challenge Map");
-    availableMaps.push_back("Template: Custom Map");
-    
-    // Then, load and add user-designed maps from filesystem
+    // Load user-designed maps from filesystem
     loadUserDesignedMapsFromFilesystem();
     
     for (const auto& mapData : userDesignedMaps) {
-        std::string mapDisplay = "User Map: " + mapData.displayName;
+        std::string mapDisplay = mapData.displayName;
         availableMaps.push_back(mapDisplay);
     }
     
@@ -233,7 +221,7 @@ void MapEditorScreen1::loadAvailableMaps() {
 void MapEditorScreen1::drawScrollableMapList() {
     if (availableMaps.empty()) {
         // Draw a simple message if no maps are available
-        const char* noMapsText = "No maps to display";
+        const char* noMapsText = "No saved maps found";
         Vector2 textSize = MeasureTextEx(font, noMapsText, fontSize - 10.0f, 0.0f);
         Vector2 textPos = {
             scrollViewRec.x + (scrollViewRec.width - textSize.x) / 2.0f,
@@ -273,8 +261,8 @@ void MapEditorScreen1::drawScrollableMapList() {
         
         // Only draw items that are visible
         if (itemY + itemHeight >= scrollViewRec.y && itemY <= scrollViewRec.y + scrollViewRec.height) {
-            Rectangle itemRect = {scrollViewRec.x + 5.0f, itemY + 2.0f, 
-                                scrollViewRec.width - 10.0f, itemHeight - 4.0f};
+            Rectangle itemRect = {scrollViewRec.x, itemY, 
+                                scrollViewRec.width, itemHeight};
             
             // Validate item rectangle
             if (itemRect.width <= 0 || itemRect.height <= 0) {
@@ -323,7 +311,7 @@ void MapEditorScreen1::drawScrollableMapList() {
             scrollRatio = std::clamp(scrollRatio, 0.0f, 1.0f); // Clamp between 0 and 1
             float thumbY = scrollViewRec.y + (scrollRatio * (scrollbarHeight - thumbHeight));
             
-            Rectangle scrollThumb = {scrollbarX + 2.0f, thumbY, scrollbarWidth - 4.0f, thumbHeight};
+            Rectangle scrollThumb = {scrollbarX, thumbY, scrollbarWidth, thumbHeight};
             DrawRectangleRec(scrollThumb, DARKGRAY);
             DrawRectangleLinesEx(scrollThumb, 1.0f, BLACK);
         }
@@ -332,64 +320,14 @@ void MapEditorScreen1::drawScrollableMapList() {
     EndScissorMode();
 }
 
-void MapEditorScreen1::createNewMapFromTemplate(int templateIndex) {
-    // Create a new map based on the selected template
-    UserMapData newMap;
-    
-    switch (templateIndex) {
-        case 0: // Basic Map
-            newMap.displayName = "Basic_Template_" + std::to_string(std::time(nullptr));
-            newMap.filename = newMap.displayName + ".json";
-            newMap.backgroundColor = {135, 206, 235, 255}; // Sky blue
-            newMap.backgroundID = 1;
-            std::cout << "Creating Basic Map template..." << std::endl;
-            break;
-        case 1: // Advanced Map
-            newMap.displayName = "Advanced_Template_" + std::to_string(std::time(nullptr));
-            newMap.filename = newMap.displayName + ".json";
-            newMap.backgroundColor = {34, 139, 34, 255}; // Forest green
-            newMap.backgroundID = 2;
-            std::cout << "Creating Advanced Map template..." << std::endl;
-            break;
-        case 2: // Challenge Map
-            newMap.displayName = "Challenge_Template_" + std::to_string(std::time(nullptr));
-            newMap.filename = newMap.displayName + ".json";
-            newMap.backgroundColor = {128, 0, 128, 255}; // Purple
-            newMap.backgroundID = 3;
-            std::cout << "Creating Challenge Map template..." << std::endl;
-            break;
-        case 3: // Custom Map
-            newMap.displayName = "Custom_Template_" + std::to_string(std::time(nullptr));
-            newMap.filename = newMap.displayName + ".json";
-            newMap.backgroundColor = {255, 215, 0, 255}; // Gold
-            newMap.backgroundID = 4;
-            std::cout << "Creating Custom Map template..." << std::endl;
-            break;
-        default:
-            std::cerr << "Invalid template index: " << templateIndex << std::endl;
-            return;
-    }
-    
-    // Initialize with empty map (all zeros)
-    newMap.entitiesID = std::vector<int>(12000, 0);
-    
-    // Save the template map to file
-    saveMapToFile(newMap, newMap.filename);
-    
-    // Refresh the available maps list
-    loadAvailableMaps();
-    
-    std::cout << "Template map created and saved: " << newMap.displayName << std::endl;
-}
-
 void MapEditorScreen1::loadUserDesignedMap(int mapIndex) {
     if (mapIndex >= 0 && mapIndex < userDesignedMaps.size()) {
         const UserMapData& mapData = userDesignedMaps[mapIndex];
         std::cout << "Loading user-designed map: " << mapData.displayName << std::endl;
         std::cout << "Entities count: " << mapData.entitiesID.size() << std::endl;
-        std::cout << "Background color: [" << mapData.backgroundColor[0] << ", " 
-                  << mapData.backgroundColor[1] << ", " << mapData.backgroundColor[2] 
-                  << ", " << mapData.backgroundColor[3] << "]" << std::endl;
+        std::cout << "Background color: [" << (int)mapData.backgroundColor.r << ", " 
+                  << (int)mapData.backgroundColor.g << ", " << (int)mapData.backgroundColor.b 
+                  << ", " << (int)mapData.backgroundColor.a << "]" << std::endl;
         std::cout << "Background ID: " << mapData.backgroundID << std::endl;
         
         // TODO: Implement map loading functionality
@@ -440,7 +378,8 @@ void MapEditorScreen1::saveMapToFile(const UserMapData& mapData, const std::stri
         // Create JSON structure
         json mapJson;
         mapJson["EntitiesID"] = mapData.entitiesID;
-        mapJson["backgroundColor"] = mapData.backgroundColor;
+        mapJson["backgroundColor"] = {mapData.backgroundColor.r, mapData.backgroundColor.g, 
+                                     mapData.backgroundColor.b, mapData.backgroundColor.a};
         mapJson["backgroundID"] = mapData.backgroundID;
         
         // Write to file
@@ -490,9 +429,10 @@ UserMapData MapEditorScreen1::loadMapFromFile(const std::string& filepath) {
         if (mapJson.contains("backgroundColor") && mapJson["backgroundColor"].is_array()) {
             auto bgColor = mapJson["backgroundColor"].get<std::vector<int>>();
             if (bgColor.size() >= 4) {
-                for (int i = 0; i < 4; i++) {
-                    mapData.backgroundColor[i] = bgColor[i];
-                }
+                mapData.backgroundColor.r = bgColor[0];
+                mapData.backgroundColor.g = bgColor[1];
+                mapData.backgroundColor.b = bgColor[2];
+                mapData.backgroundColor.a = bgColor[3];
             }
         }
         
