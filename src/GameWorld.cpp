@@ -1,6 +1,7 @@
 #include "GameWorld.h"
 #include "Item.h"
 #include "utils.h"
+#include "MapEditorScreen1.h"
 
 GameState GameWorld::state = GAME_STATE_TITLE_SCREEN;
 float GameWorld::gravity = 1200;
@@ -35,6 +36,7 @@ GameWorld::GameWorld() :
     maxDistForCollisionCheck(150.0f),
     titleScreen(nullptr),
     menuScreen(nullptr),
+    mapEditorScreen1(nullptr),
     selectCharacterScreen(nullptr),
     settingScreen(nullptr),
     helpingScreen(nullptr),
@@ -53,6 +55,11 @@ GameWorld::~GameWorld() {
     if (menuScreen != nullptr) {
         delete menuScreen;
         menuScreen = nullptr;
+    }
+
+    if (mapEditorScreen1 != nullptr) {
+        delete mapEditorScreen1;
+        mapEditorScreen1 = nullptr;
     }
 
     if (selectCharacterScreen != nullptr) {
@@ -123,6 +130,10 @@ void GameWorld::initScreensAndButtons() {
         menuScreen = new MenuScreen();
     }
 
+    if (mapEditorScreen1 == nullptr) {
+        mapEditorScreen1 = new MapEditorScreen1();
+    }
+
     if (selectCharacterScreen == nullptr) {
         selectCharacterScreen = new SelectCharacterScreen();
     }
@@ -172,6 +183,8 @@ void GameWorld::inputAndUpdate() {
          mario.getState() != SPRITE_STATE_WAITING_TO_NEXT_MAP &&
          state != GAME_STATE_TITLE_SCREEN &&
          state != GAME_STATE_MENU_SCREEN &&
+         state != GAME_STATE_MAP_EDITOR_SCREEN1 &&
+         state != GAME_STATE_MAP_EDITOR_SCREEN2 &&
          state != GAME_STATE_SELECT_CHARACTER_SCREEN &&
          state != GAME_STATE_CREDITS_SCREEN &&
          state != GAME_STATE_FINISHED &&
@@ -184,6 +197,8 @@ void GameWorld::inputAndUpdate() {
          state != GAME_STATE_MENU_SCREEN &&
          state != GAME_STATE_SELECT_CHARACTER_SCREEN &&
          state != GAME_STATE_CREDITS_SCREEN &&
+         state != GAME_STATE_MAP_EDITOR_SCREEN1 &&
+         state != GAME_STATE_MAP_EDITOR_SCREEN2 &&
          state != GAME_STATE_FINISHED &&
          state != GAME_STATE_SETTINGS_SCREEN &&
          state != GAME_STATE_HELPING_SCREEN &&
@@ -191,7 +206,9 @@ void GameWorld::inputAndUpdate() {
         mario.setActivationWidth( GetScreenWidth() * 2 );
         mario.update();
     } else if ( !pauseMario && state != GAME_STATE_TITLE_SCREEN && 
-        state != GAME_STATE_MENU_SCREEN && 
+        state != GAME_STATE_MENU_SCREEN &&
+        state != GAME_STATE_MAP_EDITOR_SCREEN1 &&
+        state != GAME_STATE_MAP_EDITOR_SCREEN2 &&
         state != GAME_STATE_SELECT_CHARACTER_SCREEN &&
         state != GAME_STATE_CREDITS_SCREEN) {
 
@@ -203,6 +220,8 @@ void GameWorld::inputAndUpdate() {
          mario.getState() != SPRITE_STATE_WAITING_TO_NEXT_MAP &&
          state != GAME_STATE_TITLE_SCREEN &&
          state != GAME_STATE_MENU_SCREEN &&
+         state != GAME_STATE_MAP_EDITOR_SCREEN1 &&
+         state != GAME_STATE_MAP_EDITOR_SCREEN2 &&
          state != GAME_STATE_SELECT_CHARACTER_SCREEN &&
          state != GAME_STATE_CREDITS_SCREEN &&
          state != GAME_STATE_FINISHED &&
@@ -908,6 +927,8 @@ void GameWorld::inputAndUpdate() {
 
     if (state == GAME_STATE_TITLE_SCREEN || 
         state == GAME_STATE_MENU_SCREEN || 
+        state == GAME_STATE_MAP_EDITOR_SCREEN1 ||
+        state == GAME_STATE_MAP_EDITOR_SCREEN2 ||
         state == GAME_STATE_SELECT_CHARACTER_SCREEN ||
         state == GAME_STATE_CREDITS_SCREEN) {
 
@@ -956,6 +977,10 @@ void GameWorld::inputAndUpdate() {
                 std::cout << "Load Game button pressed. Implement load game functionality later." << std::endl;
             }
 
+            else if (menuScreen->getButton("DESIGN MAP")->isReleased()) {
+                state = GAME_STATE_MAP_EDITOR_SCREEN1;
+            }
+
             else if (menuScreen->getButton("SETTINGS")->isReleased()) {
                 settingBoardIsOpen = true;
                 settingScreen->setSettingBoardIsOpenInMenuScreen(true);
@@ -989,6 +1014,32 @@ void GameWorld::inputAndUpdate() {
                 state = GAME_STATE_MENU_SCREEN;
             }
         }
+
+        else if (state == GAME_STATE_MAP_EDITOR_SCREEN1) {
+            if (mapEditorScreen1 != nullptr) {
+                mapEditorScreen1->update();
+                
+                // Only check other buttons if dialog is not open
+                if (!mapEditorScreen1->isDialogOpen()) {
+                    Button* designButton = mapEditorScreen1->getButton("DESIGN NEW MAP");
+                    if (designButton != nullptr && designButton->isReleased()) {
+                        // Navigate to map editor screen 2 for new map design (implement later)
+                        std::cout << "Design New Map button pressed. Navigate to actual editor (screen 2) - implement later." << std::endl;
+                        state = GAME_STATE_MAP_EDITOR_SCREEN2;
+                    }
+
+                    Button* backButton = mapEditorScreen1->getButton("BACK TO MENU");
+                    if (backButton != nullptr && backButton->isReleased()) {
+                        state = GAME_STATE_MENU_SCREEN;
+                    }
+                }
+            }
+        }
+
+        else if (state == GAME_STATE_MAP_EDITOR_SCREEN2) {
+            // Implement later
+            std::cout << "Map Editor Screen 2 - Implement later." << std::endl;
+        }
     }
 
     else if ( state == GAME_STATE_GAME_OVER ) {
@@ -1020,6 +1071,12 @@ void GameWorld::draw() {
 
     else if (state == GAME_STATE_MENU_SCREEN) {
         menuScreen->draw();
+    }
+
+    else if (state == GAME_STATE_MAP_EDITOR_SCREEN1) {
+        if (mapEditorScreen1 != nullptr) {
+            mapEditorScreen1->draw();
+        }
     }
 
     else if (state == GAME_STATE_SELECT_CHARACTER_SCREEN) {
