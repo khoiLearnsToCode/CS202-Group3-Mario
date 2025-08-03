@@ -6,12 +6,15 @@
 #include "raylib.h"
 #include "json.hpp"
 #include "Data.h"
+#include "GameState.h"
+#include "MapEditorScreen2.h"
 #include <unordered_map>
 #include <vector>
 #include <string>
 #include <fstream>
 #include <filesystem>
-#include <array>
+
+class GameWorld;
 
 class MapEditorScreen1 : public Screen {
 private:
@@ -28,6 +31,10 @@ private:
     Rectangle contentRec;
     Vector2 scrollOffset;
     int selectedMapIndex;
+
+    MapEditorScreen2* mapEditorScreen2;
+    void setMapEditorScreen2(MapEditorScreen2* screen); 
+    friend class MapEditorScreen2;
     
     // Double-click detection
     int lastClickedIndex;
@@ -55,4 +62,7 @@ public:
     bool isDialogOpen() const;
     std::unordered_map<std::string, Button*>& getButtons();
     Button* getButton(const std::string& key) const;
+    void createNewMap();
+
+     
 };

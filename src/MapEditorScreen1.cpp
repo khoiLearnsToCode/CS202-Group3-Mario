@@ -1,4 +1,5 @@
 #include "MapEditorScreen1.h"
+#include "GameWorld.h"
 #include <algorithm>
 #include <iostream>
 #include <cmath>
@@ -131,7 +132,7 @@ void MapEditorScreen1::update() {
         return;
     }
     
-    // Only check for button interactions when dialog is not open
+    // Only check for saved map button when dialog is not open
     Button* selectMapButton = getButton("SAVED MAP");
     if (selectMapButton && selectMapButton->isReleased()) {
         showSavedMapDialog = true;
@@ -330,15 +331,37 @@ void MapEditorScreen1::loadUserDesignedMap(int mapIndex) {
                   << ", " << (int)mapData.backgroundColor.a << "]" << std::endl;
         std::cout << "Background ID: " << mapData.backgroundID << std::endl;
         
-        // TODO: Implement map loading functionality
-        // This would typically involve:
-        // 1. Setting up the map editor with the loaded data
-        // 2. Transitioning to the map editor screen
+        // Create a copy of the map data to pass to MapEditorScreen2
+        UserMapData* mapDataCopy = new UserMapData(mapData);
+        
+        // Pass the data to MapEditorScreen2 and transition to it
+        if (mapEditorScreen2) {
+            mapEditorScreen2->setCurrentMapData(mapDataCopy);
+            GameWorld::state = GAME_STATE_MAP_EDITOR_SCREEN2;
+        }
         
         std::cout << "Map loaded from: " << mapData.filename << std::endl;
     } else {
         std::cerr << "Invalid map index: " << mapIndex << std::endl;
     }
+}
+
+void MapEditorScreen1::createNewMap() {
+    std::cout << "Creating new map..." << std::endl;
+    int mapIndex = userDesignedMaps.size() + 1; // New map will be added at the end
+    
+    // Create a new default UserMapData
+    UserMapData newMapData;
+    newMapData.displayName = "New Map " + std::to_string(mapIndex);
+    newMapData.filename = "Des" + std::to_string(mapIndex) + ".json";
+
+    // Pass the new map data to MapEditorScreen2
+    if (mapEditorScreen2) {
+        mapEditorScreen2->setCurrentMapData(&newMapData);
+    }
+    
+    // Switch to MapEditorScreen2
+    GameWorld::state = GAME_STATE_MAP_EDITOR_SCREEN2;
 }
 
 void MapEditorScreen1::loadUserDesignedMapsFromFilesystem() {
@@ -458,3 +481,8 @@ std::string MapEditorScreen1::getUserDesignedMapsDirectory() const {
     // Relative path to the user designed maps directory
     return "../resource/userDesignedMaps";
 }
+
+void MapEditorScreen1::setMapEditorScreen2(MapEditorScreen2* screen) {
+    mapEditorScreen2 = screen;
+}
+
