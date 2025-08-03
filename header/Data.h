@@ -37,3 +37,14 @@ struct bigData : public Data {
 		: Data(data), blocks(blks), baddies(bds), items(its), staticItems(staticIts) {}
 
 };
+
+// For maps designed by users
+struct UserMapData {
+    std::string filename;
+    std::string displayName;
+    std::vector<int> entitiesID;
+    std::array<int, 4> backgroundColor;
+    int backgroundID;
+    
+    UserMapData() : entitiesID(12000, 0), backgroundColor({255, 255, 255, 0}), backgroundID(1) {}
+};
