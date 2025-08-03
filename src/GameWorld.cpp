@@ -1,7 +1,10 @@
 #include "GameWorld.h"
 #include "Item.h"
 #include "utils.h"
+#include "TitleScreen.h"
+#include "MenuScreen.h"
 #include "MapEditorScreen1.h"
+#include "MapEditorScreen2.h"
 
 GameState GameWorld::state = GAME_STATE_TITLE_SCREEN;
 float GameWorld::gravity = 1200;
@@ -37,6 +40,7 @@ GameWorld::GameWorld() :
     titleScreen(nullptr),
     menuScreen(nullptr),
     mapEditorScreen1(nullptr),
+    mapEditorScreen2(nullptr),
     selectCharacterScreen(nullptr),
     settingScreen(nullptr),
     helpingScreen(nullptr),
@@ -60,6 +64,11 @@ GameWorld::~GameWorld() {
     if (mapEditorScreen1 != nullptr) {
         delete mapEditorScreen1;
         mapEditorScreen1 = nullptr;
+    }
+    
+    if (mapEditorScreen2 != nullptr) {
+        delete mapEditorScreen2;
+        mapEditorScreen2 = nullptr;
     }
 
     if (selectCharacterScreen != nullptr) {
@@ -132,6 +141,10 @@ void GameWorld::initScreensAndButtons() {
 
     if (mapEditorScreen1 == nullptr) {
         mapEditorScreen1 = new MapEditorScreen1();
+    }
+    
+    if (mapEditorScreen2 == nullptr) {
+        mapEditorScreen2 = new MapEditorScreen2(mapEditorScreen1);
     }
 
     if (selectCharacterScreen == nullptr) {
@@ -1021,11 +1034,10 @@ void GameWorld::inputAndUpdate() {
                 
                 // Only check other buttons if dialog is not open
                 if (!mapEditorScreen1->isDialogOpen()) {
-                    Button* designButton = mapEditorScreen1->getButton("DESIGN NEW MAP");
-                    if (designButton != nullptr && designButton->isReleased()) {
-                        // Navigate to map editor screen 2 for new map design (implement later)
-                        std::cout << "Design New Map button pressed. Navigate to actual editor (screen 2) - implement later." << std::endl;
-                        state = GAME_STATE_MAP_EDITOR_SCREEN2;
+                    Button* newMapButton = mapEditorScreen1->getButton("NEW MAP");
+                    if (newMapButton != nullptr && newMapButton->isReleased()) {
+                        // Create new map and navigate to map editor screen 2
+                        mapEditorScreen1->createNewMap();
                     }
 
                     Button* backButton = mapEditorScreen1->getButton("BACK TO MENU");
@@ -1037,8 +1049,9 @@ void GameWorld::inputAndUpdate() {
         }
 
         else if (state == GAME_STATE_MAP_EDITOR_SCREEN2) {
-            // Implement later
-            std::cout << "Map Editor Screen 2 - Implement later." << std::endl;
+            if (mapEditorScreen2 != nullptr) {
+                mapEditorScreen2->update();
+            }
         }
     }
 
@@ -1076,6 +1089,12 @@ void GameWorld::draw() {
     else if (state == GAME_STATE_MAP_EDITOR_SCREEN1) {
         if (mapEditorScreen1 != nullptr) {
             mapEditorScreen1->draw();
+        }
+    }
+
+    else if (state == GAME_STATE_MAP_EDITOR_SCREEN2) {
+        if (mapEditorScreen2 != nullptr) {
+            mapEditorScreen2->draw();
         }
     }
 
