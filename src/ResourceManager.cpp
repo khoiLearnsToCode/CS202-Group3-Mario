@@ -244,13 +244,13 @@ void ResourceManager::loadTextures() {
         textures["background1"] = LoadTexture("../resource/graphic/backgrounds/background1.png");
         textures["background2"] = LoadTexture("../resource/graphic/backgrounds/background2.png");
         textures["background3"] = LoadTexture("../resource/graphic/backgrounds/background3.png");
-        //textures["background4"] = LoadTexture("resources/graphics/backgrounds/background4.png");
-        //textures["background5"] = LoadTexture("resources/graphics/backgrounds/background5.png");
-        //textures["background6"] = LoadTexture("resources/graphics/backgrounds/background6.png");
-        //textures["background7"] = LoadTexture("resources/graphics/backgrounds/background7.png");
-        //textures["background8"] = LoadTexture("resources/graphics/backgrounds/background8.png");
-        //textures["background9"] = LoadTexture("resources/graphics/backgrounds/background9.png");
-        //textures["background10"] = LoadTexture("resources/graphics/backgrounds/background10.png");
+        textures["background4"] = LoadTexture("../resource/graphic/backgrounds/background4.png");
+        textures["background5"] = LoadTexture("../resource/graphic/backgrounds/background5.png");
+        textures["background6"] = LoadTexture("../resource/graphic/backgrounds/background6.png");
+        textures["background7"] = LoadTexture("../resource/graphic/backgrounds/background7.png");
+        textures["background8"] = LoadTexture("../resource/graphic/backgrounds/background8.png");
+        textures["background9"] = LoadTexture("../resource/graphic/backgrounds/background9.png");
+        textures["background10"] = LoadTexture("../resource/graphic/backgrounds/background10.png");
         textures["settingBackground"] = LoadTexture("../resource/graphic/backgrounds/settingBackground.png");
         textures["helpBackground"] = LoadTexture("../resource/graphic/backgrounds/helpBackground.png");
 
@@ -410,6 +410,7 @@ void ResourceManager::loadTextures() {
         textures["creditButton"] = LoadTexture("../resource/graphic/gui/creditButton.png");
         textures["selectYourCharacter"] = LoadTexture("../resource/graphic/gui/selectYourCharacter.png");
         textures["leaderboard"] = LoadTexture("../resource/graphic/gui/leaderboard.png");
+        textures["mapEditor"] = LoadTexture("../resource/graphic/gui/mapEditor.png");
 
 
         // UI elements
@@ -444,6 +445,9 @@ void ResourceManager::loadTextures() {
         textures["acceptButtonRelease"] = LoadTexture("../resource/graphic/ui/acceptButtonRelease.png");
         textures["helpButtonPress"] = LoadTexture("../resource/graphic/ui/helpButtonPress.png");
         textures["helpButtonRelease"] = LoadTexture("../resource/graphic/ui/helpButtonRelease.png");
+        textures["returnButtonPress"] = LoadTexture("../resource/graphic/ui/returnButtonPress.png");
+        textures["returnButtonRelease"] = LoadTexture("../resource/graphic/ui/returnButtonRelease.png");
+
         textures["leaderButtonPress"] = LoadTexture("../resource/graphic/ui/leaderButtonPress.png");
         textures["leaderButtonRelease"] = LoadTexture("../resource/graphic/ui/leaderButtonRelease.png");
 

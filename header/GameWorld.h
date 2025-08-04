@@ -10,6 +10,8 @@ class Mario;
 #include "Screen.h"
 #include "TitleScreen.h"
 #include "MenuScreen.h"
+#include "MapEditorScreen1.h"
+#include "MapEditorScreen2.h"
 #include "SelectCharacterScreen.h"
 #include "SettingScreen.h"
 #include "HelpingScreen.h"
@@ -25,6 +27,8 @@ class GameWorld : public virtual Drawable {
 
     TitleScreen* titleScreen;
     MenuScreen* menuScreen;
+    MapEditorScreen1* mapEditorScreen1;
+    MapEditorScreen2* mapEditorScreen2;
     SelectCharacterScreen* selectCharacterScreen;
     SettingScreen* settingScreen;
     HelpingScreen* helpingScreen;
