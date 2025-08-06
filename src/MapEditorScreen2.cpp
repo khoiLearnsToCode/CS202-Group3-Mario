@@ -3,19 +3,17 @@
 #include "GameWorld.h"
 #include "raylib.h"
 #include "raymath.h"
-//#define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
 #include <iostream>
 
-// Define static constants
 const float MapEditorScreen2::BASE_TILE_SIZE = 32.0f;
 
 MapEditorScreen2::MapEditorScreen2(MapEditorScreen1* parentScreen)
     : Screen(), currentMapData(nullptr), MainState(MAP_EDITOR_STATE_IDLE),
                                     AuxiliaryState(MAP_EDITOR_STATE_TILE), isDragging(false),
-                                    selectedEntityID(0), selectedCategoryIndex(0), toolsScrollOffset({0.0f, 0.0f}),
+                                    selectedEntityID(0), lastSelectedEntityID(1), selectedCategoryIndex(0), toolsScrollOffset({0.0f, 0.0f}),
                                     hoveredGridPos({-1, -1}), isHoveringGrid(false), isDrawing(false), 
-                                    eraserSize(1) {
+                                    eraserSize(1), brushSize(1) {
 
         // Initialize camera for grid view
         gridCamera.target = {0.0f, 0.0f};
@@ -130,13 +128,6 @@ void MapEditorScreen2::draw() {
     // Draw tools area
     drawToolsArea();
     
-    // Draw instructions and hover info
-    const char* instructions = "ESC: Return to menu | Mouse Wheel: Zoom | Right Click + Drag: Pan | Left Click + Drag: Draw";
-    Vector2 instructSize = MeasureTextEx(font, instructions, 20.0f, 0.0f);
-    DrawTextEx(font, instructions, 
-               {20.0f, GetScreenHeight() - 40.0f}, 
-               20.0f, 0.0f, DARKGRAY);
-               
     // Draw hover coordinates at bottom right
     if (isHoveringGrid) {
         const char* hoverInfo = TextFormat("Grid: (%d, %d)", (int)hoveredGridPos.x, (int)hoveredGridPos.y);
@@ -209,62 +200,118 @@ void MapEditorScreen2::drawGrid() {
         for (int y = 0; y < GRID_HEIGHT_IN_TILES; y++) {
             for (int x = 0; x < GRID_WIDTH_IN_TILES; x++) {
                 int index = y * GRID_WIDTH_IN_TILES + x;
-                if (index < currentMapData->entitiesID.size()) {
-                    int entityID = currentMapData->entitiesID[index];
+                int entityID = currentMapData->entitiesID[index];               
+                // Draw different colors/textures based on entity ID
+                if (entityID != 0) {
+                    float tileX = x * BASE_TILE_SIZE;
+                    float tileY = y * BASE_TILE_SIZE;
+                    Rectangle tileRect = {tileX, tileY, BASE_TILE_SIZE, BASE_TILE_SIZE};
                     
-                    // Draw different colors/textures based on entity ID
-                    if (entityID != 0) {
-                        float tileX = x * BASE_TILE_SIZE;
-                        float tileY = y * BASE_TILE_SIZE;
-                        Rectangle tileRect = {tileX, tileY, BASE_TILE_SIZE, BASE_TILE_SIZE};
-                        
-                        Color tileColor = GRAY; // Default color
-                        
-                        // Color based on entity type
-                        if (entityID >= 1 && entityID <= 87) {
-                            // Tiles - try to load texture, fallback to green
-                            std::string tileKey = "tile_" + std::to_string(entityID);
-                            if (textures.find(tileKey) != textures.end()) {
-                                DrawTexturePro(textures[tileKey], 
-                                             {0, 0, (float)textures[tileKey].width, (float)textures[tileKey].height},
-                                             tileRect, {0, 0}, 0.0f, WHITE);
-                            } else {
-                                tileColor = GREEN;
-                                DrawRectangleRec(tileRect, tileColor);
-                            }
-                        } else if (entityID >= 88 && entityID <= 102) {
-                            // Blocks - try to load texture, fallback to brown
-                            std::string blockKey = "block" + std::to_string(entityID);
-                            if (textures.find(blockKey) != textures.end()) {
-                                DrawTexturePro(textures[blockKey], 
-                                             {0, 0, (float)textures[blockKey].width, (float)textures[blockKey].height},
-                                             tileRect, {0, 0}, 0.0f, WHITE);
-                            } else {
-                                tileColor = BROWN;
-                                DrawRectangleRec(tileRect, tileColor);
-                            }
-                        } else if (entityID >= 103 && entityID <= 120) {
-                            // Items
-                            tileColor = GOLD;
+                    Color tileColor = GRAY; // Default color
+                    
+                    // Color based on entity type
+                    if (entityID >= 1 && entityID <= 87) {
+                        // Tiles - try to load texture, fallback to green
+                        std::string tileKey = "tile_" + std::to_string(entityID);
+                        if (textures.find(tileKey) != textures.end()) {
+                            DrawTexturePro(textures[tileKey], 
+                                            {0, 0, (float)textures[tileKey].width, (float)textures[tileKey].height},
+                                            tileRect, {0, 0}, 0.0f, WHITE);
+                        } else {
+                            tileColor = GREEN;
                             DrawRectangleRec(tileRect, tileColor);
-                        } else if (entityID >= 121 && entityID <= 158) {
-                            // Baddies
+                        }
+                    } else if (entityID >= 88 && entityID <= 102) {
+                        // Blocks - try to load texture, fallback to brown
+                        std::string blockKey = "block" + std::to_string(entityID);
+                        if (textures.find(blockKey) != textures.end()) {
+                            DrawTexturePro(textures[blockKey], 
+                                            {0, 0, (float)textures[blockKey].width, (float)textures[blockKey].height},
+                                            tileRect, {0, 0}, 0.0f, WHITE);
+                        } else {
+                            tileColor = BROWN;
+                            DrawRectangleRec(tileRect, tileColor);
+                        }
+                    } else if (entityID >= 103 && entityID <= 120) {
+                        // Items - try to load texture, fallback to yellow
+                        std::string itemKey = "";
+                        if (entityID == 103) {
+                            itemKey = "1UpMushroom";
+                        } else if (entityID == 104) {
+                            itemKey = "3UpMoon";
+                        } else if (entityID >= 108 && entityID <= 111) {
+                            itemKey = "coin0"; // Use first coin texture for all coin variants
+                        } else if (entityID == 112) {
+                            itemKey = "courseClearToken";
+                        } else if (entityID >= 113 && entityID <= 114) {
+                            itemKey = "fireFlower0"; // Use first fire flower texture
+                        } else if (entityID == 115) {
+                            itemKey = "mushroom";
+                        } else if (entityID == 116) {
+                            itemKey = "star";
+                        } else if (entityID >= 117 && entityID <= 120) {
+                            itemKey = "yoshiCoin0"; // Use first yoshi coin texture for all variants
+                        }
+                        
+                        if (!itemKey.empty() && textures.find(itemKey) != textures.end()) {
+                            DrawTexturePro(textures[itemKey], 
+                                            {0, 0, (float)textures[itemKey].width, (float)textures[itemKey].height},
+                                            tileRect, {0, 0}, 0.0f, WHITE);
+                        } else {
+                            tileColor = YELLOW;
+                            DrawRectangleRec(tileRect, tileColor);
+                        }
+                    } else if (entityID >= 121 && entityID <= 158) {
+                        // Baddies - try to load texture, fallback to red
+                        std::string baddieKey = "";
+                        if (entityID == 121 || entityID == 122) {
+                            baddieKey = "blueKoopaTroopa0R";
+                        } else if (entityID == 123 || entityID == 124) {
+                            baddieKey = "bobOmb0R";
+                        } else if (entityID == 125) {
+                            baddieKey = "bulletBill0R";
+                        } else if (entityID == 126 || entityID == 127) {
+                            baddieKey = "buzzyBeetle0R";
+                        } else if (entityID >= 128 && entityID <= 131) {
+                            baddieKey = "flyingGoomba0R";
+                        } else if (entityID == 132 || entityID == 133) {
+                            baddieKey = "goomba0R";
+                        } else if (entityID == 134 || entityID == 135) {
+                            baddieKey = "greenKoopaTroopa0R";
+                        } else if (entityID >= 136 && entityID <= 139) {
+                            baddieKey = "jumpingPiranhaPlant0";
+                        } else if (entityID == 140 || entityID == 141) {
+                            baddieKey = "montyMole0R";
+                        } else if (entityID == 142 || entityID == 143) {
+                            baddieKey = "mummyBeetle0R";
+                        } else if (entityID == 144 || entityID == 145) {
+                            baddieKey = "muncher0";
+                        } else if (entityID == 146 || entityID == 147) {
+                            baddieKey = "piranhaPlant0";
+                        } else if (entityID == 148 || entityID == 149) {
+                            baddieKey = "redKoopaTroopa0R";
+                        } else if (entityID >= 150 && entityID <= 153) {
+                            baddieKey = "rex10R";
+                        } else if (entityID >= 154 && entityID <= 156) {
+                            baddieKey = "swooper0R";
+                        } else if (entityID ==  157 || entityID == 158) {
+                            baddieKey = "yellowKoopaTroopa0R";
+                        }
+                        
+                        if (!baddieKey.empty() && textures.find(baddieKey) != textures.end()) {
+                            DrawTexturePro(textures[baddieKey], 
+                                            {0, 0, (float)textures[baddieKey].width, (float)textures[baddieKey].height},
+                                            tileRect, {0, 0}, 0.0f, WHITE);
+                        } else {
                             tileColor = RED;
                             DrawRectangleRec(tileRect, tileColor);
-                        } else {
-                            // Unknown entity
-                            tileColor = PURPLE;
-                            DrawRectangleRec(tileRect, tileColor);
                         }
-                        
-                        // Draw tile borders when zoomed in enough (for non-textured tiles)
-                        if (actualTileSize >= 12.0f && (entityID < 1 || entityID > 102 || 
-                            textures.find("tile_" + std::to_string(entityID)) == textures.end() &&
-                            textures.find("block" + std::to_string(entityID)) == textures.end())) {
-                            DrawRectangleLinesEx(tileRect, 1.0f, BLACK);
-                        }
+                    } else {
+                        // Unknown entity
+                        tileColor = PURPLE;
+                        DrawRectangleRec(tileRect, tileColor);
                     }
-                }
+                }              
             }
         }
     }
@@ -291,6 +338,24 @@ void MapEditorScreen2::drawGrid() {
                     }
                 }
             }
+        } else if (selectedEntityID == -1) {
+            // Show brush size preview
+            int halfSize = brushSize / 2;
+            for (int dy = -halfSize; dy <= halfSize; dy++) {
+                for (int dx = -halfSize; dx <= halfSize; dx++) {
+                    int targetX = (int)hoveredGridPos.x + dx;
+                    int targetY = (int)hoveredGridPos.y + dy;
+                    
+                    if (targetX >= 0 && targetX < GRID_WIDTH_IN_TILES && 
+                        targetY >= 0 && targetY < GRID_HEIGHT_IN_TILES) {
+                        float tileX = targetX * BASE_TILE_SIZE;
+                        float tileY = targetY * BASE_TILE_SIZE;
+                        Rectangle hoverRect = {tileX, tileY, BASE_TILE_SIZE, BASE_TILE_SIZE};
+                        DrawRectangleRec(hoverRect, Fade(GREEN, 0.3f));
+                        DrawRectangleLinesEx(hoverRect, 1.0f, GREEN);
+                    }
+                }
+            }
         } else {
             // Normal single tile hover
             float tileX = hoveredGridPos.x * BASE_TILE_SIZE;
@@ -314,30 +379,27 @@ void MapEditorScreen2::drawGrid() {
 }
 
 void MapEditorScreen2::initializeCategories() {
-    categories = {"ERASER", "TILES", "BLOCKS", "ITEMS", "BADDIES"};
+    categories = {"TILES", "BLOCKS", "ITEMS", "BADDIES"};
     categoryEntityIDs.resize(categories.size());
-    
-    // Eraser (ID 0)
-    categoryEntityIDs[0] = {0};
     
     // Tiles (IDs 1-87)
     for (int i = 1; i <= 87; i++) {
-        categoryEntityIDs[1].push_back(i);
+        categoryEntityIDs[0].push_back(i);
     }
     
     // Blocks (IDs 88-102)
     for (int i = 88; i <= 102; i++) {
-        categoryEntityIDs[2].push_back(i);
+        categoryEntityIDs[1].push_back(i);
     }
     
     // Items (IDs 103-120)
     for (int i = 103; i <= 120; i++) {
-        categoryEntityIDs[3].push_back(i);
+        categoryEntityIDs[2].push_back(i);
     }
     
     // Baddies (IDs 121-158)
     for (int i = 121; i <= 158; i++) {
-        categoryEntityIDs[4].push_back(i);
+        categoryEntityIDs[3].push_back(i);
     }
 }
 
@@ -366,114 +428,189 @@ void MapEditorScreen2::drawToolsArea() {
         DrawTextEx(font, selectedInfo, 
                    {toolsAreaX + 10.0f, 40.0f}, 
                    16.0f, 0.0f, DARKBLUE);
-    } else {
+    } else if (selectedEntityID == 0) {
         DrawTextEx(font, "Selected: ERASER", 
                    {toolsAreaX + 10.0f, 40.0f}, 
                    16.0f, 0.0f, RED);
+    } else if (selectedEntityID == -1) {
+        DrawTextEx(font, "Selected: BRUSH", 
+                   {toolsAreaX + 10.0f, 40.0f}, 
+                   16.0f, 0.0f, GREEN);
     }
     
     float currentY = 70.0f;
     
-    // Draw eraser size slider if eraser is selected
+    // Always reserve space for size area to keep layout consistent
     if (selectedEntityID == 0) {
+        // Draw eraser size slider when eraser is selected
         drawEraserSizeArea(toolsAreaX, toolsAreaWidth, currentY);
+    } else if (selectedEntityID == -1) {
+        // Draw brush size slider when brush is selected
+        drawBrushSizeArea(toolsAreaX, toolsAreaWidth, currentY);
+    } else {
+        // Reserve the same space even when neither tool is selected
+        currentY += 75.0f; // Same height as size areas
     }
-    float categoryHeight = 30.0f;
-    float itemSize = 32.0f;
-    float itemSpacing = 4.0f;
     
-    // Draw categories
+    float categoryHeight = 25.0f;
+    float itemSize = 28.0f;
+    float itemSpacing = 3.0f;
+    float categoryWidth = (toolsAreaWidth - 20.0f) / categories.size(); // Divide width equally
+    
+    // Draw categories horizontally
     for (int catIndex = 0; catIndex < categories.size(); catIndex++) {
         Color categoryColor = (catIndex == selectedCategoryIndex) ? BLUE : DARKGRAY;
         
+        float categoryX = toolsAreaX + 5.0f + catIndex * categoryWidth;
+        
         // Draw category header
-        Rectangle categoryRect = {toolsAreaX + 5.0f, currentY, toolsAreaWidth - 10.0f, categoryHeight};
+        Rectangle categoryRect = {categoryX, currentY, categoryWidth - 2.0f, categoryHeight};
         DrawRectangleRec(categoryRect, Fade(categoryColor, 0.3f));
         DrawRectangleLinesEx(categoryRect, 1.0f, categoryColor);
         
+        // Draw category text (smaller to fit)
+        Vector2 textSize = MeasureTextEx(font, categories[catIndex].c_str(), 12.0f, 0.0f);
+        float textX = categoryX + (categoryWidth - textSize.x) / 2.0f;
         DrawTextEx(font, categories[catIndex].c_str(), 
-                   {toolsAreaX + 10.0f, currentY + 5.0f}, 
-                   18.0f, 0.0f, categoryColor);
+                   {textX, currentY + 6.0f}, 
+                   12.0f, 0.0f, categoryColor);
+    }
+    
+    currentY += categoryHeight + 15.0f; // Increased spacing to lower the object sections
+    
+    // Show items for the selected category (all categories now contain actual entities)
+    if (selectedCategoryIndex >= 0 && selectedCategoryIndex < categoryEntityIDs.size()) {
+        float itemX = toolsAreaX + 10.0f;
+        float itemY = currentY;
+        int itemsPerRow = (int)((toolsAreaWidth - 20.0f) / (itemSize + itemSpacing));
         
-        currentY += categoryHeight + 5.0f;
+        // Reserve space for permanent tools at bottom (120px)
+        float maxItemY = toolsAreaHeight - 120.0f;
         
-        // If this category is selected, show its items
-        if (catIndex == selectedCategoryIndex) {
-            float itemX = toolsAreaX + 10.0f;
-            float itemY = currentY;
-            int itemsPerRow = (int)((toolsAreaWidth - 20.0f) / (itemSize + itemSpacing));
+        for (int i = 0; i < categoryEntityIDs[selectedCategoryIndex].size(); i++) {
+            int entityID = categoryEntityIDs[selectedCategoryIndex][i];
             
-            for (int i = 0; i < categoryEntityIDs[catIndex].size(); i++) {
-                int entityID = categoryEntityIDs[catIndex][i];
-                
-                // Calculate position
-                int row = i / itemsPerRow;
-                int col = i % itemsPerRow;
-                float x = itemX + col * (itemSize + itemSpacing);
-                float y = itemY + row * (itemSize + itemSpacing);
-                
-                // Check if we're still within the tools area
-                if (y + itemSize > toolsAreaHeight - 20.0f) break;
-                
-                Rectangle itemRect = {x, y, itemSize, itemSize};
-                
-                // Highlight selected item with outline (draw first, bigger than item)
-                if (entityID == selectedEntityID) {
-                    // Draw bigger outline around the item
-                    float outlineSize = 2.0f;
-                    Rectangle outlineRect = {x - outlineSize, y - outlineSize, 
-                                           itemSize + outlineSize * 2, itemSize + outlineSize * 2};
-                    DrawRectangleLinesEx(outlineRect, 3.0f, ORANGE);
-                }
-                
-                // Don't draw white background - keep transparent
-                
-                // Draw entity representation
-                if (entityID == 0) {
-                    // Eraser - draw X
-                    DrawLine((int)x + 4, (int)y + 4, (int)(x + itemSize - 4), (int)(y + itemSize - 4), RED);
-                    DrawLine((int)(x + itemSize - 4), (int)y + 4, (int)x + 4, (int)(y + itemSize - 4), RED);
-                } else if (entityID >= 1 && entityID <= 87) {
-                    // Tiles - try to draw texture or colored square
-                    std::string tileKey = "tile_" + std::to_string(entityID);
-                    if (textures.find(tileKey) != textures.end()) {
-                        DrawTexturePro(textures[tileKey], 
-                                     {0, 0, (float)textures[tileKey].width, (float)textures[tileKey].height},
-                                     itemRect, {0, 0}, 0.0f, WHITE);
-                    } else {
-                        // Draw colored square without white background
-                        DrawRectangleRec(itemRect, GREEN);
-                    }
-                } else if (entityID >= 88 && entityID <= 102) {
-                    // Blocks - try to draw texture or colored square
-                    std::string blockKey = "block" + std::to_string(entityID);
-                    if (textures.find(blockKey) != textures.end()) {
-                        DrawTexturePro(textures[blockKey], 
-                                     {0, 0, (float)textures[blockKey].width, (float)textures[blockKey].height},
-                                     itemRect, {0, 0}, 0.0f, WHITE);
-                    } else {
-                        // Draw colored square without white background
-                        DrawRectangleRec(itemRect, BROWN);
-                    }
-                } else if (entityID >= 103 && entityID <= 120) {
-                    // Items - draw colored square without white background
-                    DrawRectangleRec(itemRect, GOLD);
-                } else if (entityID >= 121 && entityID <= 158) {
-                    // Baddies - draw colored square without white background
-                    DrawRectangleRec(itemRect, RED);
-                }
-                
-                // Draw thin border for better visibility (for all items)
-                DrawRectangleLinesEx(itemRect, 1.0f, BLACK);
+            // Calculate position
+            int row = i / itemsPerRow;
+            int col = i % itemsPerRow;
+            float x = itemX + col * (itemSize + itemSpacing);
+            float y = itemY + row * (itemSize + itemSpacing);
+            
+            // Check if we're still within the available area (reserve space for tools)
+            if (y + itemSize > maxItemY) break;
+            
+            Rectangle itemRect = {x, y, itemSize, itemSize};
+            
+            // Highlight selected item with outline (draw first, bigger than item)
+            // In brush mode, highlight the entity that will be placed (lastSelectedEntityID)
+            int entityToHighlight = (selectedEntityID == -1) ? lastSelectedEntityID : selectedEntityID;
+            if (entityID == entityToHighlight) {
+                // Draw bigger outline around the item
+                float outlineSize = 2.0f;
+                Rectangle outlineRect = {x - outlineSize, y - outlineSize, 
+                                       itemSize + outlineSize * 2, itemSize + outlineSize * 2};
+                DrawRectangleLinesEx(outlineRect, 3.0f, ORANGE);
             }
             
-            // Update currentY for next category
-            int rows = ((int)categoryEntityIDs[catIndex].size() + itemsPerRow - 1) / itemsPerRow;
-            currentY += rows * (itemSize + itemSpacing) + 10.0f;
+            // Draw entity representation
+            if (entityID >= 1 && entityID <= 87) {
+                // Tiles - try to draw texture or colored square
+                std::string tileKey = "tile_" + std::to_string(entityID);
+                if (textures.find(tileKey) != textures.end()) {
+                    DrawTexturePro(textures[tileKey], 
+                                 {0, 0, (float)textures[tileKey].width, (float)textures[tileKey].height},
+                                 itemRect, {0, 0}, 0.0f, WHITE);
+                } else {
+                    DrawRectangleRec(itemRect, GREEN);
+                }
+            } else if (entityID >= 88 && entityID <= 102) {
+                // Blocks - try to draw texture or colored square
+                std::string blockKey = "block" + std::to_string(entityID);
+                if (textures.find(blockKey) != textures.end()) {
+                    DrawTexturePro(textures[blockKey], 
+                                 {0, 0, (float)textures[blockKey].width, (float)textures[blockKey].height},
+                                 itemRect, {0, 0}, 0.0f, WHITE);
+                } else {
+                    DrawRectangleRec(itemRect, BROWN);
+                }
+            } else if (entityID >= 103 && entityID <= 120) {
+                // Items - try to draw texture or colored square
+                std::string itemKey = "";
+                if (entityID == 103) {
+                    itemKey = "1UpMushroom";
+                } else if (entityID == 104) {
+                    itemKey = "3UpMoon";
+                } else if (entityID >= 108 && entityID <= 111) {
+                    itemKey = "coin0"; // Use first coin texture for all coin variants
+                } else if (entityID == 112) {
+                    itemKey = "courseClearToken";
+                } else if (entityID >= 113 && entityID <= 114) {
+                    itemKey = "fireFlower0"; // Use first fire flower texture
+                } else if (entityID == 115) {
+                    itemKey = "mushroom";
+                } else if (entityID == 116) {
+                    itemKey = "star";
+                } else if (entityID >= 117 && entityID <= 120) {
+                    itemKey = "yoshiCoin0"; // Use first yoshi coin texture for all variants
+                }
+                
+                if (!itemKey.empty() && textures.find(itemKey) != textures.end()) {
+                    DrawTexturePro(textures[itemKey], 
+                                 {0, 0, (float)textures[itemKey].width, (float)textures[itemKey].height},
+                                 itemRect, {0, 0}, 0.0f, WHITE);
+                } else {
+                    DrawRectangleRec(itemRect, GOLD);
+                }
+            } else if (entityID >= 121 && entityID <= 158) {
+                // Baddies - try to draw texture or colored square
+                std::string baddieKey = "";
+                if (entityID == 121 || entityID == 122) {
+                    baddieKey = "blueKoopaTroopa0R";
+                } else if (entityID == 123 || entityID == 124) {
+                    baddieKey = "bobOmb0R";
+                } else if (entityID == 125) {
+                    baddieKey = "bulletBill0R";
+                } else if (entityID == 126 || entityID == 127) {
+                    baddieKey = "buzzyBeetle0R";
+                } else if (entityID >= 128 && entityID <= 131) {
+                    baddieKey = "flyingGoomba0R";
+                } else if (entityID == 132 || entityID == 133) {
+                    baddieKey = "goomba0R";
+                } else if (entityID == 134 || entityID == 135) {
+                    baddieKey = "greenKoopaTroopa0R";
+                } else if (entityID >= 136 && entityID <= 139) {
+                    baddieKey = "jumpingPiranhaPlant0";
+                } else if (entityID == 140 || entityID == 141) {
+                    baddieKey = "montyMole0R";
+                } else if (entityID == 142 || entityID == 143) {
+                    baddieKey = "mummyBeetle0R";
+                } else if (entityID == 144 || entityID == 145) {
+                    baddieKey = "muncher0";
+                } else if (entityID == 146 || entityID == 147) {
+                    baddieKey = "piranhaPlant0";
+                } else if (entityID == 148 || entityID == 149) {
+                    baddieKey = "redKoopaTroopa0R";
+                } else if (entityID >= 150 && entityID <= 153) {
+                    baddieKey = "rex10R";
+                } else if (entityID >= 154 && entityID <= 156) {
+                    baddieKey = "swooper0R";
+                } else if (entityID == 157 || entityID == 158) {
+                    baddieKey = "yellowKoopaTroopa0R";
+                }
+                
+                if (!baddieKey.empty() && textures.find(baddieKey) != textures.end()) {
+                    DrawTexturePro(textures[baddieKey], 
+                                 {0, 0, (float)textures[baddieKey].width, (float)textures[baddieKey].height},
+                                 itemRect, {0, 0}, 0.0f, WHITE);
+                } else {
+                    DrawRectangleRec(itemRect, RED);
+                }
+            }
         }
-        
-        currentY += 5.0f;
     }
+    
+    // Draw permanent tools section at the bottom right
+    drawPermanentToolsSection(toolsAreaX, toolsAreaWidth, toolsAreaHeight);
 }
 
 void MapEditorScreen2::handleToolSelection(Vector2 mousePos) {
@@ -481,57 +618,84 @@ void MapEditorScreen2::handleToolSelection(Vector2 mousePos) {
     
     float toolsAreaWidth = GetScreenWidth() * 0.2f;
     float toolsAreaX = GetScreenWidth() - toolsAreaWidth;
+    float toolsAreaHeight = GetScreenHeight();
+    
+    // Check permanent tools section first (at the bottom)
+    float sectionHeight = 100.0f;
+    float sectionY = toolsAreaHeight - sectionHeight - 10.0f;
+    float buttonSize = 32.0f;
+    float buttonSpacing = 10.0f;
+    float buttonsY = sectionY + 25.0f;
+    
+    // Check eraser button
+    float eraserX = toolsAreaX + 15.0f;
+    Rectangle eraserRect = {eraserX, buttonsY, buttonSize, buttonSize};
+    if (CheckCollisionPointRec(mousePos, eraserRect)) {
+        selectedEntityID = 0; // Eraser
+        return;
+    }
+    
+    // Check brush button
+    float brushX = eraserX + buttonSize + buttonSpacing;
+    Rectangle brushRect = {brushX, buttonsY, buttonSize, buttonSize};
+    if (CheckCollisionPointRec(mousePos, brushRect)) {
+        selectedEntityID = -1; // Brush
+        return;
+    }
     
     float currentY = 70.0f;
     
-    // Skip eraser size area if eraser is selected
-    if (selectedEntityID == 0) {
-        currentY += 60.0f; // Skip the eraser size area
-    }
-    float categoryHeight = 30.0f;
-    float itemSize = 32.0f;
-    float itemSpacing = 4.0f;
+    // Always skip the same space for size area to keep layout consistent
+    currentY += 75.0f; // Same height as size areas (whether shown or not)
     
-    // Check category headers
+    float categoryHeight = 25.0f;
+    float itemSize = 28.0f;
+    float itemSpacing = 3.0f;
+    float categoryWidth = (toolsAreaWidth - 20.0f) / categories.size();
+    
+    // Check category headers (now horizontal, only for TILES, BLOCKS, ITEMS, BADDIES)
     for (int catIndex = 0; catIndex < categories.size(); catIndex++) {
-        Rectangle categoryRect = {toolsAreaX + 5.0f, currentY, toolsAreaWidth - 10.0f, categoryHeight};
+        float categoryX = toolsAreaX + 5.0f + catIndex * categoryWidth;
+        Rectangle categoryRect = {categoryX, currentY, categoryWidth - 2.0f, categoryHeight};
         
         if (CheckCollisionPointRec(mousePos, categoryRect)) {
             selectedCategoryIndex = catIndex;
             return;
         }
+    }
+    
+    // Check for item clicks in the selected category area
+    currentY += categoryHeight + 15.0f; // Match the spacing from drawToolsArea
+    
+    if (selectedCategoryIndex >= 0 && selectedCategoryIndex < categoryEntityIDs.size()) {
+        float itemX = toolsAreaX + 10.0f;
+        float itemY = currentY;
+        int itemsPerRow = (int)((toolsAreaWidth - 20.0f) / (itemSize + itemSpacing));
         
-        currentY += categoryHeight + 5.0f;
+        // Reserve space for permanent tools at bottom (120px)
+        float maxItemY = toolsAreaHeight - 120.0f;
         
-        // If this is the selected category, check for item clicks
-        if (catIndex == selectedCategoryIndex) {
-            float itemX = toolsAreaX + 10.0f;
-            float itemY = currentY;
-            int itemsPerRow = (int)((toolsAreaWidth - 20.0f) / (itemSize + itemSpacing));
+        for (int i = 0; i < categoryEntityIDs[selectedCategoryIndex].size(); i++) {
+            int entityID = categoryEntityIDs[selectedCategoryIndex][i];
             
-            for (int i = 0; i < categoryEntityIDs[catIndex].size(); i++) {
-                int entityID = categoryEntityIDs[catIndex][i];
-                
-                int row = i / itemsPerRow;
-                int col = i % itemsPerRow;
-                float x = itemX + col * (itemSize + itemSpacing);
-                float y = itemY + row * (itemSize + itemSpacing);
-                
-                if (y + itemSize > GetScreenHeight() - 20.0f) break;
-                
-                Rectangle itemRect = {x, y, itemSize, itemSize};
-                
-                if (CheckCollisionPointRec(mousePos, itemRect)) {
-                    selectedEntityID = entityID;
-                    return;
+            int row = i / itemsPerRow;
+            int col = i % itemsPerRow;
+            float x = itemX + col * (itemSize + itemSpacing);
+            float y = itemY + row * (itemSize + itemSpacing);
+            
+            if (y + itemSize > maxItemY) break;
+            
+            Rectangle itemRect = {x, y, itemSize, itemSize};
+            
+            if (CheckCollisionPointRec(mousePos, itemRect)) {
+                // Store the last selected entity if it's not a special tool (eraser/brush)
+                if (entityID > 0) {
+                    lastSelectedEntityID = entityID;
                 }
+                selectedEntityID = entityID;
+                return;
             }
-            
-            int rows = ((int)categoryEntityIDs[catIndex].size() + itemsPerRow - 1) / itemsPerRow;
-            currentY += rows * (itemSize + itemSpacing) + 10.0f;
         }
-        
-        currentY += 5.0f;
     }
 }
 
@@ -548,8 +712,11 @@ void MapEditorScreen2::handleGridPlacement(Vector2 mousePos) {
         isDrawing = false;
     }
     
-    // Only draw while holding left mouse button
-    if (!isDrawing) return;
+    // Brush mode: Draw on mouse press OR when hovering while drawing (continuous brush)
+    bool shouldDraw = IsMouseButtonPressed(MOUSE_BUTTON_LEFT) || 
+                     (isDrawing && IsMouseButtonDown(MOUSE_BUTTON_LEFT));
+    
+    if (!shouldDraw) return;
     
     // Convert mouse position to world position
     Vector2 worldPos = GetScreenToWorld2D(mousePos, gridCamera);
@@ -578,11 +745,34 @@ void MapEditorScreen2::handleGridPlacement(Vector2 mousePos) {
                     }
                 }
             }
+        } else if (selectedEntityID == -1) {
+            // Brush mode: Use the last selected entity (not -1)
+            int entityToPlace = lastSelectedEntityID;
+            
+            // Place in a square pattern based on brush size
+            int halfSize = brushSize / 2;
+            for (int dy = -halfSize; dy <= halfSize; dy++) {
+                for (int dx = -halfSize; dx <= halfSize; dx++) {
+                    int targetX = gridX + dx;
+                    int targetY = gridY + dy;
+                    
+                    if (targetX >= 0 && targetX < GRID_WIDTH_IN_TILES && 
+                        targetY >= 0 && targetY < GRID_HEIGHT_IN_TILES) {
+                        int index = targetY * GRID_WIDTH_IN_TILES + targetX;
+                        if (index >= 0 && index < currentMapData->entitiesID.size()) {
+                            currentMapData->entitiesID[index] = entityToPlace;
+                        }
+                    }
+                }
+            }
         } else {
-            // Normal single tile placement
+            // Single placement mode: Place tiles smoothly as mouse moves
             int index = gridY * GRID_WIDTH_IN_TILES + gridX;
             if (index >= 0 && index < currentMapData->entitiesID.size()) {
-                currentMapData->entitiesID[index] = selectedEntityID;
+                // Only place if the current tile is different to avoid redundant operations
+                if (currentMapData->entitiesID[index] != selectedEntityID) {
+                    currentMapData->entitiesID[index] = selectedEntityID;
+                }
             }
         }
     }
@@ -656,5 +846,111 @@ void MapEditorScreen2::drawEraserSizeArea(float toolsAreaX, float toolsAreaWidth
     eraserSize = Clamp(newSize, MIN_ERASER_SIZE, MAX_ERASER_SIZE);
     
     currentY += 30.0f;
+}
+
+void MapEditorScreen2::drawBrushSizeArea(float toolsAreaX, float toolsAreaWidth, float& currentY) {
+    Font font = ResourceManager::getInstance().getFont("SuperMario256");
+    
+    // Draw brush size label
+    const char* sizeLabel = "Brush Size:";
+    DrawTextEx(font, sizeLabel, 
+               {toolsAreaX + 10.0f, currentY}, 
+               16.0f, 0.0f, BLACK);
+    currentY += 25.0f;
+    
+    // Draw size value
+    const char* sizeValue = TextFormat("%d x %d", brushSize, brushSize);
+    DrawTextEx(font, sizeValue, 
+               {toolsAreaX + 10.0f, currentY}, 
+               14.0f, 0.0f, DARKGREEN);
+    currentY += 20.0f;
+    
+    // Draw raygui slider
+    Rectangle sliderRect = {toolsAreaX + 10.0f, currentY, toolsAreaWidth - 30.0f, 20.0f};
+    
+    // Convert brush size to slider value (0.0 to 1.0)
+    float sliderValue = (float)(brushSize - MIN_BRUSH_SIZE) / (float)(MAX_BRUSH_SIZE - MIN_BRUSH_SIZE);
+    
+    // Use GuiSlider with custom range
+    GuiSlider(sliderRect, NULL, NULL, &sliderValue, 0.0f, 1.0f);
+    
+    // Convert back to brush size and ensure odd numbers only
+    int newSize = MIN_BRUSH_SIZE + (int)(sliderValue * (MAX_BRUSH_SIZE - MIN_BRUSH_SIZE));
+    
+    // Ensure odd number
+    if (newSize % 2 == 0) {
+        // If even, round to nearest odd number
+        newSize = (newSize < MAX_BRUSH_SIZE) ? newSize + 1 : MAX_BRUSH_SIZE;
+    }
+    
+    brushSize = Clamp(newSize, MIN_BRUSH_SIZE, MAX_BRUSH_SIZE);
+    
+    currentY += 30.0f;
+}
+
+void MapEditorScreen2::drawPermanentToolsSection(float toolsAreaX, float toolsAreaWidth, float toolsAreaHeight) {
+    Font font = ResourceManager::getInstance().getFont("SuperMario256");
+    
+    float sectionHeight = 100.0f;
+    float sectionY = toolsAreaHeight - sectionHeight - 10.0f;
+    
+    // Draw background for permanent tools section
+    Rectangle toolsSectionRect = {toolsAreaX + 5.0f, sectionY, toolsAreaWidth - 10.0f, sectionHeight};
+    DrawRectangleRec(toolsSectionRect, Fade(DARKBLUE, 0.1f));
+    DrawRectangleLinesEx(toolsSectionRect, 2.0f, DARKBLUE);
+    
+    // Draw section title
+    const char* sectionTitle = "TOOLS";
+    Vector2 titleSize = MeasureTextEx(font, sectionTitle, 16.0f, 0.0f);
+    DrawTextEx(font, sectionTitle, 
+               {toolsAreaX + 10.0f, sectionY + 5.0f}, 
+               16.0f, 0.0f, DARKBLUE);
+    
+    // Draw eraser and brush buttons
+    float buttonSize = 32.0f;
+    float buttonSpacing = 10.0f;
+    float buttonsY = sectionY + 25.0f;
+    
+    // Eraser button
+    float eraserX = toolsAreaX + 15.0f;
+    Rectangle eraserRect = {eraserX, buttonsY, buttonSize, buttonSize};
+    Color eraserColor = (selectedEntityID == 0) ? RED : GRAY;
+    DrawRectangleRec(eraserRect, Fade(eraserColor, 0.3f));
+    DrawRectangleLinesEx(eraserRect, 2.0f, eraserColor);
+    
+    // Draw X for eraser
+    DrawLine((int)eraserX + 6, (int)buttonsY + 6, (int)(eraserX + buttonSize - 6), (int)(buttonsY + buttonSize - 6), eraserColor);
+    DrawLine((int)(eraserX + buttonSize - 6), (int)buttonsY + 6, (int)eraserX + 6, (int)(buttonsY + buttonSize - 6), eraserColor);
+    
+    // Eraser label
+    DrawTextEx(font, "ERASER", 
+               {eraserX, buttonsY + buttonSize + 3.0f}, 
+               10.0f, 0.0f, eraserColor);
+    
+    // Brush button
+    float brushX = eraserX + buttonSize + buttonSpacing;
+    Rectangle brushRect = {brushX, buttonsY, buttonSize, buttonSize};
+    Color brushColor = (selectedEntityID == -1) ? GREEN : GRAY;
+    DrawRectangleRec(brushRect, Fade(brushColor, 0.3f));
+    DrawRectangleLinesEx(brushRect, 2.0f, brushColor);
+    
+    // Draw brush icon (filled square)
+    float iconSize = buttonSize * 0.6f;
+    float iconOffset = (buttonSize - iconSize) / 2.0f;
+    DrawRectangle((int)(brushX + iconOffset), (int)(buttonsY + iconOffset), (int)iconSize, (int)iconSize, brushColor);
+    
+    // Brush label
+    DrawTextEx(font, "BRUSH", 
+               {brushX, buttonsY + buttonSize + 3.0f}, 
+               10.0f, 0.0f, brushColor);
+    
+    // Show size info only for eraser (brush info is already shown in slider area)
+    float infoY = buttonsY + buttonSize + 20.0f;
+    if (selectedEntityID == 0) {
+        const char* sizeInfo = TextFormat("Size: %dx%d", eraserSize, eraserSize);
+        DrawTextEx(font, sizeInfo, 
+                   {toolsAreaX + 10.0f, infoY}, 
+                   12.0f, 0.0f, RED);
+    }
 }
 

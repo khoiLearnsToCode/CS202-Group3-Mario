@@ -16,6 +16,8 @@ private:
     static const float BASE_TILE_SIZE;
     static const int MIN_ERASER_SIZE = 1;
     static const int MAX_ERASER_SIZE = 9; // Changed to 9 to ensure only odd numbers
+    static const int MIN_BRUSH_SIZE = 1;
+    static const int MAX_BRUSH_SIZE = 9; // Brush size range (odd numbers only)
     
     UserMapData* currentMapData;
 
@@ -32,6 +34,7 @@ private:
     
     // Tool selection
     int selectedEntityID;
+    int lastSelectedEntityID; // Store the last selected entity for brush mode
     int selectedCategoryIndex;
     std::vector<std::string> categories;
     std::vector<std::vector<int>> categoryEntityIDs;
@@ -46,6 +49,9 @@ private:
     
     // Eraser settings
     int eraserSize;
+    
+    // Brush settings
+    int brushSize;
 
 
 public:
@@ -62,11 +68,13 @@ public:
 private:
     void drawGrid();
     void drawToolsArea();
+    void drawPermanentToolsSection(float toolsAreaX, float toolsAreaWidth, float toolsAreaHeight);
     void initializeCategories();
     void handleToolSelection(Vector2 mousePos);
     void handleGridPlacement(Vector2 mousePos);
     void updateHoverState(Vector2 mousePos);
     void drawEraserSizeArea(float toolsAreaX, float toolsAreaWidth, float& currentY);
+    void drawBrushSizeArea(float toolsAreaX, float toolsAreaWidth, float& currentY);
     
 public:
 };

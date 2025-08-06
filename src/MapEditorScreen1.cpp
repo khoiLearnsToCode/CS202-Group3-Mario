@@ -97,7 +97,8 @@ void MapEditorScreen1::update() {
     Button* selectMapButton = getButton("SAVED MAP");
     if (selectMapButton && selectMapButton->isReleased()) {
         showSavedMapDialog = true;
-        loadAvailableMaps(); // Refresh the list
+        // Only refresh if needed (e.g., after saving a new map)
+        // loadAvailableMaps(); // Uncomment this line only if you need to refresh from disk
     }
 }
 
