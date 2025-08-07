@@ -254,6 +254,26 @@ void ResourceManager::loadTextures() {
         textures["settingBackground"] = LoadTexture("../resource/graphic/backgrounds/settingBackground.png");
         textures["helpBackground"] = LoadTexture("../resource/graphic/backgrounds/helpBackground.png");
 
+        Image mapEditorScreen0Image = LoadImage("../resource/graphic/backgrounds/mapEditorScreen0.png");
+        ImageResize(&mapEditorScreen0Image, GetScreenWidth(), GetScreenHeight());
+        textures["mapEditorScreen0"] = LoadTextureFromImage(mapEditorScreen0Image);
+        UnloadImage(mapEditorScreen0Image);
+
+        Image mapEditorScreen1Image = LoadImage("../resource/graphic/backgrounds/mapEditorScreen1.png");
+        ImageResize(&mapEditorScreen1Image, GetScreenWidth(), GetScreenHeight());
+        textures["mapEditorScreen1"] = LoadTextureFromImage(mapEditorScreen1Image);
+        UnloadImage(mapEditorScreen1Image);
+
+        Image mapEditorScreen2Image = LoadImage("../resource/graphic/backgrounds/mapEditorScreen2.png");
+        ImageResize(&mapEditorScreen2Image, GetScreenWidth(), GetScreenHeight());
+        textures["mapEditorScreen2"] = LoadTextureFromImage(mapEditorScreen2Image);
+        UnloadImage(mapEditorScreen2Image);
+
+        Image mapEditorScreen3Image = LoadImage("../resource/graphic/backgrounds/mapEditorScreen3.png");
+        ImageResize(&mapEditorScreen3Image, GetScreenWidth(), GetScreenHeight());
+        textures["mapEditorScreen3"] = LoadTextureFromImage(mapEditorScreen3Image);
+        UnloadImage(mapEditorScreen3Image);
+
         // items
         textures["coin0"] = LoadTexture("../resource/graphic/sprites/items/Coin_0.png");
         textures["coin1"] = LoadTexture("../resource/graphic/sprites/items/Coin_1.png");

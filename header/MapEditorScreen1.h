@@ -19,8 +19,13 @@ class GameWorld;
 class MapEditorScreen1 : public Screen {
 private:
     std::unordered_map<std::string, Button*> buttons;
-    Font& font;
+    Font& font1;
+    Font& font2;
+    int frame;
+    const int maxFrame;
     float fontSize;
+    float frameTimeAccum;
+    const float frameTime;
     bool showSavedMapDialog;
     Rectangle dialogBox;
     
@@ -49,6 +54,7 @@ private:
     void saveMapToFile(const UserMapData& mapData, const std::string& filename);
     UserMapData loadMapFromFile(const std::string& filepath);
     std::string getUserDesignedMapsDirectory() const;
+    void updateFrameAnimation();
 
 public:
     MapEditorScreen1();

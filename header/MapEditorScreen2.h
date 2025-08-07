@@ -11,15 +11,17 @@ class MapEditorScreen1;
 class MapEditorScreen2 : public Screen {
 private:
     // Static constants
-    static const int GRID_WIDTH_IN_TILES = 200;
-    static const int GRID_HEIGHT_IN_TILES = 60;
+    static const int GRID_WIDTH_IN_TILES;
+    static const int GRID_HEIGHT_IN_TILES;
     static const float BASE_TILE_SIZE;
     static const int MIN_ERASER_SIZE = 1;
-    static const int MAX_ERASER_SIZE = 9; // Changed to 9 to ensure only odd numbers
+    static const int MAX_ERASER_SIZE = 9; 
     static const int MIN_BRUSH_SIZE = 1;
-    static const int MAX_BRUSH_SIZE = 9; // Brush size range (odd numbers only)
+    static const int MAX_BRUSH_SIZE = 9; 
     
     UserMapData* currentMapData;
+    Font& font1;
+    Font& font2;
 
     friend class MapEditorScreen1; 
     void setCurrentMapData(UserMapData* mapData);
@@ -52,6 +54,12 @@ private:
     
     // Brush settings
     int brushSize;
+    
+    // Color picker settings
+    float colorPickerRed;
+    float colorPickerGreen;
+    float colorPickerBlue;
+    float colorPickerAlpha;
 
 
 public:
@@ -75,6 +83,7 @@ private:
     void updateHoverState(Vector2 mousePos);
     void drawEraserSizeArea(float toolsAreaX, float toolsAreaWidth, float& currentY);
     void drawBrushSizeArea(float toolsAreaX, float toolsAreaWidth, float& currentY);
+    void drawColorPicker(float toolsAreaX, float toolsAreaWidth, float& currentY);
     
 public:
 };

@@ -1,32 +1,38 @@
 #include "MapEditorScreen1.h"
 #include "GameWorld.h"
+#include "utils.h"
 #include <algorithm>
 #include <iostream>
 #include <cmath>
 #include <filesystem>
 #include <ctime>
+#include <sstream>
 #include "raygui.h"
 
 using json = nlohmann::json;
 
 MapEditorScreen1::MapEditorScreen1() : Screen(), 
-                                       font(ResourceManager::getInstance().getFont("SuperMario256")),
+                                       font1(ResourceManager::getInstance().getFont("fixedsys")),
+                                       font2(ResourceManager::getInstance().getFont("SuperMario256")),
                                        fontSize(40.0f),
                                        showSavedMapDialog(false),
                                        scrollOffset({0, 0}),
                                        selectedMapIndex(-1),
                                        lastClickedIndex(-1),
-                                       lastClickTime(0.0f) {
+                                       lastClickTime(0.0f),
+                                       frame(0), maxFrame(4),
+                                       frameTimeAccum(0.0f),
+                                       frameTime(1.0f) {
     
     
         // Create buttons for map editor options
     buttons.emplace("NEW MAP", new ButtonTextTexture("NEW MAP", "longButton", 
                     {GetScreenWidth() / 2.0f - 128.0f, GetScreenHeight() / 2.0f - 50.0f}, 
-                    2.0f, WHITE, font, fontSize));
+                    2.0f, WHITE, font1, fontSize));
         
     buttons.emplace("SAVED MAP", new ButtonTextTexture("SAVED MAP", "longButton", 
                     {GetScreenWidth() / 2.0f - 128.0f, GetScreenHeight() / 2.0f + 25.0f}, 
-                    2.0f, WHITE, font, fontSize));
+                    2.0f, WHITE, font1, fontSize));
     
     buttons.emplace("BACK TO MENU", new ButtonTextTexture("returnButton", 
                     { 100.0f, GetScreenHeight() - 100.0f }, 2.0f));
@@ -59,14 +65,48 @@ MapEditorScreen1::MapEditorScreen1() : Screen(),
 }
 
 MapEditorScreen1::~MapEditorScreen1() {
+    // Clean up buttons
     for (auto& [key, button] : buttons) {
         delete button;
         button = nullptr;
     }
     buttons.clear();
+    
+    // Delete all existing JSON files and rewrite from current userDesignedMaps
+    std::string mapsDirectory = "../../../../resource/userDesignedMaps";
+    
+    try {
+        // Delete all existing JSON files in the directory
+        if (std::filesystem::exists(mapsDirectory) && std::filesystem::is_directory(mapsDirectory)) {
+            for (const auto& entry : std::filesystem::directory_iterator(mapsDirectory)) {
+                if (entry.is_regular_file() && entry.path().extension() == ".json") {
+                    try {
+                        std::filesystem::remove(entry.path());
+                        std::cout << "Deleted existing map file: " << entry.path().filename() << std::endl;
+                    } catch (const std::exception& e) {
+                        std::cerr << "Error deleting file " << entry.path() << ": " << e.what() << std::endl;
+                    }
+                }
+            }
+        }
+        
+        // Rewrite all maps from current userDesignedMaps vector
+        for (const auto& mapData : userDesignedMaps) {
+            if (!mapData.filename.empty()) {
+                saveMapToFile(mapData, mapData.filename);
+                std::cout << "Rewritten map file: " << mapData.filename << std::endl;
+            }
+        }
+        
+    } catch (const std::exception& e) {
+        std::cerr << "Error during destructor cleanup: " << e.what() << std::endl;
+    }
 }
 
 void MapEditorScreen1::update() {
+
+    updateFrameAnimation();
+
     // If dialog is open, handle dialog-specific input and prevent other button interactions
     if (showSavedMapDialog) {
         // Check if user clicked outside the dialog box to dismiss it
@@ -103,16 +143,15 @@ void MapEditorScreen1::update() {
 }
 
 void MapEditorScreen1::draw() {
-    // Draw yellow background
-    ClearBackground(YELLOW);
-    
+
+    // Draw background
+    std::string key = TextFormat("mapEditorScreen%d", frame);
+    DrawTexture(textures[key], 0, 0, WHITE);
+
     // Draw title
-    const char* title = "MAP EDITOR";
-    Vector2 titleSize = MeasureTextEx(font, title, fontSize + 20.0f, 0.0f);
-    DrawTextEx(font, title, 
-               {(GetScreenWidth() - titleSize.x) / 2.0f, GetScreenHeight() / 2.0f - 150.0f}, 
-               fontSize + 20.0f, 0.0f, BLACK);
-    
+    Vector2 titlePos = {(GetScreenWidth() - textures["mapEditor"].width) / 2.0f, 0};
+    DrawTexture(textures["mapEditor"], titlePos.x, titlePos.y, WHITE);
+
     // Draw buttons
     for (auto& [key, button] : buttons) {
         button->draw();
@@ -129,8 +168,8 @@ void MapEditorScreen1::draw() {
         
         // Draw dialog title
         const char* dialogTitle = "SAVED MAPS";
-        Vector2 titleSize = MeasureTextEx(font, dialogTitle, fontSize, 0.0f);
-        DrawTextEx(font, dialogTitle, 
+        Vector2 titleSize = MeasureTextEx(font2, dialogTitle, fontSize, 0.0f);
+        DrawTextEx(font2, dialogTitle, 
                    {dialogBox.x + (dialogBox.width - titleSize.x) / 2.0f, dialogBox.y + 20.0f}, 
                    fontSize, 0.0f, BLACK);
         
@@ -139,8 +178,8 @@ void MapEditorScreen1::draw() {
         
         // Draw close instruction
         const char* closeText = "Click outside to close | Double-click to select";
-        Vector2 closeSize = MeasureTextEx(font, closeText, fontSize - 20.0f, 0.0f);
-        DrawTextEx(font, closeText, 
+        Vector2 closeSize = MeasureTextEx(font1, closeText, fontSize - 20.0f, 0.0f);
+        DrawTextEx(font1, closeText, 
                    {dialogBox.x + (dialogBox.width - closeSize.x) / 2.0f, 
                     dialogBox.y + dialogBox.height - 40.0f}, 
                    fontSize - 20.0f, 0.0f, DARKGRAY);
@@ -190,12 +229,12 @@ void MapEditorScreen1::drawScrollableMapList() {
         GuiPanel(scrollViewRec, NULL);
         
         // Draw centered text
-        Vector2 textSize = MeasureTextEx(font, noMapsText, fontSize - 10.0f, 0.0f);
+        Vector2 textSize = MeasureTextEx(font2, noMapsText, fontSize - 10.0f, 0.0f);
         Vector2 textPos = {
             scrollViewRec.x + (scrollViewRec.width - textSize.x) / 2.0f,
             scrollViewRec.y + (scrollViewRec.height - textSize.y) / 2.0f
         };
-        DrawTextEx(font, noMapsText, textPos, fontSize - 10.0f, 0.0f, DARKGRAY);
+        DrawTextEx(font2, noMapsText, textPos, fontSize - 10.0f, 0.0f, DARKGRAY);
         return;
     }
     
@@ -285,7 +324,7 @@ void MapEditorScreen1::drawScrollableMapList() {
             if (!availableMaps[i].empty()) {
                 float textSize = fontSize - 15.0f;
                 Vector2 textPos = {itemRect.x + 10.0f, itemRect.y + (itemRect.height - textSize) / 2.0f};
-                DrawTextEx(font, availableMaps[i].c_str(), textPos, textSize, 0.0f, BLACK);
+                DrawTextEx(font2, availableMaps[i].c_str(), textPos, textSize, 0.0f, BLACK);
             }
         }
     }
@@ -295,7 +334,7 @@ void MapEditorScreen1::drawScrollableMapList() {
 
 void MapEditorScreen1::loadUserDesignedMap(int mapIndex) {
     if (mapIndex >= 0 && mapIndex < userDesignedMaps.size()) {
-        const UserMapData& mapData = userDesignedMaps[mapIndex];
+        UserMapData& mapData = userDesignedMaps[mapIndex];
         std::cout << "Loading user-designed map: " << mapData.displayName << std::endl;
         std::cout << "Entities count: " << mapData.entitiesID.size() << std::endl;
         std::cout << "Background color: [" << (int)mapData.backgroundColor.r << ", " 
@@ -303,12 +342,9 @@ void MapEditorScreen1::loadUserDesignedMap(int mapIndex) {
                   << ", " << (int)mapData.backgroundColor.a << "]" << std::endl;
         std::cout << "Background ID: " << mapData.backgroundID << std::endl;
         
-        // Create a copy of the map data to pass to MapEditorScreen2
-        UserMapData* mapDataCopy = new UserMapData(mapData);
-        
         // Pass the data to MapEditorScreen2 and transition to it
         if (mapEditorScreen2) {
-            mapEditorScreen2->setCurrentMapData(mapDataCopy);
+            mapEditorScreen2->setCurrentMapData(&mapData);
             GameWorld::state = GAME_STATE_MAP_EDITOR_SCREEN2;
         }
         
@@ -324,12 +360,13 @@ void MapEditorScreen1::createNewMap() {
     
     // Create a new default UserMapData
     UserMapData newMapData;
-    newMapData.displayName = "New Map " + std::to_string(mapIndex);
-    newMapData.filename = "Des" + std::to_string(mapIndex) + ".json";
+    newMapData.displayName = "New Map";
+    newMapData.filename = "des" + std::to_string(mapIndex) + ".json";
+    userDesignedMaps.push_back(newMapData);
 
     // Pass the new map data to MapEditorScreen2
     if (mapEditorScreen2) {
-        mapEditorScreen2->setCurrentMapData(&newMapData);
+        mapEditorScreen2->setCurrentMapData(&userDesignedMaps.back());
     }
     
     // Switch to MapEditorScreen2
@@ -363,24 +400,38 @@ void MapEditorScreen1::loadUserDesignedMapsFromFilesystem() {
 }
 
 void MapEditorScreen1::saveMapToFile(const UserMapData& mapData, const std::string& filename) {
-    std::string mapsDirectory = getUserDesignedMapsDirectory();
+    std::string mapsDirectory = "../../../../resource/userDesignedMaps";
     std::string fullPath = mapsDirectory + "/" + filename;
     
     try {
         // Create directory if it doesn't exist
         std::filesystem::create_directories(mapsDirectory);
         
-        // Create JSON structure
-        json mapJson;
-        mapJson["EntitiesID"] = mapData.entitiesID;
-        mapJson["backgroundColor"] = {mapData.backgroundColor.r, mapData.backgroundColor.g, 
-                                     mapData.backgroundColor.b, mapData.backgroundColor.a};
-        mapJson["backgroundID"] = mapData.backgroundID;
+        // Create compact JSON structure manually
+        std::stringstream jsonStream;
+        jsonStream << "{\n";
+        
+        // Serialize EntitiesID with chunks of 200 elements per line for compactness
+        jsonStream << "  \"EntitiesID\": ";
+        jsonStream << serialize_vector_with_chunks(mapData.entitiesID, 200);
+        jsonStream << ",\n";
+        
+        // Serialize backgroundColor
+        jsonStream << "  \"backgroundColor\": [" 
+                   << (int)mapData.backgroundColor.r << ", " 
+                   << (int)mapData.backgroundColor.g << ", " 
+                   << (int)mapData.backgroundColor.b << ", " 
+                   << (int)mapData.backgroundColor.a << "],\n";
+        
+        // Serialize backgroundID
+        jsonStream << "  \"backgroundID\": " << mapData.backgroundID << "\n";
+        
+        jsonStream << "}";
         
         // Write to file
         std::ofstream file(fullPath);
         if (file.is_open()) {
-            file << mapJson.dump(2); // Pretty print with 2-space indentation
+            file << jsonStream.str();
             file.close();
             std::cout << "Map saved to: " << fullPath << std::endl;
         } else {
@@ -417,6 +468,7 @@ UserMapData MapEditorScreen1::loadMapFromFile(const std::string& filepath) {
                 mapData.entitiesID.resize(12000, 0);
             }
         } else {
+            std::cerr << "EntitiesID not found or invalid in map file: " << filepath << std::endl;
             mapData.entitiesID = std::vector<int>(12000, 0);
         }
         
@@ -456,5 +508,13 @@ std::string MapEditorScreen1::getUserDesignedMapsDirectory() const {
 
 void MapEditorScreen1::setMapEditorScreen2(MapEditorScreen2* screen) {
     mapEditorScreen2 = screen;
+}
+
+void MapEditorScreen1::updateFrameAnimation() {
+    frameTimeAccum += GetFrameTime();
+    if (frameTimeAccum >= frameTime) {
+        frameTimeAccum = 0.0f;
+        frame = (frame + 1) % maxFrame; // Loop through frames
+    }
 }
 
