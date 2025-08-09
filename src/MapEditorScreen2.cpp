@@ -24,7 +24,10 @@ MapEditorScreen2::MapEditorScreen2(MapEditorScreen1* parentScreen)
                                     eraserSize(1), brushSize(1), colorPickerRed(0.7f), colorPickerGreen(0.7f), 
                                     colorPickerBlue(0.7f), colorPickerAlpha(1.0f),
                                     font1(ResourceManager::getInstance().getFont("SuperMario256")), 
-                                    font2(ResourceManager::getInstance().getFont("fixedsys")) {
+                                    font2(ResourceManager::getInstance().getFont("fixedsys")),
+                                    colorPalette({
+                                        {255, 61, 65, 255},
+                                    }) {
 
         // Initialize camera for grid view
         gridCamera.target = {0.0f, 0.0f};
@@ -1013,19 +1016,20 @@ void MapEditorScreen2::drawPermanentToolsSection(float toolsAreaX, float toolsAr
 
 void MapEditorScreen2::drawColorPicker(float toolsAreaX, float toolsAreaWidth, float& currentY) {
     // Color picker area background
-    float colorPickerHeight = 200.0f; // Reduced height since no text input
+    float colorPickerHeight = 220.0f; 
+    float fontSize = 20.0f;
     Rectangle colorPickerArea = {toolsAreaX + 5.0f, currentY, toolsAreaWidth - 10.0f, colorPickerHeight};
     DrawRectangleRec(colorPickerArea, Fade(PURPLE, 0.1f));
     DrawRectangleLinesEx(colorPickerArea, 1.0f, PURPLE);
     
-    float startY = currentY + 10.0f;
+    float startY = currentY + 20.0f;
     float sliderWidth = toolsAreaWidth - 30.0f;
     float sliderHeight = 20.0f;
-    float sliderSpacing = 45.0f;
+    float sliderSpacing = 50.0f;
     
     // Red slider
     DrawTextEx(font1, TextFormat("Red: %d", (int)(colorPickerRed * 255)), 
-               {toolsAreaX + 10.0f, startY}, 15.0f, 0.0f, BLACK);
+               {toolsAreaX + 10.0f, startY - 6.0f}, fontSize, 0.0f, colorPalette[0]);
     Rectangle redSlider = {toolsAreaX + 10.0f, startY + 14.0f, sliderWidth, sliderHeight};
     GuiSlider(redSlider, NULL, NULL, &colorPickerRed, 0.0f, 1.0f);
     
@@ -1033,7 +1037,7 @@ void MapEditorScreen2::drawColorPicker(float toolsAreaX, float toolsAreaWidth, f
     
     // Green slider
     DrawTextEx(font1, TextFormat("Green: %d", (int)(colorPickerGreen * 255)), 
-               {toolsAreaX + 10.0f, startY}, 15.0f, 0.0f, BLACK);
+               {toolsAreaX + 10.0f, startY - 6.0f}, fontSize, 0.0f, BLACK);
     Rectangle greenSlider = {toolsAreaX + 10.0f, startY + 14.0f, sliderWidth, sliderHeight};
     GuiSlider(greenSlider, NULL, NULL, &colorPickerGreen, 0.0f, 1.0f);
     
@@ -1041,7 +1045,7 @@ void MapEditorScreen2::drawColorPicker(float toolsAreaX, float toolsAreaWidth, f
     
     // Blue slider
     DrawTextEx(font1, TextFormat("Blue: %d", (int)(colorPickerBlue * 255)), 
-               {toolsAreaX + 10.0f, startY}, 15.0f, 0.0f, BLACK);
+               {toolsAreaX + 10.0f, startY - 6.0f}, fontSize, 0.0f, BLACK);
     Rectangle blueSlider = {toolsAreaX + 10.0f, startY + 14.0f, sliderWidth, sliderHeight};
     GuiSlider(blueSlider, NULL, NULL, &colorPickerBlue, 0.0f, 1.0f);
     
@@ -1049,7 +1053,7 @@ void MapEditorScreen2::drawColorPicker(float toolsAreaX, float toolsAreaWidth, f
     
     // Alpha slider
     DrawTextEx(font1, TextFormat("Alpha: %d", (int)(colorPickerAlpha * 255)), 
-               {toolsAreaX + 10.0f, startY}, 15.0f, 0.0f, BLACK);
+               {toolsAreaX + 10.0f, startY - 6.0f}, fontSize, 0.0f, BLACK);
     Rectangle alphaSlider = {toolsAreaX + 10.0f, startY + 14.0f, sliderWidth, sliderHeight};
     GuiSlider(alphaSlider, NULL, NULL, &colorPickerAlpha, 0.0f, 1.0f);
     
@@ -1070,15 +1074,15 @@ void MapEditorScreen2::drawColorPicker(float toolsAreaX, float toolsAreaWidth, f
     DrawRectangleLinesEx(previewRect, 2.0f, BLACK);
     
     // Color code display (read-only)
-    const char* colorCode = TextFormat("RGBA: %d,%d,%d,%d", 
+    const char* colorCode = TextFormat("RGBA: %d, %d, %d, %d", 
             (int)(colorPickerRed * 255),
             (int)(colorPickerGreen * 255),
             (int)(colorPickerBlue * 255),
             (int)(colorPickerAlpha * 255));
     
     DrawTextEx(font1, colorCode, 
-               {toolsAreaX + previewSize + 15.0f, startY + 10.0f}, 
-               15.0f, 0.0f, BLACK);
+               {toolsAreaX + previewSize + 15.0f, startY + 30.0f}, 
+               18.0f, 0.0f, BLACK);
     
     // Auto-apply color changes to map background in real-time
     if (currentMapData) {

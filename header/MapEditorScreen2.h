@@ -61,6 +61,8 @@ private:
     float colorPickerBlue;
     float colorPickerAlpha;
 
+    const std::vector<Color> colorPalette;
+
 
 public:
     MapEditorScreen2(MapEditorScreen1* parentScreen);
