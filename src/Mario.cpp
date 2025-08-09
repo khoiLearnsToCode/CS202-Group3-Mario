@@ -327,79 +327,154 @@ void Mario::draw() {
 
     const char dir = facingDirection == DIRECTION_RIGHT ? 'R' : 'L';
 
-    if (state == SPRITE_STATE_DYING) {
-        DrawTexture(textures[std::string(TextFormat("smallMario%dDy", currentFrame))], pos.x, pos.y, WHITE);
-    }
-    else if (state == SPRITE_STATE_TRANSITIONING_SMALL_TO_SUPER ||
-        state == SPRITE_STATE_TRANSITIONING_SUPER_TO_SMALL) {
-        DrawTexture(textures[std::string(TextFormat("transitioningMarioSS%d%c", transitionCurrentFrame, dir))], pos.x, pos.y, WHITE);
-    }
-    else if (state == SPRITE_STATE_TRANSITIONING_SMALL_TO_FLOWER ||
-        state == SPRITE_STATE_TRANSITIONING_FLOWER_TO_SMALL) {
-        DrawTexture(textures[std::string(TextFormat("transitioningMarioSF%d%c", transitionCurrentFrame, dir))], pos.x, pos.y, WHITE);
-    }
-    else if (state == SPRITE_STATE_TRANSITIONING_SUPER_TO_FLOWER) {
-        if (transitionCurrentFrame == 0) {
-            DrawTexture(textures[std::string(TextFormat("superMario0%c", dir))], pos.x, pos.y, WHITE);
+    bool luigi = true;
+    if (!luigi) {
+        if (state == SPRITE_STATE_DYING) {
+            DrawTexture(textures[std::string(TextFormat("smallMario%dDy", currentFrame))], pos.x, pos.y, WHITE);
+        }
+        else if (state == SPRITE_STATE_TRANSITIONING_SMALL_TO_SUPER ||
+            state == SPRITE_STATE_TRANSITIONING_SUPER_TO_SMALL) {
+            DrawTexture(textures[std::string(TextFormat("transitioningMarioSS%d%c", transitionCurrentFrame, dir))], pos.x, pos.y, WHITE);
+        }
+        else if (state == SPRITE_STATE_TRANSITIONING_SMALL_TO_FLOWER ||
+            state == SPRITE_STATE_TRANSITIONING_FLOWER_TO_SMALL) {
+            DrawTexture(textures[std::string(TextFormat("transitioningMarioSF%d%c", transitionCurrentFrame, dir))], pos.x, pos.y, WHITE);
+        }
+        else if (state == SPRITE_STATE_TRANSITIONING_SUPER_TO_FLOWER) {
+            if (transitionCurrentFrame == 0) {
+                DrawTexture(textures[std::string(TextFormat("superMario0%c", dir))], pos.x, pos.y, WHITE);
+            }
+            else {
+                DrawTexture(textures[std::string(TextFormat("flowerMario0%c", dir))], pos.x, pos.y, WHITE);
+            }
         }
         else {
-            DrawTexture(textures[std::string(TextFormat("flowerMario0%c", dir))], pos.x, pos.y, WHITE);
-        }
-    }
-    else {
 
-        Color tint = WHITE;
+            Color tint = WHITE;
 
-        if (invincible) {
-            tint = ColorFromHSV(360 * (invincibleAcum / invincibleTime * 20), 0.3, 1);
-        }
+            if (invincible) {
+                tint = ColorFromHSV(360 * (invincibleAcum / invincibleTime * 20), 0.3, 1);
+            }
 
-		if (!invulnerableBlink) { // Only draw if not blinking
+            if (!invulnerableBlink) { // Only draw if not blinking
 
-            if (state == SPRITE_STATE_ON_GROUND) {
+                if (state == SPRITE_STATE_ON_GROUND) {
 
-                if (lookingUp) {
-                    DrawTexture(textures[std::string(TextFormat("%sMario0Lu%c", prefix.c_str(), dir))], pos.x, pos.y, tint);
+                    if (lookingUp) {
+                        DrawTexture(textures[std::string(TextFormat("%sMario0Lu%c", prefix.c_str(), dir))], pos.x, pos.y, tint);
+                    }
+                    else if (ducking) {
+                        DrawTexture(textures[std::string(TextFormat("%sMario0Du%c", prefix.c_str(), dir))], pos.x, pos.y, tint);
+                    }
+                    else if (drawRunningFrames) {
+                        DrawTexture(textures[std::string(TextFormat("%sMario%dRu%c", prefix.c_str(), currentFrame, dir))], pos.x, pos.y, tint);
+                    }
+                    else { // idle
+                        if (IsKeyPressed(KEY_LEFT_CONTROL) && type == MARIO_TYPE_FLOWER) {
+                            DrawTexture(textures[std::string(TextFormat("%sMario%dTf%c", prefix.c_str(), currentFrame, dir))], pos.x, pos.y, tint);
+                        }
+                        else {
+                            DrawTexture(textures[std::string(TextFormat("%sMario%d%c", prefix.c_str(), currentFrame, dir))], pos.x, pos.y, tint);
+                        }
+                    }
+
                 }
-                else if (ducking) {
-                    DrawTexture(textures[std::string(TextFormat("%sMario0Du%c", prefix.c_str(), dir))], pos.x, pos.y, tint);
-                }
-                else if (drawRunningFrames) {
-                    DrawTexture(textures[std::string(TextFormat("%sMario%dRu%c", prefix.c_str(), currentFrame, dir))], pos.x, pos.y, tint);
-                }
-                else { // idle
-                    if (IsKeyPressed(KEY_LEFT_CONTROL) && type == MARIO_TYPE_FLOWER) {
-                        DrawTexture(textures[std::string(TextFormat("%sMario%dTf%c", prefix.c_str(), currentFrame, dir))], pos.x, pos.y, tint);
+                else if (state == SPRITE_STATE_JUMPING) {
+                    if (drawRunningFrames) {
+                        DrawTexture(textures[std::string(TextFormat("%sMario0JuRu%c", prefix.c_str(), dir))], pos.x, pos.y, tint);
                     }
                     else {
-                        DrawTexture(textures[std::string(TextFormat("%sMario%d%c", prefix.c_str(), currentFrame, dir))], pos.x, pos.y, tint);
+                        DrawTexture(textures[std::string(TextFormat("%sMario0Ju%c", prefix.c_str(), dir))], pos.x, pos.y, tint);
                     }
                 }
-
-            }
-            else if (state == SPRITE_STATE_JUMPING) {
-                if (drawRunningFrames) {
-                    DrawTexture(textures[std::string(TextFormat("%sMario0JuRu%c", prefix.c_str(), dir))], pos.x, pos.y, tint);
+                else if (state == SPRITE_STATE_FALLING) {
+                    DrawTexture(textures[std::string(TextFormat("%sMario0Fa%c", prefix.c_str(), dir))], pos.x, pos.y, tint);
                 }
-                else {
-                    DrawTexture(textures[std::string(TextFormat("%sMario0Ju%c", prefix.c_str(), dir))], pos.x, pos.y, tint);
+                else if (state == SPRITE_STATE_VICTORY || state == SPRITE_STATE_WAITING_TO_NEXT_MAP) {
+                    DrawTexture(textures[std::string(TextFormat("%sMario0Vic", prefix.c_str()))], pos.x, pos.y, tint);
                 }
-            }
-            else if (state == SPRITE_STATE_FALLING) {
-                DrawTexture(textures[std::string(TextFormat("%sMario0Fa%c", prefix.c_str(), dir))], pos.x, pos.y, tint);
-            }
-            else if (state == SPRITE_STATE_VICTORY || state == SPRITE_STATE_WAITING_TO_NEXT_MAP) {
-                DrawTexture(textures[std::string(TextFormat("%sMario0Vic", prefix.c_str()))], pos.x, pos.y, tint);
-            }
-            
-        }
 
-        for (auto& fireball : fireballs) {
-            fireball.draw();
-        }
+            }
 
+            for (auto& fireball : fireballs) {
+                fireball.draw();
+            }
+
+        }
+    } else {
+        if (state == SPRITE_STATE_DYING) {
+            DrawTexture(textures[std::string(TextFormat("smallLuigi%dDy", currentFrame))], pos.x, pos.y, WHITE);
+        }
+        else if (state == SPRITE_STATE_TRANSITIONING_SMALL_TO_SUPER ||
+            state == SPRITE_STATE_TRANSITIONING_SUPER_TO_SMALL) {
+            DrawTexture(textures[std::string(TextFormat("transitioningLuigiSS%d%c", transitionCurrentFrame, dir))], pos.x, pos.y, WHITE);
+        }
+        else if (state == SPRITE_STATE_TRANSITIONING_SMALL_TO_FLOWER ||
+            state == SPRITE_STATE_TRANSITIONING_FLOWER_TO_SMALL) {
+            DrawTexture(textures[std::string(TextFormat("transitioningLuigiSF%d%c", transitionCurrentFrame, dir))], pos.x, pos.y, WHITE);
+        }
+        else if (state == SPRITE_STATE_TRANSITIONING_SUPER_TO_FLOWER) {
+            if (transitionCurrentFrame == 0) {
+                DrawTexture(textures[std::string(TextFormat("superLuigi0%c", dir))], pos.x, pos.y, WHITE);
+            }
+            else {
+                DrawTexture(textures[std::string(TextFormat("flowerLuigi0%c", dir))], pos.x, pos.y, WHITE);
+            }
+        }
+        else {
+
+            Color tint = WHITE;
+
+            if (invincible) {
+                tint = ColorFromHSV(360 * (invincibleAcum / invincibleTime * 20), 0.3, 1);
+            }
+
+            if (!invulnerableBlink) { // Only draw if not blinking
+
+                if (state == SPRITE_STATE_ON_GROUND) {
+
+                    if (lookingUp) {
+                        DrawTexture(textures[std::string(TextFormat("%sLuigi0Lu%c", prefix.c_str(), dir))], pos.x, pos.y, tint);
+                    }
+                    else if (ducking) {
+                        DrawTexture(textures[std::string(TextFormat("%sLuigi0Du%c", prefix.c_str(), dir))], pos.x, pos.y, tint);
+                    }
+                    else if (drawRunningFrames) {
+                        DrawTexture(textures[std::string(TextFormat("%sLuigi%dRu%c", prefix.c_str(), currentFrame, dir))], pos.x, pos.y, tint);
+                    }
+                    else { // idle
+                        if (IsKeyPressed(KEY_LEFT_CONTROL) && type == MARIO_TYPE_FLOWER) {
+                            DrawTexture(textures[std::string(TextFormat("%sLuigi%dTf%c", prefix.c_str(), currentFrame, dir))], pos.x, pos.y, tint);
+                        }
+                        else {
+                            DrawTexture(textures[std::string(TextFormat("%sLuigi%d%c", prefix.c_str(), currentFrame, dir))], pos.x, pos.y, tint);
+                        }
+                    }
+
+                }
+                else if (state == SPRITE_STATE_JUMPING) {
+                    if (drawRunningFrames) {
+                        DrawTexture(textures[std::string(TextFormat("%sLuigi0JuRu%c", prefix.c_str(), dir))], pos.x, pos.y, tint);
+                    }
+                    else {
+                        DrawTexture(textures[std::string(TextFormat("%sLuigi0Ju%c", prefix.c_str(), dir))], pos.x, pos.y, tint);
+                    }
+                }
+                else if (state == SPRITE_STATE_FALLING) {
+                    DrawTexture(textures[std::string(TextFormat("%sLuigi0Fa%c", prefix.c_str(), dir))], pos.x, pos.y, tint);
+                }
+                else if (state == SPRITE_STATE_VICTORY || state == SPRITE_STATE_WAITING_TO_NEXT_MAP) {
+                    DrawTexture(textures[std::string(TextFormat("%sLuigi0Vic", prefix.c_str()))], pos.x, pos.y, tint);
+                }
+
+            }
+
+            for (auto& fireball : fireballs) {
+                fireball.draw();
+            }
+
+        }
     }
-
     if (playerDownMusicStreamPlaying) {
 		playPlayerDownMusicStream();
     }
