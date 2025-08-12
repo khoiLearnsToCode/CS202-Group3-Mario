@@ -80,6 +80,8 @@ class Mario : public Sprite {
 	GameWorld* gw; 
 	Map* map;
 
+    bool isLuigi;
+
 public:
 
     Mario(Vector2 pos, Vector2 dim, Vector2 vel, Color color, float speedX, float maxSpeedX, float jumpSpeed, bool immortal);
@@ -161,5 +163,8 @@ public:
     bool isGameOverMusicStreamPlaying() const;
 
     Vector2 getSouthCollisionProbePos() const;
+
+    void toLuigi();
+	void toMario();
 
 };

@@ -1008,6 +1008,7 @@ void GameWorld::inputAndUpdate() {
             if (selectCharacterScreen->getMarioButton().isReleased()) {
                 // Mario selected - start the game
                 mario.resetAll();
+				mario.toMario(); // Switch to Mario
                 map.loadFromJsonFile(); // Load the map immediately
                 mario.setMaxTime(400.0f); // Set the time limit (400 seconds = typical Mario game time)
                 
@@ -1019,7 +1020,17 @@ void GameWorld::inputAndUpdate() {
 
             else if (selectCharacterScreen->getLuigiButton().isReleased()) {
                 // Luigi selected - implement later
-                std::cout << "Luigi button pressed. Luigi functionality will be implemented later." << std::endl;
+                // std::cout << "Luigi button pressed. Luigi functionality will be implemented later." << std::endl;
+
+                mario.resetAll();
+				mario.toLuigi(); // Switch to Luigi
+                map.loadFromJsonFile(); // Load the map immediately
+                mario.setMaxTime(400.0f); // Set the time limit (400 seconds = typical Mario game time)
+
+                if (IsMusicStreamPlaying(musics["title"])) {
+                    StopMusicStream(musics["title"]);
+                }
+                state = GAME_STATE_PLAYING;
             }
 
             else if (selectCharacterScreen->getHomeButton().isReleased()) {

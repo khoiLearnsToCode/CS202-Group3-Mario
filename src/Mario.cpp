@@ -66,18 +66,21 @@ Mario::Mario( Vector2 pos, Vector2 dim, Vector2 vel, Color color, float speedX, 
     cpW.setColor(LIME);
     cpW1.setColor(LIME);
 
+    isLuigi = false;
+
 }
 
 Mario::~Mario() = default;
 
 void Mario::update() {
     const float delta = GetFrameTime();
+    float accelRate = isLuigi ? 0.6f : 1.0f; // Luigi accelerates slower than Mario
 
-    // Mario is running if Left Ctrl or Right Ctrl is hold and he is moving (velocity is non-zero)
+    // The character is running if Left Ctrl or Right Ctrl is hold and he is moving (velocity is non-zero)
     running = ((IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL)) && vel.x != 0.0f);
 
     if (running) {
-        runningAcum += delta;
+        runningAcum += delta * accelRate;
         if (runningAcum >= runningTime) {
             drawRunningFrames = true;
         }
@@ -110,7 +113,7 @@ void Mario::update() {
         state != SPRITE_STATE_VICTORY &&
         state != SPRITE_STATE_WAITING_TO_NEXT_MAP) {
         
-        // Add elapsed time to total played time before Mario dies from timeout
+        // Add elapsed time to total played time before the character dies from timeout
         if (gw != nullptr) {
             gw->addToTotalPlayedTime(ellapsedTime);
         }
@@ -229,15 +232,14 @@ void Mario::update() {
 
         }
         else {
-
             if (IsKeyDown(KEY_RIGHT) || IsKeyDown(KEY_D)) {
                 facingDirection = DIRECTION_RIGHT;
-                movingAcum += delta * 2;
+                movingAcum += delta * accelRate * 2;
                 vel.x = currentSpeedX * (movingAcum < 1 ? movingAcum : 1);
             }
             else if (IsKeyDown(KEY_LEFT) || IsKeyDown(KEY_A)) {
                 facingDirection = DIRECTION_LEFT;
-                movingAcum += delta * 2;
+                movingAcum += delta * accelRate * 2;
                 vel.x = -currentSpeedX * (movingAcum < 1 ? movingAcum : 1);
             }
             else {
@@ -327,8 +329,7 @@ void Mario::draw() {
 
     const char dir = facingDirection == DIRECTION_RIGHT ? 'R' : 'L';
 
-    bool luigi = true;
-    if (!luigi) {
+    if (!isLuigi) {
         if (state == SPRITE_STATE_DYING) {
             DrawTexture(textures[std::string(TextFormat("smallMario%dDy", currentFrame))], pos.x, pos.y, WHITE);
         }
@@ -944,4 +945,14 @@ bool Mario::isGameOverMusicStreamPlaying() const {
 
 Vector2 Mario::getSouthCollisionProbePos() const {
     return Vector2{ cpS.getX(), cpS.getY() };
+}
+
+void Mario::toLuigi() {
+    isLuigi = true;
+    jumpSpeed = -700; // Luigi jumps higher than Mario
+}
+
+void Mario::toMario() {
+    isLuigi = false;
+    jumpSpeed = -600; // Mario jumps lower than Luigi
 }
