@@ -1,0 +1,7 @@
+#pragma once
+
+enum PlayerType {
+	PLAYER_TYPE_SMALL,
+	PLAYER_TYPE_SUPER,
+	PLAYER_TYPE_FLOWER
+};

@@ -1,7 +1,7 @@
 #pragma once
 #include "raylib.h"
 #include "Sprite.h"
-#include "Mario.h"
+#include "Player.h"
 #include <string>
 
 // Base class for all items in the game
@@ -28,8 +28,8 @@ public:
     void update() override = 0;
     void draw() override = 0;
     virtual void playCollisionSound() = 0;
-    virtual void updateMario(Mario& mario) = 0;
-    virtual void onSouthCollision(Mario& mario);
+    virtual void updatePlayer(Player& player) = 0;
+    virtual void onSouthCollision(Player& player);
     virtual bool isPauseGameOnHit();
 	virtual std::string getType() const = 0;
 };
@@ -42,7 +42,7 @@ public:
     void update() override;
     void draw() override;
     void playCollisionSound() override;
-    void updateMario(Mario& mario) override;
+    void updatePlayer(Player& player) override;
     CollisionType checkCollision(Sprite* sprite) override;
     std::string getType() const override {
         return "Coin";
@@ -65,8 +65,8 @@ public:
     void update() override;
     void draw() override;
     void playCollisionSound() override;
-    void updateMario(Mario& mario) override;
-    void onSouthCollision(Mario& mario) override;
+    void updatePlayer(Player& player) override;
+    void onSouthCollision(Player& player) override;
 	std::string getType() const override {
 		return "Mushroom";
 	}
@@ -81,7 +81,7 @@ public:
     void update() override;
     void draw() override;
     void playCollisionSound() override;
-    void updateMario(Mario& mario) override;
+    void updatePlayer(Player& player) override;
 	std::string getType() const override {
 		return "OneUpMushroom";
 	}
@@ -104,8 +104,8 @@ public:
     void update() override;
     void draw() override;
     void playCollisionSound() override;
-    void updateMario(Mario& mario) override;
-    void onSouthCollision(Mario& mario) override;
+    void updatePlayer(Player& player) override;
+    void onSouthCollision(Player& player) override;
 	std::string getType() const override {
 		return "FireFlower";
 	}
@@ -119,8 +119,8 @@ public:
     void update() override;
     void draw() override;
     void playCollisionSound() override;
-    void updateMario(Mario& mario) override;
-    void onSouthCollision(Mario& mario) override;
+    void updatePlayer(Player& player) override;
+    void onSouthCollision(Player& player) override;
 	std::string getType() const override {
 		return "Star";
 	}
@@ -135,7 +135,7 @@ public:
     void update() override;
     void draw() override;
     void playCollisionSound() override;
-    void updateMario(Mario& mario) override;
+    void updatePlayer(Player& player) override;
 	std::string getType() const override {
 		return "ThreeUpMoon";
 	}
@@ -153,7 +153,7 @@ public:
     void update() override;
     void draw() override;
     void playCollisionSound() override;
-    void updateMario(Mario& mario) override;
+    void updatePlayer(Player& player) override;
     CollisionType checkCollision(Sprite* sprite) override;
     std::string getType() const override {
         return "YoshiCoin";
@@ -168,7 +168,7 @@ public:
 	void update() override;
 	void draw() override;
 	void playCollisionSound() override;
-	void updateMario(Mario& mario) override;
+	void updatePlayer(Player& player) override;
 	CollisionType checkCollision(Sprite* sprite) override;
 	std::string getType() const override {
 		return "CourseClearToken";

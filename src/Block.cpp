@@ -18,7 +18,7 @@ void Block::resetHit() {
 	hit = false;
 }
 
-void Block::doHit(Mario& mario, Map* map) {
+void Block::doHit(Player& player, Map* map) {
 	if (!hit)
 		hit = true;
 }
@@ -192,14 +192,14 @@ void QuestionBlock::draw() {
 	}
 }
 
-void QuestionBlock::doHit(Mario& mario, Map* map) {
+void QuestionBlock::doHit(Player& player, Map* map) {
 	if (!hit) {
 		PlaySound(ResourceManager::getInstance().getSounds()["coin"]);
 		hit = true;
 		coinAnimationRunning = true;
 		coinY = pos.y;
-		mario.addCoins(1);
-		mario.addPoints(earnedPoints);
+		player.addCoins(1);
+		player.addPoints(earnedPoints);
 	}
 }
 QuestionBlock::QuestionBlock(Vector2 pos, Vector2 dim, Color color) :
@@ -266,14 +266,14 @@ void QuestionMushroomBlock::draw() {
 		DrawRectangle(pos.x, pos.y, dim.x, dim.y, Fade(color, 0.5));
 	}
 }
-void QuestionMushroomBlock::doHit(Mario& mario, Map* map) {
+void QuestionMushroomBlock::doHit(Player& player, Map* map) {
 	if (!hit) {
 		hit = true;
 		Vector2 itemPos = { pos.x, pos.y - dim.y };
 		Vector2 itemDim = { 32, 32 }; // Assuming a standard item size
 		Vector2 itemVel = { 0, -150 }; // Initial velocity for the item
 		item = FactoryItem::createItem("Mushroom", itemPos, itemDim, itemVel, RED, true, true, false);
-		item->setFacingDirection(mario.getFacingDirection());
+		item->setFacingDirection(player.getFacingDirection());
 		itemMinY = pos.y - 32;
 		this->map = map;
 	}
@@ -336,14 +336,14 @@ void QuestionFireFlowerBlock::draw() {
 		DrawRectangle(pos.x, pos.y, dim.x, dim.y, Fade(color, 0.5));
 	}
 }
-void QuestionFireFlowerBlock::doHit(Mario& mario, Map* map) {
+void QuestionFireFlowerBlock::doHit(Player& player, Map* map) {
 	if (!hit) {
 		hit = true;
 		Vector2 itemPos = { pos.x, pos.y - dim.y };
 		Vector2 itemDim = { 32, 32 };
 		Vector2 itemVel = { 0, -150 };
 		this -> item = FactoryItem::createItem("FireFlower", itemPos, itemDim, itemVel, ORANGE, true, true, false);
-		item->setFacingDirection(mario.getFacingDirection());
+		item->setFacingDirection(player.getFacingDirection());
 		itemMinY = pos.y - 32;
 		this->map = map;
 	}
@@ -398,14 +398,14 @@ void QuestionStarBlock::draw() {
 		DrawRectangle(pos.x, pos.y, dim.x, dim.y, Fade(color, 0.5));
 	}
 }
-void QuestionStarBlock::doHit(Mario& mario, Map* map) {
+void QuestionStarBlock::doHit(Player& player, Map* map) {
 	if (!hit) {
 		hit = true;
 		Vector2 itemPos = { pos.x, pos.y - dim.y };
 		Vector2 itemDim = { 30, 32 }; 
 		Vector2 itemVel = { 0, -150 };
 		this -> item = FactoryItem::createItem("Star", itemPos, itemDim, itemVel, YELLOW, true, true, false);
-		item->setFacingDirection(mario.getFacingDirection());
+		item->setFacingDirection(player.getFacingDirection());
 		itemMinY = pos.y - 32;
 		this->map = map;
 	}
@@ -464,14 +464,14 @@ void QuestionOneUpMushroomBlock::draw() {
 		DrawRectangle(pos.x, pos.y, dim.x, dim.y, Fade(color, 0.5));
 	}
 }
-void QuestionOneUpMushroomBlock::doHit(Mario& mario, Map* map) {
+void QuestionOneUpMushroomBlock::doHit(Player& player, Map* map) {
 	if (!hit) {
 		hit = true;
 		Vector2 itemPos = { pos.x, pos.y - dim.y };
 		Vector2 itemDim = { 32, 32 };
 		Vector2 itemVel = { 0, -150 };
 		this->item = FactoryItem::createItem("OneUpMushroom", itemPos, itemDim, itemVel, YELLOW, true, true, false);
-		item->setFacingDirection(mario.getFacingDirection());
+		item->setFacingDirection(player.getFacingDirection());
 		itemMinY = pos.y - 32;
 		this->map = map;
 	}
@@ -530,14 +530,14 @@ void QuestionThreeUpMoonBlock::draw() {
 		DrawRectangle(pos.x, pos.y, dim.x, dim.y, Fade(color, 0.5));
 	}
 }
-void QuestionThreeUpMoonBlock::doHit(Mario& mario, Map* map) {
+void QuestionThreeUpMoonBlock::doHit(Player& player, Map* map) {
 	if (!hit) {
 		hit = true;
 		Vector2 itemPos = { pos.x, pos.y - dim.y };
 		Vector2 itemDim = { 32, 32 };
 		Vector2 itemVel = { 0, -150 };
 		this-> item = FactoryItem::createItem("ThreeUpMoon", itemPos, itemDim, itemVel, YELLOW, true, true, false);
-		item->setFacingDirection(mario.getFacingDirection());
+		item->setFacingDirection(player.getFacingDirection());
 		itemMinY = pos.y - 32;
 		this->map = map;
 	}
@@ -630,7 +630,7 @@ void ExclamationBlock::draw() {
 		DrawRectangle(pos.x, pos.y, dim.x, dim.y, Fade(color, 0.5));
 	}
 }
-void ExclamationBlock::doHit(Mario& mario, Map* map) {
+void ExclamationBlock::doHit(Player& player, Map* map) {
 	if (!hit) {
 		hit = true;
 		Vector2 itemPos = { pos.x, pos.y - dim.y };
@@ -640,8 +640,8 @@ void ExclamationBlock::doHit(Mario& mario, Map* map) {
 		if (item) {
 			map->getItems().push_back(item); // Add the item to the map's items vector
 		}
-		mario.addPoints(100);
-		mario.addCoins(1);
+		player.addPoints(100);
+		player.addCoins(1);
 	}
 }
 ExclamationBlock::ExclamationBlock(Vector2 pos, Vector2 dim, Color color) :
@@ -673,7 +673,7 @@ void InvisibleBlock::update() {
 void InvisibleBlock::draw() {
 
 }
-void InvisibleBlock::doHit(Mario& mario, Map* map) {
+void InvisibleBlock::doHit(Player& player, Map* map) {
 	if (!hit) {
 		hit = true;
 		Vector2 itemPos = { pos.x, pos.y - dim.y }; 
@@ -682,9 +682,9 @@ void InvisibleBlock::doHit(Mario& mario, Map* map) {
 		Item* item = FactoryItem::createItem("Coin", itemPos, itemDim, itemVel, YELLOW, true, true, false);
 		if (item) {
 			map->getItems().push_back(item); // Add the item to the map's items vector
-			mario.addCoins(1);
+			player.addCoins(1);
 		}
-		mario.addPoints(100); 
+		player.addPoints(100); 
 	}
 }
 InvisibleBlock::InvisibleBlock(Vector2 pos, Vector2 dim, Color color)
@@ -700,11 +700,11 @@ void MessageBlock::update() {
 void MessageBlock::draw() {
 	DrawTexture(ResourceManager::getInstance().getTexture("block96"), pos.x, pos.y, color);
 }
-void MessageBlock::doHit(Mario& mario, Map* map) {
+void MessageBlock::doHit(Player& player, Map* map) {
 	if (!hit) {
 		hit = true;
 		// Display a message or perform an action
-		mario.addPoints(50);
+		player.addPoints(50);
 	}
 }
 MessageBlock::MessageBlock(Vector2 pos, Vector2 dim, Color color)

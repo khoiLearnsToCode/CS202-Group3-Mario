@@ -6,7 +6,7 @@ class GameWorld;
 #include "raylib.h"
 #include "json.hpp"
 #include "Tile.h"
-#include "Mario.h"
+#include "Player.h"
 #include "Baddie.h"
 #include "Tile.h"
 #include "Block.h"
@@ -31,8 +31,8 @@ class Map : public virtual Drawable {
     float maxWidth;
     float maxHeight;
 
-    Mario& mario;
-    float marioOffset;
+    Player& player;
+    float playerOffset;
 
     int backgroundId;
     int maxBackgroundId;
@@ -47,7 +47,7 @@ class Map : public virtual Drawable {
     float drawBlackScreenFadeTime;
 
     // Near sight vision effect for map3
-    Vector2 lastValidMarioPos;
+    Vector2 lastValidPlayerPos;
     
     //bool parseBlocks;
     //bool parseItems;
@@ -65,14 +65,14 @@ public:
 
     static constexpr int TILE_WIDTH = 32;
 
-    Map(Mario& mario, int id, bool loadTestMap, GameWorld* gw);
+    Map(Player& player, int id, bool loadTestMap, GameWorld* gw);
     ~Map() override;
     void draw() override;
 
     //void parseMap();
     void loadFromJsonFile(bool shouldLoadTestMap = false);
 
-    void setMarioOffset(float marioOffset);
+    void setPlayerOffset(float playerOffset);
     void setDrawBlackScreen(bool drawBlackScreen);
     void setCamera(Camera2D* camera);
     void setGameWorld(GameWorld* gw);

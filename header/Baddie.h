@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Mario.h"
+#include "Player.h"
 #include "raylib.h"
 #include "Sprite.h"
 
@@ -27,7 +27,7 @@ public:
 
     void update() override = 0;
     void draw() override = 0;
-    void activateWithMarioProximity( Mario &mario );
+    void activateWithPlayerProximity( Player &player );
     virtual void setAttributesOnDying();
     virtual void onSouthCollision();
     virtual void onHit();

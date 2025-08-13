@@ -52,7 +52,7 @@ const std::vector<Color> Map::backgroundColorPallete = {
     { 2, 38, 83, 255 },     // Dark blue
 };
 
-Map::Map(Mario& mario, int id, bool loadTestMap, GameWorld* gw) :
+Map::Map(Player& player, int id, bool loadTestMap, GameWorld* gw) :
 
     id(id),
     maxId(3),
@@ -60,8 +60,8 @@ Map::Map(Mario& mario, int id, bool loadTestMap, GameWorld* gw) :
     maxWidth(0),
     maxHeight(0),
 
-    mario(mario),
-    marioOffset(0),
+    player(player),
+    playerOffset(0),
     backgroundId(1),
     maxBackgroundId(3),
     backgroundColor(WHITE),
@@ -71,7 +71,7 @@ Map::Map(Mario& mario, int id, bool loadTestMap, GameWorld* gw) :
     drawBlackScreenFadeTime(1.5),
 
     // Near sight vision effect for map3
-    lastValidMarioPos({0, 0}),
+    lastValidPlayerPos({0, 0}),
 
     //tileSetId(1),
     //maxTileSetId(4),
@@ -127,7 +127,7 @@ void Map::loadFromJsonFile(bool shouldLoadTestMap) {
     }
 
     loadTestMap = shouldLoadTestMap;
-    mario.setPos(100, 1688);
+    player.setPos(100, 1688);
 
     std::string jsonFilePath;
     if (loadTestMap) {
@@ -467,7 +467,7 @@ void Map::draw() {
         for (int i = 0; i <= repeats; i++) {
             DrawTexture(
                 backgroundTexture,
-                -backgroundTexture.width + i * backgroundTexture.width - marioOffset * 0.06,
+                -backgroundTexture.width + i * backgroundTexture.width - playerOffset * 0.06,
                 maxHeight - backgroundTexture.height,
                 WHITE);
         }
@@ -506,19 +506,19 @@ void Map::draw() {
     
     }
     
-    mario.draw();
+    player.draw();
 
     Vector2 pos{10.0f, GetScreenHeight() - 20.0f};
     Vector2 drawPos = GetScreenToWorld2D(pos, *camera);
     
     if (id == 3) {  // Near sight vision effect for map3
-        // Update last valid Mario position when he's not dying
-        if (mario.getState() != SPRITE_STATE_DYING) {
-            lastValidMarioPos = mario.getPos();
+        // Update last valid Player position when he's not dying
+        if (player.getState() != SPRITE_STATE_DYING) {
+            lastValidPlayerPos = player.getPos();
         }
         
         for (float radius = 0; radius < GetScreenWidth() * 1.5f; radius += GetScreenWidth() / 100.0f) {
-            DrawRing(lastValidMarioPos, radius, GetScreenWidth() * 1.5f, 0.0f, 360.0f, 32, Fade(BLACK, 0.07f));
+            DrawRing(lastValidPlayerPos, radius, GetScreenWidth() * 1.5f, 0.0f, 360.0f, 32, Fade(BLACK, 0.07f));
         }
     }
 
@@ -559,7 +559,7 @@ void Map::playMusic() const {
        std::map<std::string, Music> musics = ResourceManager::getInstance().getMusics();
        const std::string key(TextFormat("music%d", musicId));
 
-       if (mario.isInvincible()) {
+       if (player.isInvincible()) {
            if (IsMusicStreamPlaying(musics[key])) {
                StopMusicStream(musics[key]);
            }
@@ -593,8 +593,8 @@ float Map::getMaxHeight() const {
     return maxHeight;
 }
 
-void Map::setMarioOffset(float marioOffset) {
-   this->marioOffset = marioOffset;
+void Map::setPlayerOffset(float playerOffset) {
+   this->playerOffset = playerOffset;
 }
 
 void Map::setDrawBlackScreen(bool drawBlackScreen) {
@@ -617,12 +617,12 @@ void Map::reset() {
 
     maxWidth = 0;
     maxHeight = 0;
-    marioOffset = 0;
+    playerOffset = 0;
     drawBlackScreen = false;
     drawBlackScreenFadeAcum = 0;
 
     // Reset near sight vision position
-    lastValidMarioPos = {0, 0};
+    lastValidPlayerPos = {0, 0};
 
     for (const auto& tile : untouchableTiles) {
         delete tile;

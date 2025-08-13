@@ -1,5 +1,4 @@
 #include "Baddie.h"
-#include "Mario.h"
 #include "raylib.h"
 #include "SpriteState.h"
 
@@ -43,14 +42,14 @@ Baddie::Baddie( Vector2 pos, Vector2 dim, Vector2 vel, Color color, float frameT
 
 Baddie::~Baddie() = default;
 
-void Baddie::activateWithMarioProximity( Mario &mario ) {
+void Baddie::activateWithPlayerProximity( Player &player ) {
     if ( CheckCollisionPointRec( 
         Vector2{ pos.x + dim.x / 2, pos.y + dim.y / 2 },
         Rectangle{
-            mario.getX() + mario.getWidth() / 2 - mario.getActivationWidth() / 2,
-            mario.getY() + mario.getHeight() / 2 - mario.getActivationWidth() / 2,
-            mario.getActivationWidth(),
-            mario.getActivationWidth() })) {
+            player.getX() + player.getWidth() / 2 - player.getActivationWidth() / 2,
+            player.getY() + player.getHeight() / 2 - player.getActivationWidth() / 2,
+            player.getActivationWidth(),
+            player.getActivationWidth() })) {
         state = SPRITE_STATE_ACTIVE;
     }
 }

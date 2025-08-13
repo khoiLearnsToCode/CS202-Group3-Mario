@@ -7,12 +7,12 @@ class Map;
 #include "CollisionType.h"
 #include "Direction.h"
 #include "Fireball.h"
-#include "MarioType.h"
+#include "PlayerType.h"
 #include "raylib.h"
 #include "Sprite.h"
 #include <vector>
 
-class Mario : public Sprite {
+class Player : public Sprite {
 
 	float speedX; // Base horizontal speed (walking speed)
 	float maxSpeedX; // Maximum horizontal speed (running speed)
@@ -28,7 +28,7 @@ class Mario : public Sprite {
 	bool ducking; // Whether the player is ducking, is 'true' when holding DOWN
 	bool lookingUp; // Whether the player is looking up, is 'true' when holding UP
 	bool running; // Whether the player is running, is 'true' when holding CTRL
-	bool invincible; // Whether the player is invincible, is 'true' when Mario has Star power
+	bool invincible; // Whether the player is invincible, is 'true' when Player has Star power
 
 	float frameTimeWalking; // Time between frames when walking
 	float frameTimeRunning; // Time between frames when running (faster animation)
@@ -44,12 +44,12 @@ class Mario : public Sprite {
 	float maxTime;
 	float ellapsedTime;
 
-	MarioType type; // Current Mario form
+	PlayerType type; // Current Player form
 	
 	CollisionProbe cpE1; // Right-side collision detector
 	CollisionProbe cpW1; // Left-side collision detector
 
-	MarioType reservedPowerUp; // Power-Up stored in reserve
+	PlayerType reservedPowerUp; // Power-Up stored in reserve
 
 	std::vector<Fireball> fireballs;
 
@@ -70,7 +70,7 @@ class Mario : public Sprite {
 	const int superToFlowerTransitionFrameOrder[11] = { 0, 1, 0, 1, 0, 1, 0, 1 }; // SUPER -> FLOWER
 
 	float invincibleTime; // Duration of invicibility
-	float invincibleAcum; // Accumulator to track how long Mario has been invincible
+	float invincibleAcum; // Accumulator to track how long Player has been invincible
 
 	bool playerDownMusicStreamPlaying;
 	bool gameOverMusicStreamPlaying;
@@ -80,10 +80,12 @@ class Mario : public Sprite {
 	GameWorld* gw; 
 	Map* map;
 
+    bool isLuigi;
+
 public:
 
-    Mario(Vector2 pos, Vector2 dim, Vector2 vel, Color color, float speedX, float maxSpeedX, float jumpSpeed, bool immortal);
-    ~Mario() override;
+    Player(Vector2 pos, Vector2 dim, Vector2 vel, Color color, float speedX, float maxSpeedX, float jumpSpeed, bool immortal);
+    ~Player() override;
 
     void update() override;
     void draw() override;
@@ -138,11 +140,11 @@ public:
     void changeToSuper();
     void changeToFlower();
 
-    void setReservedPowerUp(MarioType reservedPowerUp);
-    MarioType getReservedPowerUp() const;
+    void setReservedPowerUp(PlayerType reservedPowerUp);
+    PlayerType getReservedPowerUp() const;
 	/*void releaseReservedPowerUp();*/ // Needs Item class implementation
 
-    MarioType getType() const;
+    PlayerType getType() const;
     void setInvulnerable(bool invulnerable);
     bool isInvulnerable() const;
 
@@ -161,5 +163,8 @@ public:
     bool isGameOverMusicStreamPlaying() const;
 
     Vector2 getSouthCollisionProbePos() const;
+
+    void toLuigi();
+	void toMario();
 
 };
