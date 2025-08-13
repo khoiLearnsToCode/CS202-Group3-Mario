@@ -3,7 +3,7 @@
 #include "Map.h"
 #include "raylib.h"
 #include "Sprite.h"
-#include "Mario.h"
+#include "Player.h"
 #include <string>
 
 //Base class for all blocks in the game
@@ -21,7 +21,7 @@ public:
 
 	void update() override = 0;
 	void draw() override = 0;
-	virtual void doHit(Mario& mario, Map* map);
+	virtual void doHit(Player& player, Map* map);
 	void resetHit();
 	bool isHit() const;
 	virtual std::string getType() const = 0;
@@ -131,7 +131,7 @@ public:
 	void update() override;
 	void draw() override;
 
-	void doHit(Mario& mario, Map* map) override;
+	void doHit(Player& player, Map* map) override;
 	std::string getType() const override {
 		return "QuestionBlock";
 	}
@@ -151,7 +151,7 @@ public:
 	void update() override;
 	void draw() override;
 
-	void doHit(Mario& mario, Map* map) override;
+	void doHit(Player& player, Map* map) override;
 	std::string getType() const override {
 		return "QuestionMushroomBlock";
 	}
@@ -171,7 +171,7 @@ public:
 	void update() override;
 	void draw() override;
 
-	void doHit(Mario& mario, Map* map) override;
+	void doHit(Player& player, Map* map) override;
 	std::string getType() const override {
 		return "QuestionFireFlowerBlock";
 	}
@@ -191,7 +191,7 @@ public:
 	void update() override;
 	void draw() override;
 
-	void doHit(Mario& mario, Map* map) override;
+	void doHit(Player& player, Map* map) override;
 	std::string getType() const override {
 		return "QuestionStarBlock";
 	}
@@ -211,7 +211,7 @@ public:
 	void update() override;
 	void draw() override;
 
-	void doHit(Mario& mario, Map* map) override;
+	void doHit(Player& player, Map* map) override;
 	std::string getType() const override {
 		return "QuestionOneUpMushroomBlock";
 	}
@@ -231,7 +231,7 @@ public:
 	void update() override;
 	void draw() override;
 
-	void doHit(Mario& mario, Map* map) override;
+	void doHit(Player& player, Map* map) override;
 	std::string getType() const override {
 		return "QuestionThreeUpMoonBlock";
 	}
@@ -262,7 +262,7 @@ public:
 	void update() override;
 	void draw() override;
 
-	void doHit(Mario& mario, Map* map) override;
+	void doHit(Player& player, Map* map) override;
 	std::string getType() const override {
 		return "ExclamationBlock";
 	}
@@ -277,7 +277,7 @@ public:
 	void update() override;
 	void draw() override;
 
-	void doHit(Mario& mario, Map* map) override;
+	void doHit(Player& player, Map* map) override;
 	std::string getType() const override {
 		return "InvisibleBlock";
 	}
@@ -292,7 +292,7 @@ public:
 	void update() override;
 	void draw() override;
 
-	void doHit(Mario& mario, Map* map) override;
+	void doHit(Player& player, Map* map) override;
 	std::string getType() const override {
 		return "MessageBlock";
 	}

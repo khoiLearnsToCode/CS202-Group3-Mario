@@ -2,7 +2,7 @@
 #include "GameState.h"
 #include "GameWorld.h"
 #include "Map.h"
-#include "Mario.h"
+#include "Player.h"
 #include "raylib.h"
 #include "ResourceManager.h"
 #include <iostream>
@@ -11,7 +11,7 @@
 // #include "FireFlower.h"
 // #include "Mushroom.h"
 
-Mario::Mario( Vector2 pos, Vector2 dim, Vector2 vel, Color color, float speedX, float maxSpeedX, float jumpSpeed, bool immortal ) :
+Player::Player( Vector2 pos, Vector2 dim, Vector2 vel, Color color, float speedX, float maxSpeedX, float jumpSpeed, bool immortal ) :
 	Sprite( pos, dim, vel, color, 0, 2),
 	speedX( speedX ),
 	maxSpeedX( maxSpeedX ),
@@ -34,8 +34,8 @@ Mario::Mario( Vector2 pos, Vector2 dim, Vector2 vel, Color color, float speedX, 
     pointsFromPreviousMap(0),
     maxTime(400.0f),  // Set default time limit to 400 seconds (typical Mario game time)
     ellapsedTime(0.0f),
-    type(MARIO_TYPE_SMALL),
-    reservedPowerUp(MARIO_TYPE_SMALL),
+    type(PLAYER_TYPE_SMALL),
+    reservedPowerUp(PLAYER_TYPE_SMALL),
     runningAcum(0),
     runningTime(0.5),
     drawRunningFrames(false),
@@ -70,9 +70,9 @@ Mario::Mario( Vector2 pos, Vector2 dim, Vector2 vel, Color color, float speedX, 
 
 }
 
-Mario::~Mario() = default;
+Player::~Player() = default;
 
-void Mario::update() {
+void Player::update() {
     const float delta = GetFrameTime();
     float accelRate = isLuigi ? 0.6f : 1.0f; // Luigi accelerates slower than Mario
 
@@ -270,7 +270,7 @@ void Mario::update() {
                 }
             }
 
-            if (IsKeyPressed(KEY_LEFT_CONTROL) && type == MARIO_TYPE_FLOWER) {
+            if (IsKeyPressed(KEY_LEFT_CONTROL) && type == PLAYER_TYPE_FLOWER) {
 
                 if (facingDirection == DIRECTION_RIGHT) {
                     fireballs.push_back(Fireball(Vector2{ pos.x + dim.x / 2, pos.y + dim.y / 2 - 3 }, Vector2{ 16, 16 }, Vector2{ 400, 100 }, RED, DIRECTION_RIGHT, 2));
@@ -309,20 +309,20 @@ void Mario::update() {
 
 }
 
-void Mario::draw() {
+void Player::draw() {
 
     std::map<std::string, Texture2D>& textures = ResourceManager::getInstance().getTextures();
     std::string prefix;
 
     switch (type) {
     default:
-    case MARIO_TYPE_SMALL:
+    case PLAYER_TYPE_SMALL:
         prefix = "small";
         break;
-    case MARIO_TYPE_SUPER:
+    case PLAYER_TYPE_SUPER:
         prefix = "super";
         break;
-    case MARIO_TYPE_FLOWER:
+    case PLAYER_TYPE_FLOWER:
         prefix = "flower";
         break;
     }
@@ -371,7 +371,7 @@ void Mario::draw() {
                         DrawTexture(textures[std::string(TextFormat("%sMario%dRu%c", prefix.c_str(), currentFrame, dir))], pos.x, pos.y, tint);
                     }
                     else { // idle
-                        if (IsKeyPressed(KEY_LEFT_CONTROL) && type == MARIO_TYPE_FLOWER) {
+                        if (IsKeyPressed(KEY_LEFT_CONTROL) && type == PLAYER_TYPE_FLOWER) {
                             DrawTexture(textures[std::string(TextFormat("%sMario%dTf%c", prefix.c_str(), currentFrame, dir))], pos.x, pos.y, tint);
                         }
                         else {
@@ -444,7 +444,7 @@ void Mario::draw() {
                         DrawTexture(textures[std::string(TextFormat("%sLuigi%dRu%c", prefix.c_str(), currentFrame, dir))], pos.x, pos.y, tint);
                     }
                     else { // idle
-                        if (IsKeyPressed(KEY_LEFT_CONTROL) && type == MARIO_TYPE_FLOWER) {
+                        if (IsKeyPressed(KEY_LEFT_CONTROL) && type == PLAYER_TYPE_FLOWER) {
                             DrawTexture(textures[std::string(TextFormat("%sLuigi%dTf%c", prefix.c_str(), currentFrame, dir))], pos.x, pos.y, tint);
                         }
                         else {
@@ -485,7 +485,7 @@ void Mario::draw() {
 
 }
 
-CollisionType Mario::checkCollision(Sprite* sprite) {
+CollisionType Player::checkCollision(Sprite* sprite) {
 
     if (sprite->getState() != SPRITE_STATE_NO_COLLIDABLE) {
 
@@ -539,7 +539,7 @@ CollisionType Mario::checkCollision(Sprite* sprite) {
 
 }
 
-CollisionType Mario::checkCollisionBaddie(Sprite* sprite) {
+CollisionType Player::checkCollisionBaddie(Sprite* sprite) {
     
     if (sprite->getState() != SPRITE_STATE_NO_COLLIDABLE) {
         Rectangle rect = sprite->getRect();
@@ -571,7 +571,7 @@ CollisionType Mario::checkCollisionBaddie(Sprite* sprite) {
 	return COLLISION_TYPE_NONE;
 }
 
-void Mario::drawHud() const {
+void Player::drawHud() const {
 	std::map<std::string, Texture2D>& textures = ResourceManager::getInstance().getTextures(); // Getting textures from ResourceManager
 
 	// Left side of the screen
@@ -597,15 +597,15 @@ void Mario::drawHud() const {
 	drawYellowSmallNumber(t, GetScreenWidth() - 34 - 128 - getSmallNumberWidth(t) - leftshift, 50); // Draw remaining time
 
 	// Center top of the screen
-    if (reservedPowerUp == MARIO_TYPE_SUPER) {
+    if (reservedPowerUp == PLAYER_TYPE_SUPER) {
         DrawTexture(textures["mushroom"], GetScreenWidth() / 2 - textures["mushroom"].width / 2, 32, WHITE);
-    } else if (reservedPowerUp == MARIO_TYPE_FLOWER) {
+    } else if (reservedPowerUp == PLAYER_TYPE_FLOWER) {
         DrawTexture(textures["fireFlower0"], GetScreenWidth() / 2 - textures["fireFlower0"].width / 2, 32, WHITE);
     }
 	DrawTexture(textures["guiNextItem"], GetScreenWidth() / 2 - textures["guiNextItem"].width / 2, 20, WHITE);
 }
 
-void Mario::updateCollisionProbes() {
+void Player::updateCollisionProbes() {
 
     cpN.setX(pos.x + dim.x / 2 - cpN.getWidth() / 2);
     if (ducking) {
@@ -623,7 +623,7 @@ void Mario::updateCollisionProbes() {
     cpW.setX(pos.x);
     cpW1.setX(pos.x);
 
-    if (type == MARIO_TYPE_SMALL) {
+    if (type == PLAYER_TYPE_SMALL) {
 
         if (ducking) {
             cpE.setY(pos.y + 21 - cpE.getHeight() / 2);
@@ -658,190 +658,190 @@ void Mario::updateCollisionProbes() {
 
 }
 
-float Mario::getSpeedX() const {
+float Player::getSpeedX() const {
     return speedX;
 }
 
-float Mario::getMaxSpeedX() const {
+float Player::getMaxSpeedX() const {
     return maxSpeedX;
 }
 
-float Mario::getJumpSpeed() const {
+float Player::getJumpSpeed() const {
     return jumpSpeed;
 }
 
-float Mario::getActivationWidth() const {
+float Player::getActivationWidth() const {
     return activationWidth;
 }
 
-void Mario::setImmortal(bool immortal) {
+void Player::setImmortal(bool immortal) {
     this->immortal = immortal;
 }
 
-bool Mario::isImmortal() const {
+bool Player::isImmortal() const {
     return immortal;
 }
 
-void Mario::setActivationWidth(float activationWidth) {
+void Player::setActivationWidth(float activationWidth) {
     this->activationWidth = activationWidth;
 }
 
-void Mario::setLives(int lives) {
+void Player::setLives(int lives) {
     this->lives = lives;
 }
 
-void Mario::setCoins(int coins) {
+void Player::setCoins(int coins) {
     this->coins = coins;
 }
 
-void Mario::setCoinsFromPreviousMap(int coinsFromPreviousMap) {
+void Player::setCoinsFromPreviousMap(int coinsFromPreviousMap) {
     this->coinsFromPreviousMap = coinsFromPreviousMap;
 }
 
-void Mario::setYoshiCoins(int yoshiCoins) {
+void Player::setYoshiCoins(int yoshiCoins) {
     this->yoshiCoins = yoshiCoins;
 }
 
-void Mario::setPoints(int points) {
+void Player::setPoints(int points) {
     this->points = points;
 }
 
-void Mario::setPointsFromPreviousMap(int pointsFromPreviousMap) {
+void Player::setPointsFromPreviousMap(int pointsFromPreviousMap) {
     this->pointsFromPreviousMap = pointsFromPreviousMap;
 }
 
-int Mario::getRemainingTime() const {
+int Player::getRemainingTime() const {
     return static_cast<int>(maxTime - ellapsedTime);
 }
 
-float Mario::getEllapsedTime() const {
+float Player::getEllapsedTime() const {
     return ellapsedTime;
 }
 
-void Mario::setMaxTime(float maxTime) {
+void Player::setMaxTime(float maxTime) {
     this->maxTime = maxTime;
 }
 
-void Mario::setLastStateBeforeTransition(SpriteState lastStateBeforeTransition) {
+void Player::setLastStateBeforeTransition(SpriteState lastStateBeforeTransition) {
     this->lastStateBeforeTransition = lastStateBeforeTransition;
 }
 
-void Mario::setGameWorld(GameWorld* gw) {
+void Player::setGameWorld(GameWorld* gw) {
     this->gw = gw;
 }
 
-void Mario::setMap(Map* map) {
+void Player::setMap(Map* map) {
     this->map = map;
 }
 
-GameWorld* Mario::getGameWorld() const {
+GameWorld* Player::getGameWorld() const {
     return gw;
 }
 
-Map* Mario::getMap() const {
+Map* Player::getMap() const {
     return map;
 }
 
-int Mario::getLives() const {
+int Player::getLives() const {
     return lives;
 }
 
-int Mario::getCoins() const {
+int Player::getCoins() const {
     return coins;
 }
 
-int Mario::getCoinsFromPreviousMap() const {
+int Player::getCoinsFromPreviousMap() const {
     return coinsFromPreviousMap;
 }
 
-int Mario::getYoshiCoins() const {
+int Player::getYoshiCoins() const {
     return yoshiCoins;
 }
 
-int Mario::getPoints() const {
+int Player::getPoints() const {
     return points;
 }
 
-int Mario::getPointsFromPreviousMap() const {
+int Player::getPointsFromPreviousMap() const {
     return pointsFromPreviousMap;
 }
 
-void Mario::addLives(int lives) {
+void Player::addLives(int lives) {
     this->lives += lives;
 }
 
-void Mario::removeLives(int lives) {
+void Player::removeLives(int lives) {
     this->lives -= lives;
 }
 
-void Mario::addCoins(int coins) {
+void Player::addCoins(int coins) {
     this->coins += coins;
 }
 
-void Mario::addYoshiCoins(int yoshiCoins) {
+void Player::addYoshiCoins(int yoshiCoins) {
     this->yoshiCoins += yoshiCoins;
 }
 
-void Mario::removeCoins(int coins) {
+void Player::removeCoins(int coins) {
     this->coins -= coins;
 }
 
-void Mario::addPoints(int points) {
+void Player::addPoints(int points) {
     this->points += points;
 }
 
-void Mario::removePoints(int points) {
+void Player::removePoints(int points) {
     this->points -= points;
 }
 
-void Mario::changeToSmall() {
-    type = MARIO_TYPE_SMALL;
+void Player::changeToSmall() {
+    type = PLAYER_TYPE_SMALL;
     pos.y = pos.y + 12;
     dim.y = 40;
     maxFrames = 2;
 }
 
-void Mario::changeToSuper() {
-    type = MARIO_TYPE_SUPER;
+void Player::changeToSuper() {
+    type = PLAYER_TYPE_SUPER;
     dim.y = 56;
     maxFrames = 3;
 }
 
-void Mario::changeToFlower() {
-    type = MARIO_TYPE_FLOWER;
+void Player::changeToFlower() {
+    type = PLAYER_TYPE_FLOWER;
     dim.y = 56;
     maxFrames = 3;
 }
 
-void Mario::setReservedPowerUp(MarioType reservedPowerUp) {
+void Player::setReservedPowerUp(PlayerType reservedPowerUp) {
     this->reservedPowerUp = reservedPowerUp;
 }
 
-MarioType Mario::getReservedPowerUp() const {
+PlayerType Player::getReservedPowerUp() const {
     return reservedPowerUp;
 }
 
-MarioType Mario::getType() const {
+PlayerType Player::getType() const {
     return type;
 }
 
-void Mario::setInvulnerable(bool invulnerable) {
+void Player::setInvulnerable(bool invulnerable) {
     this->invulnerable = invulnerable;
 }
 
-bool Mario::isInvulnerable() const {
+bool Player::isInvulnerable() const {
     return invulnerable;
 }
 
-void Mario::setInvincible(bool invincible) {
+void Player::setInvincible(bool invincible) {
     this->invincible = invincible;
 }
 
-bool Mario::isInvincible() const {
+bool Player::isInvincible() const {
     return invincible;
 }
 
-bool Mario::isTransitioning() const {
+bool Player::isTransitioning() const {
     return state == SPRITE_STATE_TRANSITIONING_SMALL_TO_SUPER ||
         state == SPRITE_STATE_TRANSITIONING_SMALL_TO_FLOWER ||
         state == SPRITE_STATE_TRANSITIONING_SUPER_TO_FLOWER ||
@@ -849,15 +849,15 @@ bool Mario::isTransitioning() const {
         state == SPRITE_STATE_TRANSITIONING_FLOWER_TO_SMALL;
 }
 
-void Mario::reset(bool removePowerUps) {
+void Player::reset(bool removePowerUps) {
     reset(removePowerUps, true);
 }
 
-void Mario::reset(bool removePowerUps, bool resetPointsToSaved) {
+void Player::reset(bool removePowerUps, bool resetPointsToSaved) {
 
     if (removePowerUps) {
         changeToSmall();
-        reservedPowerUp = MARIO_TYPE_SMALL;
+        reservedPowerUp = PLAYER_TYPE_SMALL;
     }
     vel.x = 0;
     vel.y = 0;
@@ -882,7 +882,7 @@ void Mario::reset(bool removePowerUps, bool resetPointsToSaved) {
 
 }
 
-void Mario::resetAll() {
+void Player::resetAll() {
     lives = 5;
     coins = 0;
     coinsFromPreviousMap = 0;
@@ -892,7 +892,7 @@ void Mario::resetAll() {
     reset(true);
 }
 
-void Mario::playPlayerDownMusicStream() {
+void Player::playPlayerDownMusicStream() {
 
     std::map<std::string, Music> musics = ResourceManager::getInstance().getMusics();
 
@@ -913,7 +913,7 @@ void Mario::playPlayerDownMusicStream() {
     }
 }
 
-void Mario::playGameOverMusicStream() {
+void Player::playGameOverMusicStream() {
 
     std::map<std::string, Music> musics = ResourceManager::getInstance().getMusics();
 
@@ -935,24 +935,24 @@ void Mario::playGameOverMusicStream() {
 
 }
 
-bool Mario::isPlayerDownMusicStreamPlaying() const {
+bool Player::isPlayerDownMusicStreamPlaying() const {
     return playerDownMusicStreamPlaying;
 }
 
-bool Mario::isGameOverMusicStreamPlaying() const {
+bool Player::isGameOverMusicStreamPlaying() const {
     return gameOverMusicStreamPlaying;
 }
 
-Vector2 Mario::getSouthCollisionProbePos() const {
+Vector2 Player::getSouthCollisionProbePos() const {
     return Vector2{ cpS.getX(), cpS.getY() };
 }
 
-void Mario::toLuigi() {
+void Player::toLuigi() {
     isLuigi = true;
     jumpSpeed = -700; // Luigi jumps higher than Mario
 }
 
-void Mario::toMario() {
+void Player::toMario() {
     isLuigi = false;
     jumpSpeed = -600; // Mario jumps lower than Luigi
 }
