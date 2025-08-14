@@ -20,7 +20,7 @@ GameWorld::GameWorld() :
         -600,           // jumpSpeed
         false           
     ),
-    map(mario, 3, true, this),
+    map(mario, 1, true, this),
     camera(nullptr),
     settingBoardIsOpen(false),
     helpingBoardIsOpen(false),
@@ -44,7 +44,8 @@ GameWorld::GameWorld() :
     selectCharacterScreen(nullptr),
     settingScreen(nullptr),
     helpingScreen(nullptr),
-    guardScreen(nullptr)
+    guardScreen(nullptr),
+    leaderBoardScreen(nullptr)
     {
         mario.setGameWorld(this);
         mario.setMap(&map);
@@ -91,6 +92,11 @@ GameWorld::~GameWorld() {
         guardScreen = nullptr;
     }
 
+    if (leaderBoardScreen != nullptr) {
+        delete leaderBoardScreen;
+        leaderBoardScreen = nullptr;
+    }
+
     if (settingButton != nullptr) {
         delete settingButton;
         settingButton = nullptr;
@@ -100,6 +106,7 @@ GameWorld::~GameWorld() {
         delete helpButton;
         helpButton = nullptr;
     }
+
 }
 
 Memento* GameWorld::dataFromGameWorldToSave() {
@@ -137,6 +144,10 @@ void GameWorld::initScreensAndButtons() {
 
     if (menuScreen == nullptr) {
         menuScreen = new MenuScreen();
+    }
+
+    if (leaderBoardScreen == nullptr) {
+        leaderBoardScreen = new LeaderBoardScreen();
     }
 
     if (mapEditorScreen1 == nullptr) {
@@ -571,7 +582,7 @@ void GameWorld::inputAndUpdate() {
                     if ( item->checkCollision( &mario ) != COLLISION_TYPE_NONE ) {
                         item->setState( SPRITE_STATE_HIT );
                         item->playCollisionSound();
-                        item->updateMario( mario );
+                         item->updateMario( mario );
                     }
                 } else if ( item->getY() > map.getMaxHeight() ) {
                     item->setState( SPRITE_STATE_TO_BE_REMOVED );
@@ -999,6 +1010,12 @@ void GameWorld::inputAndUpdate() {
                 settingScreen->setSettingBoardIsOpenInMenuScreen(true);
             }
 
+            else if (menuScreen->getButton("LEADERBOARD")->isReleased()) {
+                state = GAME_STATE_LEADERBOARD_SCREEN;
+                CareTaker caretaker(this);
+                caretaker.releaseLeaderBoardData();
+            }
+
             else if (menuScreen->getButton("EXIT")->isReleased()) {
                 state = GAME_STATE_TITLE_SCREEN;
             }
@@ -1057,8 +1074,15 @@ void GameWorld::inputAndUpdate() {
 
     else if ( state == GAME_STATE_GAME_OVER ) {
         mario.playGameOverMusicStream();
+        CareTaker caretaker(this);
+        caretaker.saveToCareTakerLeaderBoard();
+		state = GAME_STATE_LEADERBOARD_SCREEN;
     }
-      
+    else if (state == GAME_STATE_LEADERBOARD_SCREEN) {
+        if (IsKeyPressed(KEY_ESCAPE)) {
+            state = GAME_STATE_MENU_SCREEN;
+        }
+    }
 }
 
 void GameWorld::draw() {
@@ -1100,6 +1124,11 @@ void GameWorld::draw() {
 
     else if (state == GAME_STATE_SELECT_CHARACTER_SCREEN) {
         selectCharacterScreen->draw();
+    }
+
+    else if (state == GAME_STATE_LEADERBOARD_SCREEN) {
+        if(leaderBoardScreen)
+            leaderBoardScreen->draw();
     }
 
     else if (state == GAME_STATE_GAME_OVER){
@@ -1171,6 +1200,9 @@ void GameWorld::draw() {
 
             if ( GetKeyPressed() ) {
                 StopMusicStream( musics["ending"] );
+                CareTaker caretaker(this);
+                caretaker.releaseLeaderBoardData();
+                state = GAME_STATE_LEADERBOARD_SCREEN;
                 resetGame();
             }
 
@@ -1248,9 +1280,15 @@ void GameWorld::nextMap() {
         totalPlayedTime += static_cast<int>(mario.getEllapsedTime());
         mario.setPointsFromPreviousMap(mario.getPoints());
         mario.setCoinsFromPreviousMap(mario.getCoins());
+		// Save the current game state to the CareTaker leaderboard'
+		CareTaker caretaker(this);
+		caretaker.saveToCareTakerLeaderBoard();
+
         mario.reset(false, false);
     } else {
         state = GAME_STATE_FINISHED;
+        CareTaker caretaker(this);
+        caretaker.saveToCareTakerLeaderBoard();
     }
 }
 
