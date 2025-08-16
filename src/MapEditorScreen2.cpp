@@ -11,10 +11,10 @@
 const int MapEditorScreen2::GRID_WIDTH_IN_TILES = 200;
 const int MapEditorScreen2::GRID_HEIGHT_IN_TILES = 60;
 const float MapEditorScreen2::BASE_TILE_SIZE = 32.0f;
-const int MIN_ERASER_SIZE = 1;
-const int MAX_ERASER_SIZE = 9; 
-const int MIN_BRUSH_SIZE = 1;
-const int MAX_BRUSH_SIZE = 9;
+const int MapEditorScreen2::MIN_ERASER_SIZE = 1;
+const int MapEditorScreen2::MAX_ERASER_SIZE = 9; 
+const int MapEditorScreen2::MIN_BRUSH_SIZE = 1;
+const int MapEditorScreen2::MAX_BRUSH_SIZE = 9;
 
 MapEditorScreen2::MapEditorScreen2(MapEditorScreen1* parentScreen)
     : Screen(), currentMapData(nullptr), MainState(MAP_EDITOR_STATE_IDLE),
@@ -26,7 +26,12 @@ MapEditorScreen2::MapEditorScreen2(MapEditorScreen1* parentScreen)
                                     font1(ResourceManager::getInstance().getFont("SuperMario256")), 
                                     font2(ResourceManager::getInstance().getFont("fixedsys")),
                                     colorPalette({
-                                        {255, 61, 65, 255},
+                                        {255, 61, 65, 255},     // RED
+                                        {5, 154, 69, 255},      // GREEN
+                                        {37, 137, 190, 255},    // BLUE
+                                        {235, 114, 114, 255},   // PINK
+                                        {254, 218, 150, 255},   // LIGHT YELLOW
+                                        {229, 139, 104, 255}    // ORANGE
                                     }) {
 
         // Initialize camera for grid view
@@ -52,6 +57,10 @@ MapEditorScreen2::MapEditorScreen2(MapEditorScreen1* parentScreen)
 
 void MapEditorScreen2::setCurrentMapData(UserMapData* mapData) {
     currentMapData = mapData;
+    colorPickerRed = currentMapData->backgroundColor.r / 255.0f;
+    colorPickerGreen = currentMapData->backgroundColor.g / 255.0f;
+    colorPickerBlue = currentMapData->backgroundColor.b / 255.0f;
+    colorPickerAlpha = currentMapData->backgroundColor.a / 255.0f;
 }
 
 void MapEditorScreen2::update() {
@@ -113,18 +122,29 @@ void MapEditorScreen2::update() {
         // Return to MapEditorScreen1
         GameWorld::state = GAME_STATE_MAP_EDITOR_SCREEN1;
     }
+    
+    // Handle tool shortcuts
+    if (IsKeyPressed(KEY_E)) {
+        // Switch to eraser mode
+        selectedEntityID = 0;
+    }
+    
+    if (IsKeyPressed(KEY_B)) {
+        // Switch to brush mode
+        selectedEntityID = -1;
+    }
 }
 
 void MapEditorScreen2::draw() {
     // Clear background with a light gray color
-    ClearBackground(LIGHTGRAY);
+    ClearBackground(colorPalette[4]);
     
     // Draw title
     const char* title = "MAP EDITOR - DESIGN MODE";
-    Vector2 titleSize = MeasureTextEx(font1, title, 40.0f, 0.0f);
+    // Vector2 titleSize = MeasureTextEx(font1, title, 40.0f, 0.0f);
     DrawTextEx(font1, title, 
                {20.0f, 20.0f}, 
-               40.0f, 0.0f, BLACK);
+               40.0f, 0.0f, colorPalette[3]);
     
     // Display current map name
     if (currentMapData) {
@@ -414,8 +434,6 @@ void MapEditorScreen2::initializeCategories() {
         categoryEntityIDs[3].push_back(i);
     }
     
-    // BGColor has no entity IDs (color picker instead)
-    // categoryEntityIDs[4] remains empty
 }
 
 void MapEditorScreen2::drawToolsArea() {
@@ -425,8 +443,8 @@ void MapEditorScreen2::drawToolsArea() {
     float toolsAreaHeight = GetScreenHeight();
     
     Rectangle toolsArea = {toolsAreaX, toolsAreaY, toolsAreaWidth, toolsAreaHeight};
-    DrawRectangleRec(toolsArea, Fade(DARKGRAY, 0.1f));
-    DrawRectangleLinesEx(toolsArea, 2.0f, DARKGRAY);
+    DrawRectangleRec(toolsArea, Fade(WHITE, 0.2f));
+    DrawRectangleLinesEx(toolsArea, 2.0f, colorPalette[5]);
     
     // Draw title
     const char* toolsTitle = "TOOLS";
@@ -434,26 +452,6 @@ void MapEditorScreen2::drawToolsArea() {
     DrawTextEx(font1, toolsTitle, 
                {toolsAreaX + (toolsAreaWidth - titleSize.x) / 2.0f, 10.0f}, 
                24.0f, 0.0f, BLACK);
-    
-    // Draw selected entity info
-    if (selectedEntityID > 0 && selectedEntityID < 201) {
-        const char* selectedInfo = TextFormat("Selected: ID %d", selectedEntityID);
-        DrawTextEx(font1, selectedInfo, 
-                   {toolsAreaX + 10.0f, 40.0f}, 
-                   16.0f, 0.0f, DARKBLUE);
-    } else if (selectedCategoryIndex == 4) {
-        DrawTextEx(font1, "Selected: BG COLOR", 
-                   {toolsAreaX + 10.0f, 40.0f}, 
-                   16.0f, 0.0f, PURPLE);
-    } else if (selectedEntityID == 0) {
-        DrawTextEx(font1, "Selected: ERASER", 
-                   {toolsAreaX + 10.0f, 40.0f}, 
-                   16.0f, 0.0f, RED);
-    } else if (selectedEntityID == -1) {
-        DrawTextEx(font1, "Selected: BRUSH", 
-                   {toolsAreaX + 10.0f, 40.0f}, 
-                   16.0f, 0.0f, GREEN);
-    }
     
     float currentY = 70.0f;
     
@@ -477,7 +475,7 @@ void MapEditorScreen2::drawToolsArea() {
     float firstRowWidth = (toolsAreaWidth - 20.0f) / 4.0f; // Divide width by 4 for first row
     
     for (int catIndex = 0; catIndex < 4; catIndex++) { // Only first 4 categories
-        Color categoryColor = (catIndex == selectedCategoryIndex) ? BLUE : DARKGRAY;
+        Color categoryColor = (catIndex == selectedCategoryIndex) ? BLUE : BLACK;
         
         float categoryX = toolsAreaX + 5.0f + catIndex * firstRowWidth;
         
@@ -487,18 +485,18 @@ void MapEditorScreen2::drawToolsArea() {
         DrawRectangleLinesEx(categoryRect, 1.0f, categoryColor);
         
         // Draw category text (smaller to fit)
-        Vector2 textSize = MeasureTextEx(font1, categories[catIndex].c_str(), 12.0f, 0.0f);
+        Vector2 textSize = MeasureTextEx(font1, categories[catIndex].c_str(), 14.0f, 0.0f);
         float textX = categoryX + (firstRowWidth - textSize.x) / 2.0f;
         DrawTextEx(font1, categories[catIndex].c_str(), 
-                   {textX, currentY + 6.0f}, 
-                   12.0f, 0.0f, categoryColor);
+                   {textX, currentY + 8.0f}, 
+                   14.0f, 0.0f, categoryColor);
     }
     
     currentY += categoryHeight + 5.0f; // Small spacing between rows
     
     // Second row: BGCOLOR (centered)
     if (categories.size() > 4) { // Make sure BGCOLOR exists
-        Color categoryColor = (4 == selectedCategoryIndex) ? BLUE : DARKGRAY;
+        Color categoryColor = (4 == selectedCategoryIndex) ? BLUE : BLACK;
         
         float bgColorWidth = firstRowWidth * 1.5f; // Make it a bit wider
         float categoryX = toolsAreaX + 5.0f + (toolsAreaWidth - 20.0f - bgColorWidth) / 2.0f; // Center it
@@ -509,11 +507,11 @@ void MapEditorScreen2::drawToolsArea() {
         DrawRectangleLinesEx(categoryRect, 1.0f, categoryColor);
         
         // Draw category text (centered)
-        Vector2 textSize = MeasureTextEx(font1, categories[4].c_str(), 12.0f, 0.0f);
+        Vector2 textSize = MeasureTextEx(font1, categories[4].c_str(), 14.0f, 0.0f);
         float textX = categoryX + (bgColorWidth - textSize.x) / 2.0f;
         DrawTextEx(font1, categories[4].c_str(), 
-                   {textX, currentY + 6.0f}, 
-                   12.0f, 0.0f, categoryColor);
+                   {textX, currentY + 8.0f}, 
+                   14.0f, 0.0f, categoryColor);
     }
     
     currentY += categoryHeight + 15.0f; // Increased spacing to lower the object sections
@@ -529,8 +527,8 @@ void MapEditorScreen2::drawToolsArea() {
             float itemY = currentY;
             int itemsPerRow = (int)((toolsAreaWidth - 20.0f) / (itemSize + itemSpacing));
             
-            // Reserve space for permanent tools at bottom (120px)
-            float maxItemY = toolsAreaHeight - 120.0f;
+            // Reserve space for minimap (120px) + utilities (95px) + spacing (20px) at bottom
+            float maxItemY = toolsAreaHeight - 235.0f;
             
             for (int i = 0; i < categoryEntityIDs[selectedCategoryIndex].size(); i++) {
                 int entityID = categoryEntityIDs[selectedCategoryIndex][i];
@@ -554,7 +552,7 @@ void MapEditorScreen2::drawToolsArea() {
                     float outlineSize = 2.0f;
                     Rectangle outlineRect = {x - outlineSize, y - outlineSize, 
                                            itemSize + outlineSize * 2, itemSize + outlineSize * 2};
-                    DrawRectangleLinesEx(outlineRect, 3.0f, ORANGE);
+                    DrawRectangleLinesEx(outlineRect, 5.0f, DARKBLUE); 
                 }
                 
                 // Draw entity representation
@@ -655,8 +653,12 @@ void MapEditorScreen2::drawToolsArea() {
         }
     }
     
-    // Draw permanent tools section at the bottom right
+    // Draw utilities section above minimap
     drawPermanentToolsSection(toolsAreaX, toolsAreaWidth, toolsAreaHeight);
+    
+    // Draw minimap at the bottom right with increased size
+    float minimapY = toolsAreaHeight - 130.0f; // Position minimap at the very bottom (120px minimap + 10px spacing)
+    drawMinimap(toolsAreaX, toolsAreaWidth, minimapY);
 }
 
 void MapEditorScreen2::handleToolSelection(Vector2 mousePos) {
@@ -666,15 +668,16 @@ void MapEditorScreen2::handleToolSelection(Vector2 mousePos) {
     float toolsAreaX = GetScreenWidth() - toolsAreaWidth;
     float toolsAreaHeight = GetScreenHeight();
     
-    // Check permanent tools section first (at the bottom)
-    float sectionHeight = 100.0f;
-    float sectionY = toolsAreaHeight - sectionHeight - 10.0f;
-    float buttonSize = 32.0f;
-    float buttonSpacing = 10.0f;
+    // Check permanent tools section first (utilities above minimap)
+    float sectionHeight = 95.0f; // Match the increased utilities height
+    // Match the positioning from drawPermanentToolsSection
+    float sectionY = toolsAreaHeight - sectionHeight - 140.0f;
+    float buttonSize = 40.0f;
+    float buttonSpacing = 30.0f;
     float buttonsY = sectionY + 25.0f;
     
     // Check eraser button
-    float eraserX = toolsAreaX + 15.0f;
+    float eraserX = toolsAreaX + 25.0f;
     Rectangle eraserRect = {eraserX, buttonsY, buttonSize, buttonSize};
     if (CheckCollisionPointRec(mousePos, eraserRect)) {
         selectedEntityID = 0; // Eraser
@@ -738,8 +741,8 @@ void MapEditorScreen2::handleToolSelection(Vector2 mousePos) {
         float itemY = currentY;
         int itemsPerRow = (int)((toolsAreaWidth - 20.0f) / (itemSize + itemSpacing));
         
-        // Reserve space for permanent tools at bottom (120px)
-        float maxItemY = toolsAreaHeight - 120.0f;
+        // Reserve space for minimap (120px) + utilities (95px) + spacing (20px) at bottom
+        float maxItemY = toolsAreaHeight - 235.0f;
         
         for (int i = 0; i < categoryEntityIDs[selectedCategoryIndex].size(); i++) {
             int entityID = categoryEntityIDs[selectedCategoryIndex][i];
@@ -951,67 +954,56 @@ void MapEditorScreen2::drawBrushSizeArea(float toolsAreaX, float toolsAreaWidth,
 }
 
 void MapEditorScreen2::drawPermanentToolsSection(float toolsAreaX, float toolsAreaWidth, float toolsAreaHeight) {
-    float sectionHeight = 100.0f;
-    float sectionY = toolsAreaHeight - sectionHeight - 10.0f;
+    float sectionHeight = 95.0f; // Increased to 95px to properly contain button labels
+    // Position utilities above minimap (adjust spacing for new heights)
+    float sectionY = toolsAreaHeight - sectionHeight - 140.0f; // Increased spacing for bigger minimap
     
     // Draw background for permanent tools section
-    Rectangle toolsSectionRect = {toolsAreaX + 5.0f, sectionY, toolsAreaWidth - 10.0f, sectionHeight};
-    DrawRectangleRec(toolsSectionRect, Fade(DARKBLUE, 0.1f));
-    DrawRectangleLinesEx(toolsSectionRect, 2.0f, DARKBLUE);
+    Rectangle toolsSectionRect = {toolsAreaX + 5.0f, sectionY - 10.0f, toolsAreaWidth - 10.0f, sectionHeight};
+    DrawRectangleRec(toolsSectionRect, Fade(SKYBLUE, 0.5f));
+    DrawRectangleLinesEx(toolsSectionRect, 2.0f, colorPalette[5]);
     
     // Draw section title
-    const char* sectionTitle = "TOOLS";
-    Vector2 titleSize = MeasureTextEx(font1, sectionTitle, 16.0f, 0.0f);
+    const char* sectionTitle = "UTILITIES";
+    // Vector2 titleSize = MeasureTextEx(font1, sectionTitle, 16.0f, 0.0f);
     DrawTextEx(font1, sectionTitle, 
-               {toolsAreaX + 10.0f, sectionY + 5.0f}, 
-               16.0f, 0.0f, DARKBLUE);
+               {toolsAreaX + 10.0f, sectionY}, 
+               20.0f, 0.0f, DARKBLUE);
     
     // Draw eraser and brush buttons
-    float buttonSize = 32.0f;
-    float buttonSpacing = 10.0f;
+    float buttonSize = 40.0f;
+    float buttonSpacing = 30.0f;
     float buttonsY = sectionY + 25.0f;
     
     // Eraser button
-    float eraserX = toolsAreaX + 15.0f;
+    float eraserX = toolsAreaX + 25.0f;
     Rectangle eraserRect = {eraserX, buttonsY, buttonSize, buttonSize};
-    Color eraserColor = (selectedEntityID == 0) ? RED : GRAY;
+    Color eraserColor = (selectedEntityID == 0) ? colorPalette[0] : GRAY;
     DrawRectangleRec(eraserRect, Fade(eraserColor, 0.3f));
     DrawRectangleLinesEx(eraserRect, 2.0f, eraserColor);
     
-    // Draw X for eraser
-    DrawLine((int)eraserX + 6, (int)buttonsY + 6, (int)(eraserX + buttonSize - 6), (int)(buttonsY + buttonSize - 6), eraserColor);
-    DrawLine((int)(eraserX + buttonSize - 6), (int)buttonsY + 6, (int)eraserX + 6, (int)(buttonsY + buttonSize - 6), eraserColor);
+    // Draw eraser icon
+    DrawTexture(textures["eraserIcon"], (int)eraserX, (int)buttonsY, WHITE);
     
     // Eraser label
-    DrawTextEx(font1, "ERASER", 
-               {eraserX, buttonsY + buttonSize + 3.0f}, 
-               10.0f, 0.0f, eraserColor);
+    DrawTextEx(font1, "ERASER(E)", 
+               {eraserX - 12.0f, buttonsY + buttonSize + 3.0f}, 
+               14.0f, 0.0f, eraserColor);
     
     // Brush button
     float brushX = eraserX + buttonSize + buttonSpacing;
     Rectangle brushRect = {brushX, buttonsY, buttonSize, buttonSize};
-    Color brushColor = (selectedEntityID == -1) ? GREEN : GRAY;
+    Color brushColor = (selectedEntityID == -1) ? colorPalette[1] : GRAY;
     DrawRectangleRec(brushRect, Fade(brushColor, 0.3f));
     DrawRectangleLinesEx(brushRect, 2.0f, brushColor);
     
-    // Draw brush icon (filled square)
-    float iconSize = buttonSize * 0.6f;
-    float iconOffset = (buttonSize - iconSize) / 2.0f;
-    DrawRectangle((int)(brushX + iconOffset), (int)(buttonsY + iconOffset), (int)iconSize, (int)iconSize, brushColor);
+    // Draw brush icon
+    DrawTexture(textures["brushIcon"], (int)brushX, (int)buttonsY, WHITE);
     
     // Brush label
-    DrawTextEx(font1, "BRUSH", 
-               {brushX, buttonsY + buttonSize + 3.0f}, 
-               10.0f, 0.0f, brushColor);
-    
-    // Show size info only for eraser (brush info is already shown in slider area)
-    float infoY = buttonsY + buttonSize + 20.0f;
-    if (selectedEntityID == 0) {
-        const char* sizeInfo = TextFormat("Size: %dx%d", eraserSize, eraserSize);
-        DrawTextEx(font1, sizeInfo, 
-                   {toolsAreaX + 10.0f, infoY}, 
-                   12.0f, 0.0f, RED);
-    }
+    DrawTextEx(font1, "BRUSH(B)", 
+               {brushX - 8.0f, buttonsY + buttonSize + 3.0f}, 
+               14.0f, 0.0f, brushColor);
 }
 
 void MapEditorScreen2::drawColorPicker(float toolsAreaX, float toolsAreaWidth, float& currentY) {
@@ -1037,7 +1029,7 @@ void MapEditorScreen2::drawColorPicker(float toolsAreaX, float toolsAreaWidth, f
     
     // Green slider
     DrawTextEx(font1, TextFormat("Green: %d", (int)(colorPickerGreen * 255)), 
-               {toolsAreaX + 10.0f, startY - 6.0f}, fontSize, 0.0f, BLACK);
+               {toolsAreaX + 10.0f, startY - 6.0f}, fontSize, 0.0f, colorPalette[1]);
     Rectangle greenSlider = {toolsAreaX + 10.0f, startY + 14.0f, sliderWidth, sliderHeight};
     GuiSlider(greenSlider, NULL, NULL, &colorPickerGreen, 0.0f, 1.0f);
     
@@ -1045,7 +1037,7 @@ void MapEditorScreen2::drawColorPicker(float toolsAreaX, float toolsAreaWidth, f
     
     // Blue slider
     DrawTextEx(font1, TextFormat("Blue: %d", (int)(colorPickerBlue * 255)), 
-               {toolsAreaX + 10.0f, startY - 6.0f}, fontSize, 0.0f, BLACK);
+               {toolsAreaX + 10.0f, startY - 6.0f}, fontSize, 0.0f, colorPalette[2]);
     Rectangle blueSlider = {toolsAreaX + 10.0f, startY + 14.0f, sliderWidth, sliderHeight};
     GuiSlider(blueSlider, NULL, NULL, &colorPickerBlue, 0.0f, 1.0f);
     
@@ -1087,6 +1079,201 @@ void MapEditorScreen2::drawColorPicker(float toolsAreaX, float toolsAreaWidth, f
     // Auto-apply color changes to map background in real-time
     if (currentMapData) {
         currentMapData->backgroundColor = previewColor;
+    }
+}
+
+void MapEditorScreen2::drawMinimap(float toolsAreaX, float toolsAreaWidth, float& currentY) {
+    float minimapHeight = 120.0f; // Increased from 100px to 120px
+    float minimapWidth = toolsAreaWidth - 10.0f;
+    
+    // Draw minimap background
+    Rectangle minimapArea = {toolsAreaX + 5.0f, currentY, minimapWidth, minimapHeight};
+    DrawRectangleRec(minimapArea, Fade(SKYBLUE, 0.5f));
+    DrawRectangleLinesEx(minimapArea, 2.0f, colorPalette[5]);
+    
+    // Draw minimap title
+    const char* minimapTitle = "MINIMAP";
+    // Vector2 titleSize = MeasureTextEx(font1, minimapTitle, 16.0f, 0.0f);
+    DrawTextEx(font1, minimapTitle, 
+               {toolsAreaX + 10.0f, currentY + 8.0f}, 
+               20.0f, 0.0f, DARKBLUE);
+    
+    // Calculate minimap drawing area (leave space for title)
+    float mapDrawAreaX = toolsAreaX + 10.0f;
+    float mapDrawAreaY = currentY + 25.0f;
+    float mapDrawAreaWidth = minimapWidth - 10.0f;
+    float mapDrawAreaHeight = minimapHeight - 30.0f;
+    
+    // Calculate scale factor to fit the entire 200x60 grid into the minimap
+    float scaleX = mapDrawAreaWidth / GRID_WIDTH_IN_TILES;
+    float scaleY = mapDrawAreaHeight / GRID_HEIGHT_IN_TILES;
+    float scale = fminf(scaleX, scaleY); // Use smaller scale to maintain aspect ratio
+    
+    // Calculate actual minimap size with proper scaling
+    float actualMapWidth = GRID_WIDTH_IN_TILES * scale;
+    float actualMapHeight = GRID_HEIGHT_IN_TILES * scale;
+    
+    // Center the minimap in the available area
+    float mapStartX = mapDrawAreaX + (mapDrawAreaWidth - actualMapWidth) / 2.0f;
+    float mapStartY = mapDrawAreaY + (mapDrawAreaHeight - actualMapHeight) / 2.0f;
+    
+    // Draw the minimap grid background
+    Color bgColor = currentMapData ? currentMapData->backgroundColor : LIGHTGRAY;
+    Rectangle minimapGridRect = {mapStartX, mapStartY, actualMapWidth, actualMapHeight};
+    DrawRectangleRec(minimapGridRect, bgColor);
+    DrawRectangleLinesEx(minimapGridRect, 1.0f, BLACK);
+    
+    // Draw tiles on minimap using real textures (scaled down)
+    if (currentMapData && currentMapData->entitiesID.size() == 12000) {
+        for (int y = 0; y < GRID_HEIGHT_IN_TILES; y++) {
+            for (int x = 0; x < GRID_WIDTH_IN_TILES; x++) {
+                int index = y * GRID_WIDTH_IN_TILES + x;
+                int entityID = currentMapData->entitiesID[index];
+                
+                if (entityID > 0) { // Only draw non-empty tiles
+                    float tileX = mapStartX + x * scale;
+                    float tileY = mapStartY + y * scale;
+                    Rectangle tileRect = {tileX, tileY, scale, scale};
+                    
+                    // Draw using actual textures instead of colored blocks
+                    bool textureDrawn = false;
+                    
+                    if (entityID >= 1 && entityID <= 87) {
+                        // Tiles - try to draw texture
+                        std::string tileKey = "tile_" + std::to_string(entityID);
+                        if (textures.find(tileKey) != textures.end()) {
+                            DrawTexturePro(textures[tileKey], 
+                                         {0, 0, (float)textures[tileKey].width, (float)textures[tileKey].height},
+                                         tileRect, {0, 0}, 0.0f, WHITE);
+                            textureDrawn = true;
+                        }
+                    } else if (entityID >= 88 && entityID <= 102) {
+                        // Blocks - try to draw texture
+                        std::string blockKey = "block" + std::to_string(entityID);
+                        if (textures.find(blockKey) != textures.end()) {
+                            DrawTexturePro(textures[blockKey], 
+                                         {0, 0, (float)textures[blockKey].width, (float)textures[blockKey].height},
+                                         tileRect, {0, 0}, 0.0f, WHITE);
+                            textureDrawn = true;
+                        }
+                    } else if (entityID >= 103 && entityID <= 120) {
+                        // Items - try to draw texture
+                        std::string itemKey = "";
+                        if (entityID == 103) {
+                            itemKey = "1UpMushroom";
+                        } else if (entityID == 104) {
+                            itemKey = "3UpMoon";
+                        } else if (entityID >= 108 && entityID <= 111) {
+                            itemKey = "coin0";
+                        } else if (entityID == 112) {
+                            itemKey = "courseClearToken";
+                        } else if (entityID >= 113 && entityID <= 114) {
+                            itemKey = "fireFlower0";
+                        } else if (entityID == 115) {
+                            itemKey = "mushroom";
+                        } else if (entityID == 116) {
+                            itemKey = "star";
+                        } else if (entityID >= 117 && entityID <= 120) {
+                            itemKey = "yoshiCoin0";
+                        }
+                        
+                        if (!itemKey.empty() && textures.find(itemKey) != textures.end()) {
+                            DrawTexturePro(textures[itemKey], 
+                                         {0, 0, (float)textures[itemKey].width, (float)textures[itemKey].height},
+                                         tileRect, {0, 0}, 0.0f, WHITE);
+                            textureDrawn = true;
+                        }
+                    } else if (entityID >= 121 && entityID <= 158) {
+                        // Baddies - try to draw texture
+                        std::string baddieKey = "";
+                        if (entityID == 121 || entityID == 122) {
+                            baddieKey = "blueKoopaTroopa0R";
+                        } else if (entityID == 123 || entityID == 124) {
+                            baddieKey = "bobOmb0R";
+                        } else if (entityID == 125) {
+                            baddieKey = "bulletBill0R";
+                        } else if (entityID == 126 || entityID == 127) {
+                            baddieKey = "buzzyBeetle0R";
+                        } else if (entityID >= 128 && entityID <= 131) {
+                            baddieKey = "flyingGoomba0R";
+                        } else if (entityID == 132 || entityID == 133) {
+                            baddieKey = "goomba0R";
+                        } else if (entityID == 134 || entityID == 135) {
+                            baddieKey = "greenKoopaTroopa0R";
+                        } else if (entityID >= 136 && entityID <= 139) {
+                            baddieKey = "jumpingPiranhaPlant0";
+                        } else if (entityID == 140 || entityID == 141) {
+                            baddieKey = "montyMole0R";
+                        } else if (entityID == 142 || entityID == 143) {
+                            baddieKey = "mummyBeetle0R";
+                        } else if (entityID == 144 || entityID == 145) {
+                            baddieKey = "muncher0";
+                        } else if (entityID == 146 || entityID == 147) {
+                            baddieKey = "piranhaPlant0";
+                        } else if (entityID == 148 || entityID == 149) {
+                            baddieKey = "redKoopaTroopa0R";
+                        } else if (entityID >= 150 && entityID <= 153) {
+                            baddieKey = "rex10R";
+                        } else if (entityID >= 154 && entityID <= 156) {
+                            baddieKey = "swooper0R";
+                        } else if (entityID == 157 || entityID == 158) {
+                            baddieKey = "yellowKoopaTroopa0R";
+                        }
+                        
+                        if (!baddieKey.empty() && textures.find(baddieKey) != textures.end()) {
+                            DrawTexturePro(textures[baddieKey], 
+                                         {0, 0, (float)textures[baddieKey].width, (float)textures[baddieKey].height},
+                                         tileRect, {0, 0}, 0.0f, WHITE);
+                            textureDrawn = true;
+                        }
+                    }
+                    
+                    // Only draw colored fallback if no texture was found and scale is large enough
+                    if (!textureDrawn && scale >= 1.0f) {
+                        Color fallbackColor = WHITE;
+                        if (entityID >= 1 && entityID <= 87) {
+                            fallbackColor = GREEN; // Tiles
+                        } else if (entityID >= 88 && entityID <= 102) {
+                            fallbackColor = BROWN; // Blocks
+                        } else if (entityID >= 103 && entityID <= 120) {
+                            fallbackColor = GOLD; // Items
+                        } else if (entityID >= 121 && entityID <= 158) {
+                            fallbackColor = RED; // Baddies
+                        }
+                        DrawRectangleRec(tileRect, fallbackColor);
+                    }
+                }
+            }
+        }
+    }
+    
+    // Draw camera viewport indicator
+    if (scale > 0.1f) { // Only draw if scale is reasonable
+        // Calculate what area of the grid is currently visible in the main view
+        Vector2 topLeft = GetScreenToWorld2D({0, 120}, gridCamera);
+        Vector2 bottomRight = GetScreenToWorld2D({GetScreenWidth() * 0.8f, GetScreenHeight() - 160.0f}, gridCamera);
+        
+        // Convert to grid coordinates
+        int visibleStartX = (int)(topLeft.x / BASE_TILE_SIZE);
+        int visibleStartY = (int)(topLeft.y / BASE_TILE_SIZE);
+        int visibleEndX = (int)(bottomRight.x / BASE_TILE_SIZE);
+        int visibleEndY = (int)(bottomRight.y / BASE_TILE_SIZE);
+        
+        // Clamp to grid bounds
+        visibleStartX = Clamp(visibleStartX, 0, GRID_WIDTH_IN_TILES - 1);
+        visibleStartY = Clamp(visibleStartY, 0, GRID_HEIGHT_IN_TILES - 1);
+        visibleEndX = Clamp(visibleEndX, 0, GRID_WIDTH_IN_TILES - 1);
+        visibleEndY = Clamp(visibleEndY, 0, GRID_HEIGHT_IN_TILES - 1);
+        
+        // Draw viewport rectangle on minimap
+        float viewportX = mapStartX + visibleStartX * scale;
+        float viewportY = mapStartY + visibleStartY * scale;
+        float viewportWidth = (visibleEndX - visibleStartX + 1) * scale;
+        float viewportHeight = (visibleEndY - visibleStartY + 1) * scale;
+        
+        Rectangle viewportRect = {viewportX, viewportY, viewportWidth, viewportHeight};
+        DrawRectangleLinesEx(viewportRect, 2.0f, BLUE);
+        DrawRectangleRec(viewportRect, Fade(BLUE, 0.2f));
     }
 }
 

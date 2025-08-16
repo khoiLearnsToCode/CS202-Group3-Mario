@@ -547,7 +547,15 @@ void ResourceManager::loadTextures() {
         textures["selectYourCharacter"] = LoadTexture("../resource/graphic/gui/selectYourCharacter.png");
         textures["leaderboard"] = LoadTexture("../resource/graphic/gui/leaderboard.png");
         textures["mapEditor"] = LoadTexture("../resource/graphic/gui/mapEditor.png");
+        Image imgE = LoadImage("../resource/graphic/gui/eraserIcon.png");
+        ImageResize(&imgE, 40, 40);
+        textures["eraserIcon"] = LoadTextureFromImage(imgE);
+        UnloadImage(imgE);
 
+        Image imgB = LoadImage("../resource/graphic/gui/brushIcon.png");
+        ImageResize(&imgB, 40, 40);
+        textures["brushIcon"] = LoadTextureFromImage(imgB);
+        UnloadImage(imgB);
 
         // UI elements
         textures["muteButtonPress"] = LoadTexture("../resource/graphic/ui/muteButtonPress.png");
