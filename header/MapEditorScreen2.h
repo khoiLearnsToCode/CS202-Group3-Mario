@@ -14,10 +14,10 @@ private:
     static const int GRID_WIDTH_IN_TILES;
     static const int GRID_HEIGHT_IN_TILES;
     static const float BASE_TILE_SIZE;
-    static const int MIN_ERASER_SIZE = 1;
-    static const int MAX_ERASER_SIZE = 9; 
-    static const int MIN_BRUSH_SIZE = 1;
-    static const int MAX_BRUSH_SIZE = 9; 
+    static const int MIN_ERASER_SIZE;
+    static const int MAX_ERASER_SIZE; 
+    static const int MIN_BRUSH_SIZE;
+    static const int MAX_BRUSH_SIZE;
     
     UserMapData* currentMapData;
     Font& font1;
@@ -86,6 +86,7 @@ private:
     void drawEraserSizeArea(float toolsAreaX, float toolsAreaWidth, float& currentY);
     void drawBrushSizeArea(float toolsAreaX, float toolsAreaWidth, float& currentY);
     void drawColorPicker(float toolsAreaX, float toolsAreaWidth, float& currentY);
+    void drawMinimap(float toolsAreaX, float toolsAreaWidth, float& currentY);
     
 public:
 };
