@@ -7,6 +7,24 @@
 #include <vector>
 #include <cmath>
 
+std::string serialize_vector_with_chunks(const std::vector<int>& vec, size_t chunk_size) {
+    std::stringstream ss;
+    ss << "\n\t["; 
+    for (size_t i = 0; i < vec.size(); ++i) {
+        ss << vec[i];
+        if (i != vec.size() - 1) { 
+            ss << ","; 
+        }
+        if ((i + 1) % chunk_size == 0 || i == vec.size() - 1) {
+            ss << "\n\t"; 
+        } else {
+            ss << " "; 
+        }
+    }
+    ss << "]"; 
+    return ss.str();
+}
+
 double toRadians(double degrees) {
     return degrees * PI / 180.0;
 }

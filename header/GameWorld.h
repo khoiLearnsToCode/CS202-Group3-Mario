@@ -1,6 +1,6 @@
 #pragma once
 
-class Mario;
+class Player;
 
 #include "Drawable.h"
 #include "GameState.h"
@@ -19,7 +19,7 @@ class Mario;
 #include "LeaderBoardScreen.h"
 #include "CareTaker.h"
 #include "Memento.h"
-#include "Mario.h"
+#include "Player.h"
 #include "raylib.h"
 #include <iostream>
 
@@ -38,7 +38,7 @@ class GameWorld : public virtual Drawable {
     friend class CareTaker;
     friend class SettingScreen;
 
-    Mario mario;
+    Player player;
     Map map;
     Camera2D* camera;
     bool settingBoardIsOpen;
@@ -49,7 +49,7 @@ class GameWorld : public virtual Drawable {
     int totalPlayedTime;
 
     bool pauseMusic;
-    bool pauseMario;
+    bool pausePlayer;
     // bool showOverlayOnPause;
 
     bool outroFinished;
@@ -73,7 +73,7 @@ class GameWorld : public virtual Drawable {
 
 public:
 
-    // static bool immortalMario;
+    // static bool immortalPlayer;
     static GameState state;
     static float gravity;
 
@@ -99,7 +99,7 @@ public:
     void resetMap();
     void resetGame();
     void nextMap();
-    void pauseGame(bool playPauseSFX, bool pauseMusic, bool pauseMario, bool showSettingBoard, bool showHelpingBoard);
+    void pauseGame(bool playPauseSFX, bool pauseMusic, bool pausePlayer, bool showSettingBoard, bool showHelpingBoard);
     void unpauseGame();
     void showGuardScreen(GuardAction action);
 

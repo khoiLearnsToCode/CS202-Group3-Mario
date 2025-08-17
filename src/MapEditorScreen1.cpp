@@ -1,31 +1,38 @@
 #include "MapEditorScreen1.h"
 #include "GameWorld.h"
+#include "utils.h"
 #include <algorithm>
 #include <iostream>
 #include <cmath>
 #include <filesystem>
 #include <ctime>
+#include <sstream>
+#include "raygui.h"
 
 using json = nlohmann::json;
 
 MapEditorScreen1::MapEditorScreen1() : Screen(), 
-                                       font(ResourceManager::getInstance().getFont("SuperMario256")),
+                                       font1(ResourceManager::getInstance().getFont("fixedsys")),
+                                       font2(ResourceManager::getInstance().getFont("SuperMario256")),
                                        fontSize(40.0f),
                                        showSavedMapDialog(false),
                                        scrollOffset({0, 0}),
                                        selectedMapIndex(-1),
                                        lastClickedIndex(-1),
-                                       lastClickTime(0.0f) {
+                                       lastClickTime(0.0f),
+                                       frame(0), maxFrame(4),
+                                       frameTimeAccum(0.0f),
+                                       frameTime(1.0f) {
     
     
         // Create buttons for map editor options
     buttons.emplace("NEW MAP", new ButtonTextTexture("NEW MAP", "longButton", 
                     {GetScreenWidth() / 2.0f - 128.0f, GetScreenHeight() / 2.0f - 50.0f}, 
-                    2.0f, WHITE, font, fontSize));
+                    2.0f, WHITE, font1, fontSize));
         
     buttons.emplace("SAVED MAP", new ButtonTextTexture("SAVED MAP", "longButton", 
                     {GetScreenWidth() / 2.0f - 128.0f, GetScreenHeight() / 2.0f + 25.0f}, 
-                    2.0f, WHITE, font, fontSize));
+                    2.0f, WHITE, font1, fontSize));
     
     buttons.emplace("BACK TO MENU", new ButtonTextTexture("returnButton", 
                     { 100.0f, GetScreenHeight() - 100.0f }, 2.0f));
@@ -58,14 +65,48 @@ MapEditorScreen1::MapEditorScreen1() : Screen(),
 }
 
 MapEditorScreen1::~MapEditorScreen1() {
+    // Clean up buttons
     for (auto& [key, button] : buttons) {
         delete button;
         button = nullptr;
     }
     buttons.clear();
+    
+    // Delete all existing JSON files and rewrite from current userDesignedMaps
+    std::string mapsDirectory = "../../../../resource/userDesignedMaps";
+    
+    try {
+        // Delete all existing JSON files in the directory
+        if (std::filesystem::exists(mapsDirectory) && std::filesystem::is_directory(mapsDirectory)) {
+            for (const auto& entry : std::filesystem::directory_iterator(mapsDirectory)) {
+                if (entry.is_regular_file() && entry.path().extension() == ".json") {
+                    try {
+                        std::filesystem::remove(entry.path());
+                        std::cout << "Deleted existing map file: " << entry.path().filename() << std::endl;
+                    } catch (const std::exception& e) {
+                        std::cerr << "Error deleting file " << entry.path() << ": " << e.what() << std::endl;
+                    }
+                }
+            }
+        }
+        
+        // Rewrite all maps from current userDesignedMaps vector
+        for (const auto& mapData : userDesignedMaps) {
+            if (!mapData.filename.empty()) {
+                saveMapToFile(mapData, mapData.filename);
+                std::cout << "Rewritten map file: " << mapData.filename << std::endl;
+            }
+        }
+        
+    } catch (const std::exception& e) {
+        std::cerr << "Error during destructor cleanup: " << e.what() << std::endl;
+    }
 }
 
 void MapEditorScreen1::update() {
+
+    updateFrameAnimation();
+
     // If dialog is open, handle dialog-specific input and prevent other button interactions
     if (showSavedMapDialog) {
         // Check if user clicked outside the dialog box to dismiss it
@@ -77,52 +118,12 @@ void MapEditorScreen1::update() {
             }
         }
         
-        // Handle scroll wheel input when mouse is over the scroll view
-        Vector2 mousePos = GetMousePosition();
-        if (CheckCollisionPointRec(mousePos, scrollViewRec)) {
-            float wheel = GetMouseWheelMove();
-            scrollOffset.y += wheel * 30.0f; // Scroll speed
-            
-            // Clamp scroll offset
-            float maxScroll = 0.0f;
-            float contentHeight = availableMaps.size() * 50.0f; // 50px per item
-            if (contentHeight > scrollViewRec.height) {
-                maxScroll = contentHeight - scrollViewRec.height;
-                scrollOffset.y = std::clamp(scrollOffset.y, -maxScroll, 0.0f);
-            } else {
-                scrollOffset.y = 0.0f;
-            }
-        }
-        
-        // Handle map selection and double-click detection
-        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionPointRec(mousePos, scrollViewRec)) {
-            float relativeY = mousePos.y - scrollViewRec.y + (-scrollOffset.y);
-            int clickedIndex = (int)(relativeY / 50.0f);
-            
-            if (clickedIndex >= 0 && clickedIndex < availableMaps.size()) {
-                float currentTime = GetTime();
-                
-                // Check for double-click: same item clicked within time window
-                if (clickedIndex == lastClickedIndex && 
-                    currentTime - lastClickTime < doubleClickTimeWindow) {
-                    // Double-click detected - load user-designed map
-                    if (clickedIndex < userDesignedMaps.size()) {
-                        loadUserDesignedMap(clickedIndex);
-                    }
-                    showSavedMapDialog = false;
-                    selectedMapIndex = -1;
-                    lastClickedIndex = -1;
-                    lastClickTime = 0.0f;
-                } else {
-                    // Single click - just select the item
-                    selectedMapIndex = clickedIndex;
-                    lastClickedIndex = clickedIndex;
-                    lastClickTime = currentTime;
-                }
-            }
-        }
+        // Handle map selection and double-click detection for raygui scroll panel
+        // Note: The actual click detection is now handled in the drawScrollableMapList function
+        // where we can properly calculate the clicked item based on the raygui scroll state
         
         // Reset double-click tracking if clicking outside the scroll view
+        Vector2 mousePos = GetMousePosition();
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && !CheckCollisionPointRec(mousePos, scrollViewRec)) {
             lastClickedIndex = -1;
             lastClickTime = 0.0f;
@@ -136,21 +137,21 @@ void MapEditorScreen1::update() {
     Button* selectMapButton = getButton("SAVED MAP");
     if (selectMapButton && selectMapButton->isReleased()) {
         showSavedMapDialog = true;
-        loadAvailableMaps(); // Refresh the list
+        // Only refresh if needed (e.g., after saving a new map)
+        // loadAvailableMaps(); // Uncomment this line only if you need to refresh from disk
     }
 }
 
 void MapEditorScreen1::draw() {
-    // Draw yellow background
-    ClearBackground(YELLOW);
-    
+
+    // Draw background
+    std::string key = TextFormat("mapEditorScreen%d", frame);
+    DrawTexture(textures[key], 0, 0, WHITE);
+
     // Draw title
-    const char* title = "MAP EDITOR";
-    Vector2 titleSize = MeasureTextEx(font, title, fontSize + 20.0f, 0.0f);
-    DrawTextEx(font, title, 
-               {(GetScreenWidth() - titleSize.x) / 2.0f, GetScreenHeight() / 2.0f - 150.0f}, 
-               fontSize + 20.0f, 0.0f, BLACK);
-    
+    Vector2 titlePos = {(GetScreenWidth() - textures["mapEditor"].width) / 2.0f, 0};
+    DrawTexture(textures["mapEditor"], titlePos.x, titlePos.y, WHITE);
+
     // Draw buttons
     for (auto& [key, button] : buttons) {
         button->draw();
@@ -167,8 +168,8 @@ void MapEditorScreen1::draw() {
         
         // Draw dialog title
         const char* dialogTitle = "SAVED MAPS";
-        Vector2 titleSize = MeasureTextEx(font, dialogTitle, fontSize, 0.0f);
-        DrawTextEx(font, dialogTitle, 
+        Vector2 titleSize = MeasureTextEx(font2, dialogTitle, fontSize, 0.0f);
+        DrawTextEx(font2, dialogTitle, 
                    {dialogBox.x + (dialogBox.width - titleSize.x) / 2.0f, dialogBox.y + 20.0f}, 
                    fontSize, 0.0f, BLACK);
         
@@ -177,8 +178,8 @@ void MapEditorScreen1::draw() {
         
         // Draw close instruction
         const char* closeText = "Click outside to close | Double-click to select";
-        Vector2 closeSize = MeasureTextEx(font, closeText, fontSize - 20.0f, 0.0f);
-        DrawTextEx(font, closeText, 
+        Vector2 closeSize = MeasureTextEx(font1, closeText, fontSize - 20.0f, 0.0f);
+        DrawTextEx(font1, closeText, 
                    {dialogBox.x + (dialogBox.width - closeSize.x) / 2.0f, 
                     dialogBox.y + dialogBox.height - 40.0f}, 
                    fontSize - 20.0f, 0.0f, DARKGRAY);
@@ -221,20 +222,19 @@ void MapEditorScreen1::loadAvailableMaps() {
 
 void MapEditorScreen1::drawScrollableMapList() {
     if (availableMaps.empty()) {
-        // Draw a simple message if no maps are available
+        // Draw a simple message if no maps are available using raygui
         const char* noMapsText = "No saved maps found";
-        Vector2 textSize = MeasureTextEx(font, noMapsText, fontSize - 10.0f, 0.0f);
+        
+        // Draw background panel
+        GuiPanel(scrollViewRec, NULL);
+        
+        // Draw centered text
+        Vector2 textSize = MeasureTextEx(font2, noMapsText, fontSize - 10.0f, 0.0f);
         Vector2 textPos = {
             scrollViewRec.x + (scrollViewRec.width - textSize.x) / 2.0f,
             scrollViewRec.y + (scrollViewRec.height - textSize.y) / 2.0f
         };
-        
-        // Draw background
-        DrawRectangleRec(scrollViewRec, Fade(LIGHTGRAY, 0.3f));
-        DrawRectangleLinesEx(scrollViewRec, 2.0f, GRAY);
-        
-        // Draw text
-        DrawTextEx(font, noMapsText, textPos, fontSize - 10.0f, 0.0f, DARKGRAY);
+        DrawTextEx(font2, noMapsText, textPos, fontSize - 10.0f, 0.0f, DARKGRAY);
         return;
     }
     
@@ -243,31 +243,66 @@ void MapEditorScreen1::drawScrollableMapList() {
         return;
     }
     
-    // Begin scissor mode to clip content to scroll view
-    BeginScissorMode((int)scrollViewRec.x, (int)scrollViewRec.y, 
-                     (int)scrollViewRec.width, (int)scrollViewRec.height);
-    
-    // Draw scroll view background
-    DrawRectangleRec(scrollViewRec, Fade(LIGHTGRAY, 0.3f));
-    DrawRectangleLinesEx(scrollViewRec, 2.0f, GRAY);
-    
     // Calculate content dimensions
     float itemHeight = 50.0f;
     float totalContentHeight = availableMaps.size() * itemHeight;
-    contentRec = {scrollViewRec.x, scrollViewRec.y, scrollViewRec.width, totalContentHeight};
+    Rectangle content = {0, 0, scrollViewRec.width - 14, totalContentHeight}; // Leave space for scrollbar
+    
+    // Use raygui scroll panel
+    Vector2 scroll = {-scrollOffset.x, -scrollOffset.y};
+    Rectangle view = scrollViewRec;
+    
+    // Begin scroll panel - GuiScrollPanel handles the scroll automatically
+    GuiScrollPanel(scrollViewRec, NULL, content, &scroll, &view);
+    scrollOffset.x = -scroll.x;
+    scrollOffset.y = -scroll.y;
+    
+    // Begin scissor mode for clipping
+    BeginScissorMode((int)view.x, (int)view.y, (int)view.width, (int)view.height);
+    
+    // Handle click detection within the scroll panel
+    Vector2 mousePos = GetMousePosition();
+    bool clickedInsideView = IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionPointRec(mousePos, view);
     
     // Draw map items
     for (size_t i = 0; i < availableMaps.size(); i++) {
-        float itemY = scrollViewRec.y + (i * itemHeight) + scrollOffset.y;
+        float itemY = view.y + (i * itemHeight) + scroll.y;
         
         // Only draw items that are visible
-        if (itemY + itemHeight >= scrollViewRec.y && itemY <= scrollViewRec.y + scrollViewRec.height) {
-            Rectangle itemRect = {scrollViewRec.x, itemY, 
-                                scrollViewRec.width, itemHeight};
+        if (itemY + itemHeight >= view.y && itemY <= view.y + view.height) {
+            Rectangle itemRect = {view.x, itemY, view.width, itemHeight};
             
             // Validate item rectangle
             if (itemRect.width <= 0 || itemRect.height <= 0) {
                 continue;
+            }
+            
+            // Check if this item was clicked
+            bool itemClicked = clickedInsideView && CheckCollisionPointRec(mousePos, itemRect);
+            
+            if (itemClicked) {
+                float currentTime = GetTime();
+                int clickedIndex = (int)i;
+                
+                // Check for double-click: same item clicked within time window
+                if (clickedIndex == lastClickedIndex && 
+                    currentTime - lastClickTime < doubleClickTimeWindow) {
+                    // Double-click detected - load user-designed map
+                    if (clickedIndex < userDesignedMaps.size()) {
+                        loadUserDesignedMap(clickedIndex);
+                    }
+                    showSavedMapDialog = false;
+                    selectedMapIndex = -1;
+                    lastClickedIndex = -1;
+                    lastClickTime = 0.0f;
+                    EndScissorMode();
+                    return; // Exit early to prevent further processing
+                } else {
+                    // Single click - just select the item
+                    selectedMapIndex = clickedIndex;
+                    lastClickedIndex = clickedIndex;
+                    lastClickTime = currentTime;
+                }
             }
             
             // Draw selection highlight
@@ -276,45 +311,21 @@ void MapEditorScreen1::drawScrollableMapList() {
                 DrawRectangleLinesEx(itemRect, 2.0f, BLUE);
             } else {
                 // Draw hover effect
-                Vector2 mousePos = GetMousePosition();
-                if (CheckCollisionPointRec(mousePos, itemRect) && 
-                    CheckCollisionPointRec(mousePos, scrollViewRec)) {
+                if (CheckCollisionPointRec(mousePos, itemRect)) {
                     DrawRectangleRec(itemRect, Fade(GRAY, 0.2f));
                 }
             }
+            
+            // Draw item background
+            DrawRectangleRec(itemRect, Fade(WHITE, 0.8f));
+            DrawRectangleLinesEx(itemRect, 1.0f, LIGHTGRAY);
             
             // Draw map name - ensure we don't exceed string bounds
             if (!availableMaps[i].empty()) {
                 float textSize = fontSize - 15.0f;
                 Vector2 textPos = {itemRect.x + 10.0f, itemRect.y + (itemRect.height - textSize) / 2.0f};
-                DrawTextEx(font, availableMaps[i].c_str(), textPos, textSize, 0.0f, BLACK);
+                DrawTextEx(font2, availableMaps[i].c_str(), textPos, textSize, 0.0f, BLACK);
             }
-        }
-    }
-    
-    // Draw scrollbar if content exceeds view height
-    if (totalContentHeight > scrollViewRec.height && totalContentHeight > 0) {
-        float scrollbarWidth = 15.0f;
-        float scrollbarX = scrollViewRec.x + scrollViewRec.width - scrollbarWidth;
-        float scrollbarHeight = scrollViewRec.height;
-        
-        // Draw scrollbar background
-        Rectangle scrollbarBg = {scrollbarX, scrollViewRec.y, scrollbarWidth, scrollbarHeight};
-        DrawRectangleRec(scrollbarBg, Fade(DARKGRAY, 0.3f));
-        
-        // Calculate thumb position and size
-        float thumbHeight = (scrollViewRec.height / totalContentHeight) * scrollbarHeight;
-        thumbHeight = std::fmax(thumbHeight, 20.0f); // Minimum thumb size
-        
-        float maxScroll = totalContentHeight - scrollViewRec.height;
-        if (maxScroll > 0) {
-            float scrollRatio = -scrollOffset.y / maxScroll;
-            scrollRatio = std::clamp(scrollRatio, 0.0f, 1.0f); // Clamp between 0 and 1
-            float thumbY = scrollViewRec.y + (scrollRatio * (scrollbarHeight - thumbHeight));
-            
-            Rectangle scrollThumb = {scrollbarX, thumbY, scrollbarWidth, thumbHeight};
-            DrawRectangleRec(scrollThumb, DARKGRAY);
-            DrawRectangleLinesEx(scrollThumb, 1.0f, BLACK);
         }
     }
     
@@ -323,7 +334,7 @@ void MapEditorScreen1::drawScrollableMapList() {
 
 void MapEditorScreen1::loadUserDesignedMap(int mapIndex) {
     if (mapIndex >= 0 && mapIndex < userDesignedMaps.size()) {
-        const UserMapData& mapData = userDesignedMaps[mapIndex];
+        UserMapData& mapData = userDesignedMaps[mapIndex];
         std::cout << "Loading user-designed map: " << mapData.displayName << std::endl;
         std::cout << "Entities count: " << mapData.entitiesID.size() << std::endl;
         std::cout << "Background color: [" << (int)mapData.backgroundColor.r << ", " 
@@ -331,12 +342,9 @@ void MapEditorScreen1::loadUserDesignedMap(int mapIndex) {
                   << ", " << (int)mapData.backgroundColor.a << "]" << std::endl;
         std::cout << "Background ID: " << mapData.backgroundID << std::endl;
         
-        // Create a copy of the map data to pass to MapEditorScreen2
-        UserMapData* mapDataCopy = new UserMapData(mapData);
-        
         // Pass the data to MapEditorScreen2 and transition to it
         if (mapEditorScreen2) {
-            mapEditorScreen2->setCurrentMapData(mapDataCopy);
+            mapEditorScreen2->setCurrentMapData(&mapData);
             GameWorld::state = GAME_STATE_MAP_EDITOR_SCREEN2;
         }
         
@@ -352,12 +360,13 @@ void MapEditorScreen1::createNewMap() {
     
     // Create a new default UserMapData
     UserMapData newMapData;
-    newMapData.displayName = "New Map " + std::to_string(mapIndex);
-    newMapData.filename = "Des" + std::to_string(mapIndex) + ".json";
+    newMapData.displayName = "New Map";
+    newMapData.filename = "des" + std::to_string(mapIndex) + ".json";
+    userDesignedMaps.push_back(newMapData);
 
     // Pass the new map data to MapEditorScreen2
     if (mapEditorScreen2) {
-        mapEditorScreen2->setCurrentMapData(&newMapData);
+        mapEditorScreen2->setCurrentMapData(&userDesignedMaps.back());
     }
     
     // Switch to MapEditorScreen2
@@ -391,24 +400,38 @@ void MapEditorScreen1::loadUserDesignedMapsFromFilesystem() {
 }
 
 void MapEditorScreen1::saveMapToFile(const UserMapData& mapData, const std::string& filename) {
-    std::string mapsDirectory = getUserDesignedMapsDirectory();
+    std::string mapsDirectory = "../../../../resource/userDesignedMaps";
     std::string fullPath = mapsDirectory + "/" + filename;
     
     try {
         // Create directory if it doesn't exist
         std::filesystem::create_directories(mapsDirectory);
         
-        // Create JSON structure
-        json mapJson;
-        mapJson["EntitiesID"] = mapData.entitiesID;
-        mapJson["backgroundColor"] = {mapData.backgroundColor.r, mapData.backgroundColor.g, 
-                                     mapData.backgroundColor.b, mapData.backgroundColor.a};
-        mapJson["backgroundID"] = mapData.backgroundID;
+        // Create compact JSON structure manually
+        std::stringstream jsonStream;
+        jsonStream << "{\n";
+        
+        // Serialize EntitiesID with chunks of 200 elements per line for compactness
+        jsonStream << "  \"EntitiesID\": ";
+        jsonStream << serialize_vector_with_chunks(mapData.entitiesID, 200);
+        jsonStream << ",\n";
+        
+        // Serialize backgroundColor
+        jsonStream << "  \"backgroundColor\": [" 
+                   << (int)mapData.backgroundColor.r << ", " 
+                   << (int)mapData.backgroundColor.g << ", " 
+                   << (int)mapData.backgroundColor.b << ", " 
+                   << (int)mapData.backgroundColor.a << "],\n";
+        
+        // Serialize backgroundID
+        jsonStream << "  \"backgroundID\": " << mapData.backgroundID << "\n";
+        
+        jsonStream << "}";
         
         // Write to file
         std::ofstream file(fullPath);
         if (file.is_open()) {
-            file << mapJson.dump(2); // Pretty print with 2-space indentation
+            file << jsonStream.str();
             file.close();
             std::cout << "Map saved to: " << fullPath << std::endl;
         } else {
@@ -445,6 +468,7 @@ UserMapData MapEditorScreen1::loadMapFromFile(const std::string& filepath) {
                 mapData.entitiesID.resize(12000, 0);
             }
         } else {
+            std::cerr << "EntitiesID not found or invalid in map file: " << filepath << std::endl;
             mapData.entitiesID = std::vector<int>(12000, 0);
         }
         
@@ -484,5 +508,13 @@ std::string MapEditorScreen1::getUserDesignedMapsDirectory() const {
 
 void MapEditorScreen1::setMapEditorScreen2(MapEditorScreen2* screen) {
     mapEditorScreen2 = screen;
+}
+
+void MapEditorScreen1::updateFrameAnimation() {
+    frameTimeAccum += GetFrameTime();
+    if (frameTimeAccum >= frameTime) {
+        frameTimeAccum = 0.0f;
+        frame = (frame + 1) % maxFrame; // Loop through frames
+    }
 }
 

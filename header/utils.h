@@ -5,6 +5,8 @@
 #include <map>
 #include <vector>
 
+std::string serialize_vector_with_chunks(const std::vector<int>& vec, size_t chunk_size);
+
 double toRadians(double degrees);
 double toDegrees(double radians);
 

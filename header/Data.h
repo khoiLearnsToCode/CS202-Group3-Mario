@@ -5,7 +5,7 @@
 #include "Block.h"
 #include "Baddie.h"
 #include "Item.h"
-#include "MarioType.h"
+#include "PlayerType.h"
 #include "raylib.h"
 
 struct Data{
@@ -26,7 +26,7 @@ struct bigData : public Data {
     std::vector<Item*> items;
     std::vector<Item*> staticItems;
 
-    bigData(int mID, int sc, int lv, int c, int yC, MarioType mType)
+    bigData(int mID, int sc, int lv, int c, int yC, PlayerType mType)
         : Data(mID, sc, lv, c, yC, mType) {}
 
 	bigData(int mID, int sc, int lv, int c, int yC, int cT, std::vector<Block*> blks,
