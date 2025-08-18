@@ -18,39 +18,55 @@ LeaderBoardScreen::LeaderBoardScreen() : Screen(),
                (GetScreenHeight() - backgroundTexture.height) / 2.0f, 
                (float)backgroundTexture.width, 
                (float)backgroundTexture.height };   
+    returnButton = new ButtonTextTexture("returnButton", { GetScreenWidth() - 585.0f, 30.0f }, 2.0f);
 }
 
 LeaderBoardScreen::~LeaderBoardScreen() {
     UnloadTexture(backgroundTexture);
     UnloadTexture(leaderboardLogo);
+	delete returnButton;
 }
 
 void LeaderBoardScreen::draw() {
     DrawTexture(backgroundTexture, (GetScreenWidth() - backgroundTexture.width) / 2.0f,
         (GetScreenHeight() - backgroundTexture.height) / 2.0f, WHITE);
-	const char* title = "Leaderboard";
-    Vector2 titleSize = MeasureTextEx(font, title, fontSize * 1.5f, 2.0f);
-    DrawTextEx(font, title, { (GetScreenWidth() - titleSize.x) / 2.0f, 150.0f },
-        fontSize * 1.5f, 2.0f, BLACK);
-    float y = 200.0f;
-    if (leaderboardDataAsStrings.empty()) {
-		const char* noData = "No data available";
-        Vector2 noDataSize = MeasureTextEx(font, noData, fontSize, 2.0f);
-        DrawTextEx(font, noData, { (GetScreenWidth() - noDataSize.x) / 2.0f, y },
-            fontSize, 2.0f, WHITE);
+    DrawTexture(leaderboardLogo, (GetScreenWidth() - leaderboardLogo.width) / 2.0f, 120, WHITE);
+    int numCols = 7;
+    float tableWidth = GetScreenWidth() * 0.85f;
+    float tableStartX = (GetScreenWidth() - tableWidth) / 2.0f;
+    float tableStartY = 220.0f;
+    float colWidth = tableWidth / numCols;
+    const char* headers[] = { "RANK", "DATE", "TIME", "LIVE", "YOSHICOIN", "COIN", "POINT" };
+
+    // Vẽ header
+    for (int i = 0; i < numCols; ++i) {
+        float x = tableStartX + i * colWidth;
+        DrawTextEx(font, headers[i], { x, tableStartY }, fontSize, 2.0f, BLACK);
     }
-    else {
-        for (size_t i = 0; i < leaderboardDataAsStrings.size(); i += 6) {
-            std::string entry = "Rank " + std::to_string(i / 6 + 1) + ": Point: " + leaderboardDataAsStrings[i] +
-                ", Lives: " + leaderboardDataAsStrings[i + 1] + ", Coin: " + leaderboardDataAsStrings[i + 2] +
-                ", YoshiCoin: " + leaderboardDataAsStrings[i + 3] + ", Time: " +
-                leaderboardDataAsStrings[i + 4] + ", Date: " + leaderboardDataAsStrings[i + 5];
-            Vector2 entrySize = MeasureTextEx(font, entry.c_str(), fontSize, 2.0f);
-            DrawTextEx(font, entry.c_str(), { (GetScreenWidth() - entrySize.x) / 2.0f, y },
-                fontSize, 2.0f, WHITE);
-            y += fontSize + 10.0f;
+
+    int maxRow = 5;
+    int rowCount = std::min(maxRow, (int)leaderboardDataAsStrings.size() / 6);
+    float tableHeight = GetScreenHeight() * 0.45f;
+    float rowSpacing = tableHeight / maxRow;
+    for (int row = 0; row < rowCount; ++row) {
+        float y = tableStartY + 40.0f + row * rowSpacing;
+        // Xử lý ngày thành yyyy/mm/dd
+        std::string rawDate = leaderboardDataAsStrings[row * 6 + 5];
+        std::string shortDate = rawDate;
+        size_t pos = rawDate.find(' ');
+        if (pos != std::string::npos && rawDate.length() >= pos + 10) {
+            shortDate = rawDate.substr(pos + 1, 10); // lấy yyyy-mm-dd
+            //std::replace(shortDate.begin(), shortDate.end(), '-', '/'); // đổi - thành /
         }
+        DrawTextEx(font, std::to_string(row + 1).c_str(), { tableStartX + 0 * colWidth, y }, fontSize, 2.0f, BLACK); // Rank
+        DrawTextEx(font, shortDate.c_str(), { tableStartX + 1 * colWidth, y }, fontSize, 2.0f, BLACK); // Date
+        DrawTextEx(font, leaderboardDataAsStrings[row * 6 + 4].c_str(), { tableStartX + 2 * colWidth, y }, fontSize, 2.0f, BLACK); // Time
+        DrawTextEx(font, leaderboardDataAsStrings[row * 6 + 1].c_str(), { tableStartX + 3 * colWidth, y }, fontSize, 2.0f, BLACK); // Live
+        DrawTextEx(font, leaderboardDataAsStrings[row * 6 + 3].c_str(), { tableStartX + 4 * colWidth, y }, fontSize, 2.0f, BLACK); // YoshiCoin
+        DrawTextEx(font, leaderboardDataAsStrings[row * 6 + 2].c_str(), { tableStartX + 5 * colWidth, y }, fontSize, 2.0f, BLACK); // Coin
+        DrawTextEx(font, leaderboardDataAsStrings[row * 6 + 0].c_str(), { tableStartX + 6 * colWidth, y }, fontSize, 2.0f, BLACK); // Point
     }
+    returnButton->draw();
 }
 
 bool LeaderBoardScreen::leaderBoardShouldClose() const {
@@ -59,9 +75,9 @@ bool LeaderBoardScreen::leaderBoardShouldClose() const {
 }
 
 void LeaderBoardScreen::setLeaderboardDataAsStrings(const std::vector<std::string>& data) {
-    if (isLatestDataLoaded){
-        return;
-    }
+    //if (isLatestDataLoaded){
+    //    return;
+    //}
     leaderboardDataAsStrings.clear();
     for (const auto& entry : data) {
         leaderboardDataAsStrings.push_back(entry);
@@ -73,3 +89,6 @@ void LeaderBoardScreen::setLatestDataLoaded(bool isLoaded) {
     isLatestDataLoaded = isLoaded;
 }
 
+Button* LeaderBoardScreen::getReturnButton() const {
+    return returnButton;
+}

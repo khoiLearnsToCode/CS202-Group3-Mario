@@ -1,9 +1,10 @@
 #include "CareTaker.h"
 #include <string>
+#include <sstream>
 using json = nlohmann::json;
 
 CareTaker::CareTaker(GameWorld* gw) : gw(gw) {
-    fin.open("../resource/leaderboardData.json");
+    fin.open("../../../../resource/leaderboardData.json");
     if (!fin.is_open()) {
         std::cerr << "WARNING: Error opening leaderBoardData.json file." << std::endl;
         return;
@@ -21,9 +22,34 @@ CareTaker::CareTaker(GameWorld* gw) : gw(gw) {
                 int coins = item["coins"];
                 int yoshiCoins = item["yoshiCoins"];
                 int clearanceTime = item["clearanceTime"];
-                std::string date = item["date"];
+                std::string rawDate = item["date"];
+                std::string formattedDate = rawDate;
+                std::istringstream iss(rawDate);
+                std::string weekday, month, day, time, year;
+                std::string formattedTime = time;
+                if (iss >> weekday >> month >> day >> time >> year) {
+                    std::string monthNum = "01";
+                    if (month == "Jan") monthNum = "01";
+                    else if (month == "Feb") monthNum = "02";
+                    else if (month == "Mar") monthNum = "03";
+                    else if (month == "Apr") monthNum = "04";
+                    else if (month == "May") monthNum = "05";
+                    else if (month == "Jun") monthNum = "06";
+                    else if (month == "Jul") monthNum = "07";
+                    else if (month == "Aug") monthNum = "08";
+                    else if (month == "Sep") monthNum = "09";
+                    else if (month == "Oct") monthNum = "10";
+                    else if (month == "Nov") monthNum = "11";
+                    else if (month == "Dec") monthNum = "12";
+                    formattedDate = year + "-" + monthNum + "-" + day;
+                }
+                else {
+                    formattedDate = rawDate;
+                    formattedTime = "";
+                }
+
                 Data data(0, score, lives, coins, yoshiCoins, clearanceTime);
-                Memento* memento = new ConcreteMemento(data, date);
+                Memento* memento = new ConcreteMemento(data, formattedDate , formattedTime);
                 leaderboardMementos.push_back(memento);
             }
             std::sort(leaderboardMementos.begin(), leaderboardMementos.end(),
@@ -68,7 +94,7 @@ CareTaker::CareTaker(GameWorld* gw) : gw(gw) {
     // }  
     // fin.close(); 
 
-    leaderboardMementos.clear();
+    //leaderboardMementos.clear();
 }
 
 CareTaker::~CareTaker() {
@@ -80,18 +106,21 @@ CareTaker::~CareTaker() {
         try {
             json j;
             j["leaderboard"] = json::array();
-            for (const auto& memento : leaderboardMementos) {
-                Data data = memento->getData();
-                json entry;
-                entry["score"] = data.score;
-                entry["lives"] = data.lives;
-                entry["coins"] = data.coins;
-                entry["yoshiCoins"] = data.yoshiCoins;
-                entry["clearanceTime"] = data.clearanceTime;
-                entry["date"] = memento->getDate();
-                j["leaderboard"].push_back(entry);
+            if (!leaderboardMementos.empty()){
+                for (const auto& memento : leaderboardMementos) {
+                    Data data = memento->getData();
+                    json entry;
+                    entry["score"] = data.score;
+                    entry["lives"] = data.lives;
+                    entry["coins"] = data.coins;
+                    entry["yoshiCoins"] = data.yoshiCoins;
+                    entry["clearanceTime"] = data.clearanceTime;
+                    entry["date"] = memento->getDate();
+                    entry["time"] = memento->getTime();
+                    j["leaderboard"].push_back(entry);
+                }
+                fout << j.dump(4);
             }
-            fout << j.dump(4);
             fout.close();
         }
         catch (const std::exception& e) {
@@ -198,7 +227,13 @@ void CareTaker::releaseLeaderBoardData() const {
         leaderboardData.push_back(std::to_string(data.coins));
         leaderboardData.push_back(std::to_string(data.yoshiCoins));
         leaderboardData.push_back(std::to_string(data.clearanceTime));
-        leaderboardData.push_back(memento->getDate());
+        std::string rawDate = memento->getDate();
+        std::string shortDate = rawDate;
+        size_t pos = rawDate.find(' ');
+        if (pos != std::string::npos && rawDate.length() >= pos + 10) {
+            shortDate = rawDate.substr(pos + 1, 10);
+        }
+        leaderboardData.push_back(shortDate);
     }  
     gw->leaderBoardScreen->setLeaderboardDataAsStrings(leaderboardData);  
 }

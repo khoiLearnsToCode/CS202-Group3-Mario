@@ -2,10 +2,20 @@
     "leaderboard": [
         {
             "clearanceTime": 0,
-            "coins": 33,
-            "date": "Thu Aug 14 22:39:55 2025\n",
+            "coins": 44,
+            "date": "2025-08-19",
             "lives": -1,
-            "score": 55200,
+            "score": 58550,
+            "time": "",
+            "yoshiCoins": 0
+        },
+        {
+            "clearanceTime": 0,
+            "coins": 27,
+            "date": "2025-08-18",
+            "lives": 5,
+            "score": 54950,
+            "time": "",
             "yoshiCoins": 0
         }
     ]

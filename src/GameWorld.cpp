@@ -1082,6 +1082,9 @@ void GameWorld::inputAndUpdate() {
         if (IsKeyPressed(KEY_ESCAPE)) {
             state = GAME_STATE_MENU_SCREEN;
         }
+        else if (leaderBoardScreen && leaderBoardScreen->getReturnButton()->isReleased()) {
+        state = GAME_STATE_MENU_SCREEN;
+        }
     }
 }
 
