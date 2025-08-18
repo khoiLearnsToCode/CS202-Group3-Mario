@@ -4,8 +4,8 @@ LeaderBoardScreen::LeaderBoardScreen() : Screen(),
                                          font(ResourceManager::getInstance().getFont("SuperMario256")),
                                          fontSize(20.0f), isLatestDataLoaded(false) {
 
-    Image img = LoadImageFromTexture(textures["settingBackground"]);
-    ImageResize(&img, img.width * 0.5f, img.height * 0.5f);
+    Image img = LoadImageFromTexture(textures["leaderboardScreen"]);
+    //ImageResize(&img, img.width, img.height);
     backgroundTexture = LoadTextureFromImage(img);
     UnloadImage(img);
 
@@ -18,7 +18,7 @@ LeaderBoardScreen::LeaderBoardScreen() : Screen(),
                (GetScreenHeight() - backgroundTexture.height) / 2.0f, 
                (float)backgroundTexture.width, 
                (float)backgroundTexture.height };   
-    returnButton = new ButtonTextTexture("returnButton", { GetScreenWidth() - 585.0f, 30.0f }, 2.0f);
+    returnButton = new ButtonTextTexture("returnButton", { 125.0f, 800.0f }, 2.0f);
 }
 
 LeaderBoardScreen::~LeaderBoardScreen() {

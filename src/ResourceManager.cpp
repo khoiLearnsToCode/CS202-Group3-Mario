@@ -253,6 +253,7 @@ void ResourceManager::loadTextures() {
         textures["background10"] = LoadTexture("../resource/graphic/backgrounds/background10.png");
         textures["settingBackground"] = LoadTexture("../resource/graphic/backgrounds/settingBackground.png");
         textures["helpBackground"] = LoadTexture("../resource/graphic/backgrounds/helpBackground.png");
+		textures["leaderboardScreen"] = LoadTexture("../resource/graphic/backgrounds/leaderboardScreen.png");
 
         // items
         textures["coin0"] = LoadTexture("../resource/graphic/sprites/items/Coin_0.png");
