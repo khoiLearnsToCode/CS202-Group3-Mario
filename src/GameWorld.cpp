@@ -1012,6 +1012,8 @@ void GameWorld::inputAndUpdate() {
             }
 
             if (menuScreen->getButton("NEW GAME")->isReleased()) {
+                map.first();
+                map.setLoadFromUserDesignedMap(false);
                 state = GAME_STATE_SELECT_CHARACTER_SCREEN;
             }
 
@@ -1093,6 +1095,16 @@ void GameWorld::inputAndUpdate() {
         else if (state == GAME_STATE_MAP_EDITOR_SCREEN2) {
             if (mapEditorScreen2 != nullptr) {
                 mapEditorScreen2->update();
+                if (mapEditorScreen2->getPlayButton()->isReleased()) {
+                    // Start the game with the current map
+                    state = GAME_STATE_SELECT_CHARACTER_SCREEN;
+                    map.setCurrentData(mapEditorScreen2->getCurrentMapData());
+                    map.setLoadFromUserDesignedMap(true);
+                }
+                else if (mapEditorScreen2->getReturnButton()->isReleased()) {
+                    // Return to the previous screen
+                    state = GAME_STATE_MAP_EDITOR_SCREEN1;
+                }
             }
         }
     }
@@ -1272,19 +1284,37 @@ void GameWorld::addToTotalPlayedTime(float timeToAdd) {
     totalPlayedTime += static_cast<int>(timeToAdd);
 }
 
+void GameWorld::stopAllMusic() {
+    std::map<std::string, Music>& musics = ResourceManager::getInstance().getMusics();
+    
+    // Stop all possible music streams
+    for (auto& musicPair : musics) {
+        if (IsMusicStreamPlaying(musicPair.second)) {
+            StopMusicStream(musicPair.second);
+        }
+    }
+}
+
 void GameWorld::resetMap() {
+    // Stop all music streams before resetting
+    stopAllMusic();
     player.reset(true);
     map.reset();
     map.loadFromJsonFile(); 
+    pauseMusic = false;  // Ensure music isn't paused after reset
     state = GAME_STATE_PLAYING;
 }
 
 void GameWorld::resetGame() {
+    // Stop all music streams before resetting
+    stopAllMusic();
     player.resetAll();
     map.first();
     map.reset();
     totalPlayedTime = 0; // Reset total played time when starting a new game
+    pauseMusic = false;  // Ensure music isn't paused after reset
     hasCheckpoint = false;
+
     state = GAME_STATE_TITLE_SCREEN;
 }
 

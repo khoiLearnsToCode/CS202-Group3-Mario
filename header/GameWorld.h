@@ -105,6 +105,7 @@ public:
 
     void addToTotalPlayedTime(float timeToAdd);
 
+    void stopAllMusic();
     void resetMap();
     void resetGame();
     void nextMap();

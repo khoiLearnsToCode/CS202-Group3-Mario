@@ -339,12 +339,12 @@ void QuestionFireFlowerBlock::draw() {
 void QuestionFireFlowerBlock::doHit(Player& player, Map* map) {
 	if (!hit) {
 		hit = true;
-		Vector2 itemPos = { pos.x, pos.y - dim.y };
+		Vector2 itemPos = { pos.x, pos.y };  // Start at block position, not above it
 		Vector2 itemDim = { 32, 32 };
 		Vector2 itemVel = { 0, -150 };
-		this -> item = FactoryItem::createItem("FireFlower", itemPos, itemDim, itemVel, ORANGE, true, true, false);
+		this -> item = FactoryItem::createItem("FireFlower", itemPos, itemDim, itemVel, ORANGE, false, true, true);  // Enable doCollisionOnGround and blinking
 		item->setFacingDirection(player.getFacingDirection());
-		itemMinY = pos.y - 32;
+		itemMinY = pos.y - 32;  // Stop 32 pixels above the block (same as mushroom)
 		this->map = map;
 	}
 }

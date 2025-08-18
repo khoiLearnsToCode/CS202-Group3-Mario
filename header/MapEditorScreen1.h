@@ -8,6 +8,7 @@
 #include "Data.h"
 #include "GameState.h"
 #include "MapEditorScreen2.h"
+#include "Map.h"
 #include <unordered_map>
 #include <vector>
 #include <string>
@@ -40,6 +41,7 @@ private:
     MapEditorScreen2* mapEditorScreen2;
     void setMapEditorScreen2(MapEditorScreen2* screen); 
     friend class MapEditorScreen2;
+    friend class Map;
     
     // Double-click detection
     int lastClickedIndex;
