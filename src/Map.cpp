@@ -3,43 +3,26 @@
 #include "BobOmb.h"
 #include "BulletBill.h"
 #include "BuzzyBeetle.h"
-//#include "CloudBlock.h"
-//#include "Coin.h"
-//#include "CourseClearToken.h"
-//#include "ExclamationBlock.h"
-//#include "EyesClosedBlock.h"
-//#include "EyesOpenedBlock.h"
+#include "Block.h"
+#include "Item.h"
 #include "FlyingGoomba.h"
 #include "GameWorld.h"
-//#include "GlassBlock.h"
 #include "Goomba.h"
 #include "GreenKoopaTroopa.h"
-//#include "InvisibleBlock.h"
 #include "Item.h"
 #include "JumpingPiranhaPlant.h"
 #include "Map.h"
-//#include "MessageBlock.h"
 #include "MontyMole.h"
 #include "MummyBeetle.h"
 #include "Muncher.h"
 #include "PiranhaPlant.h"
-//#include "QuestionBlock.h"
-//#include "QuestionFireFlowerBlock.h"
-//#include "QuestionMushroomBlock.h"
-//#include "QuestionOneUpMushroomBlock.h"
-//#include "QuestionStarBlock.h"
-//#include "QuestionThreeUpMoonBlock.h"
 #include "raylib.h"
 #include "RedKoopaTroopa.h"
 #include "ResourceManager.h"
 #include "Rex.h"
 #include "Sprite.h"
-//#include "StoneBlock.h"
 #include "Swooper.h"
-//#include "utils.h"
-//#include "WoodBlock.h"
 #include "YellowKoopaTroopa.h"
-//#include "YoshiCoin.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -76,7 +59,7 @@ Map::Map(Player& player, int id, bool loadTestMap, GameWorld* gw) :
     //tileSetId(1),
     //maxTileSetId(4),
 
-    musicId(0),
+    musicId(1),
     maxMusicId(9),
 
     //parseBlocks(parseBlocks),
@@ -84,6 +67,8 @@ Map::Map(Player& player, int id, bool loadTestMap, GameWorld* gw) :
     //parseBaddies(parseBaddies),
 
     loadTestMap(loadTestMap),
+    loadFromUserDesignedMap(false),
+    currentData(nullptr),
     parsed(false),
 
     camera(nullptr),
@@ -123,6 +108,11 @@ void Map::loadFromJsonFile(bool shouldLoadTestMap) {
     //reset();
 
     if (parsed) {
+        return;
+    }
+
+    if (loadFromUserDesignedMap) {
+        loadUserData();
         return;
     }
 
@@ -448,7 +438,166 @@ void Map::loadFromJsonFile(bool shouldLoadTestMap) {
     fin.close();
 }
 
+void Map::loadUserData() {
 
+    if (parsed) {
+        return;
+    }
+
+    if (!currentData) {
+        std::cerr << "No user data to load." << std::endl;
+        return;
+    }
+
+    backgroundColor = currentData->backgroundColor;
+    backgroundId = currentData->backgroundID;
+    id = 100;
+    
+    // User-designed maps are 200x60 tiles (12000 elements total)
+    int width = 200;
+    int height = 60;
+    maxWidth = width * TILE_WIDTH;
+    maxHeight = height * TILE_WIDTH;
+    
+    // Set default player position
+    player.setPos(10, 10);
+
+
+    // Set music ID to default (could be extended to be configurable)
+    musicId = 1;
+
+    // Load entities from the single layer - all will be touchable tiles
+    const std::vector<int>& entitiesID = currentData->entitiesID;
+    
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            int entityID = entitiesID[y * width + x];
+            if (entityID == 0) continue;
+
+            Vector2 pos = {1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH};
+            Vector2 dim = {TILE_WIDTH * 1.0f, TILE_WIDTH * 1.0f};
+
+            // Handle different entity types based on ID ranges
+            
+            // Tiles (make all as touchable tiles since it's single layer)
+            if (entityID >= 1 && entityID <= 87) {
+                touchableTiles.push_back(new Tile(pos, dim, BLACK, "tile_" + std::to_string(entityID), true));
+            }
+            
+            // Blocks (88-102)
+            else if (entityID >= 88 && entityID <= 102) {
+                Block* newBlock = nullptr;
+
+                if (entityID == 88) {
+                    newBlock = new CloudBlock(pos, dim, WHITE);
+                } else if (entityID == 89) {
+                    newBlock = new ExclamationBlock(pos, dim, WHITE);
+                } else if (entityID == 90) {
+                    newBlock = new EyesClosedBlock(pos, dim, WHITE);
+                } else if (entityID >= 91 && entityID <= 94) {
+                    newBlock = new EyesOpenedBlock(pos, dim, WHITE);
+                } else if (entityID == 95) {
+                    newBlock = new GrassBlock(pos, dim, WHITE);
+                } else if (entityID >= 97 && entityID <= 100) {
+                    // Question blocks - default to regular question block
+                    newBlock = new QuestionBlock(pos, dim, WHITE, 0.1f, 4);
+                } else if (entityID == 101) {
+                    newBlock = new StoneBlock(pos, dim, WHITE);
+                } else if (entityID == 102) {
+                    newBlock = new WoodBlock(pos, dim, WHITE);
+                }
+
+                if (newBlock) {
+                    blocks.push_back(newBlock);
+                }
+            }
+            
+            // Items that should become question blocks (103-104, 113-116)
+            else if (entityID == 103 || entityID == 104 || (entityID >= 113 && entityID <= 116)) {
+                Block* newBlock = nullptr;
+
+                if (entityID == 103) {
+                    newBlock = new QuestionOneUpMushroomBlock(pos, dim, WHITE, 0.1f, 4);
+                } else if (entityID == 104) {
+                    newBlock = new QuestionThreeUpMoonBlock(pos, dim, WHITE, 0.1f, 4);
+                } else if (entityID == 113 || entityID == 114) {
+                    newBlock = new QuestionFireFlowerBlock(pos, dim, WHITE, 0.1f, 4);
+                } else if (entityID == 115) {
+                    newBlock = new QuestionMushroomBlock(pos, dim, WHITE, 0.1f, 4);
+                } else if (entityID == 116) {
+                    newBlock = new QuestionStarBlock(pos, dim, WHITE, 0.1f, 4);
+                }
+
+                if (newBlock) {
+                    blocks.push_back(newBlock);
+                }
+            }
+            
+            // Static Items (108-112, 117-120) - only coins, course clear token, and yoshi coins remain as static
+            else if ((entityID >= 108 && entityID <= 112) || (entityID >= 117 && entityID <= 120)) {
+                Item* newStaticItem = nullptr;
+
+                if (entityID >= 108 && entityID <= 111) {
+                    newStaticItem = new Coin(pos, dim, WHITE);
+                } else if (entityID == 112) {
+                    newStaticItem = new CourseClearToken(pos, dim, WHITE);
+                } else if (entityID >= 117 && entityID <= 120) {
+                    newStaticItem = new YoshiCoin(pos, dim, WHITE);
+                }
+
+                if (newStaticItem) {
+                    staticItems.push_back(newStaticItem);
+                }
+            }
+            
+            // Baddies (121-158)
+            else if (entityID >= 121 && entityID <= 158) {
+                Baddie* newBaddie = nullptr;
+
+                if (entityID == 121) {
+                    newBaddie = new BlueKoopaTroopa(pos, {32,54}, {-100,0}, BLUE);
+                } else if (entityID == 123) {
+                    newBaddie = new BobOmb(pos, {24,30}, {-100,0}, BLACK);
+                } else if (entityID == 125) { // bullet bill
+                    newBaddie = new BulletBill({pos.x, pos.y + 2 * TILE_WIDTH}, {32,28}, {-200,0}, BLACK);
+                } else if (entityID == 126) { // buzzy beetle
+                    newBaddie = new BuzzyBeetle(pos, {32,32}, {-80,0}, BLUE);
+                } else if (entityID == 128) { // flying goomba
+                    newBaddie = new FlyingGoomba(pos, {66,50}, {-100,0}, MAROON);
+                } else if (entityID == 132) { // goomba
+                    newBaddie = new Goomba(pos, {32,30}, {-100,0}, MAROON);
+                } else if (entityID == 134) { // green koopa troopa
+                    newBaddie = new GreenKoopaTroopa(pos, {32,54}, {-100,0}, GREEN);
+                } else if (entityID == 136) { // jumping piranha plant
+                    newBaddie = new JumpingPiranhaPlant({pos.x + 16, pos.y + 34}, {32,42}, RED);
+                } else if (entityID == 140) { // monty mole
+                    newBaddie = new MontyMole(pos, {32,30}, {-200,0}, BROWN);
+                } else if (entityID == 142) { // mummy beetle
+                    newBaddie = new MummyBeetle(pos, {32,32}, {-80,0}, GRAY);
+                } else if (entityID == 144) { // muncher
+                    newBaddie = new Muncher(pos, {32,30}, BROWN);
+                } else if (entityID == 146) { // piranha plant
+                    newBaddie = new PiranhaPlant(pos, {32,66}, RED);
+                } else if (entityID == 148) { // red koopa troopa
+                    newBaddie = new RedKoopaTroopa(pos, {32,54}, {-100,0}, RED);
+                } else if (entityID == 152) { // rex
+                    newBaddie = new Rex(pos, {40,64}, {-100,0}, VIOLET);
+                } else if (entityID == 154) { // swooper
+                    newBaddie = new Swooper(pos, {32,34}, {-100,0}, BLACK);
+                } else if (entityID == 157) { // yellow koopa troopa
+                    newBaddie = new YellowKoopaTroopa(pos, {32,54}, {-100,0}, YELLOW);
+                }
+
+                if (newBaddie) {
+                    baddies.push_back(newBaddie);
+                    frontBaddies.push_back(newBaddie); // Add to front baddies for drawing
+                }
+            }
+        }
+    }
+
+    parsed = true;
+}
 
 void Map::draw() {
 
@@ -556,27 +705,31 @@ void Map::playMusic() const {
 
    if (musicId != 0) {
 
-       std::map<std::string, Music> musics = ResourceManager::getInstance().getMusics();
+       std::map<std::string, Music>& musics = ResourceManager::getInstance().getMusics();
        const std::string key(TextFormat("music%d", musicId));
 
        if (player.isInvincible()) {
+           // Stop regular music if playing
            if (IsMusicStreamPlaying(musics[key])) {
                StopMusicStream(musics[key]);
            }
+           // Play invincible music if not already playing
            if (!IsMusicStreamPlaying(musics["invincible"])) {
                PlayMusicStream(musics["invincible"]);
                SeekMusicStream(musics["invincible"], 1);
-           }
-           else {
+           } else {
                UpdateMusicStream(musics["invincible"]);
            }
        }
        else {
-           if (!IsMusicStreamPlaying(musics[key])) {
+           // Stop invincible music if playing
+           if (IsMusicStreamPlaying(musics["invincible"])) {
                StopMusicStream(musics["invincible"]);
-               PlayMusicStream(musics[key]);
            }
-           else {
+           // Play regular music if not already playing
+           if (!IsMusicStreamPlaying(musics[key])) {
+               PlayMusicStream(musics[key]);
+           } else {
                UpdateMusicStream(musics[key]);
            }
        }
@@ -607,6 +760,15 @@ void Map::setCamera(Camera2D* camera) {
 
 void Map::setGameWorld(GameWorld* gw) {
     this->gw = gw;
+}
+
+void Map::setCurrentData(UserMapData* data) {
+    this->currentData = data;
+}
+
+void Map::setLoadFromUserDesignedMap(bool loadFromUser) {
+    this->loadFromUserDesignedMap = loadFromUser;
+    reset();
 }
 
 int Map::getId() const {
@@ -656,7 +818,11 @@ void Map::reset() {
     frontBaddies.clear();
     backBaddies.clear();
 
-    StopMusicStream(ResourceManager::getInstance().getMusics()[std::string(TextFormat("music%d", musicId))]);
+    // Stop all music streams properly before resetting
+    std::map<std::string, Music>& musics = ResourceManager::getInstance().getMusics();
+    StopMusicStream(musics[std::string(TextFormat("music%d", musicId))]);
+    StopMusicStream(musics["invincible"]);
+    
     parsed = false;
     loadFromJsonFile();
 

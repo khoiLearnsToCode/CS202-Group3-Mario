@@ -2,6 +2,7 @@
 
 class Block;
 class GameWorld;
+struct UserMapData;
 
 #include "raylib.h"
 #include "json.hpp"
@@ -11,6 +12,7 @@ class GameWorld;
 #include "Tile.h"
 #include "Block.h"
 #include "Item.h"
+#include "Data.h"
 #include <vector>
 
 class Map : public virtual Drawable {
@@ -48,19 +50,18 @@ class Map : public virtual Drawable {
 
     // Near sight vision effect for map3
     Vector2 lastValidPlayerPos;
-    
-    //bool parseBlocks;
-    //bool parseItems;
-    //bool parseBaddies;
 
     bool loadTestMap;
+    bool loadFromUserDesignedMap;
     bool parsed;
+    UserMapData* currentData;
 
     //bool drawMessage;
     //std::string message;
     Camera2D* camera;
     GameWorld* gw;
 
+    void loadUserData();
 public:
 
     static constexpr int TILE_WIDTH = 32;
@@ -76,6 +77,8 @@ public:
     void setDrawBlackScreen(bool drawBlackScreen);
     void setCamera(Camera2D* camera);
     void setGameWorld(GameWorld* gw);
+    void setCurrentData(UserMapData* data);
+    void setLoadFromUserDesignedMap(bool loadFromUser);
 
     std::vector<Tile*>& getTiles();
     std::vector<Block*>& getBlocks();
@@ -97,7 +100,6 @@ public:
 // Returns true if there is a next map to load and jump to next map
     bool hasNext();
     void first();
-    //void pauseGameToShowMessage() const;
 
     void eraseBaddieFromDrawingVectors(Baddie* baddie);
 
