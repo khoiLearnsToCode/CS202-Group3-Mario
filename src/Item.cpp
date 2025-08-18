@@ -345,9 +345,8 @@ void FireFlower::update() {
             currentFrame = (currentFrame + 1) % maxFrames;
         }
         pos.y += vel.y * delta;
-        if (doCollisionOnGround && pos.y + dim.y > GetScreenHeight()) {
-            pos.y = GetScreenHeight() - dim.y;
-            vel.y = 0;
+        if (doCollisionOnGround) {
+            vel.y += GameWorld::gravity * delta;  // Apply gravity when doCollisionOnGround is true
         }
         if (blinking) {
             blinkingAcum += delta;
@@ -365,6 +364,7 @@ void FireFlower::update() {
         }
         pointsFrameAcum = std::min(pointsFrameAcum + delta, pointsFrameTime);
     }
+    updateCollisionProbes();  // Add collision probe updates like other items
 }
 
 void FireFlower::draw() {
@@ -438,6 +438,7 @@ void FireFlower::updatePlayer(Player& player) {
 
 void FireFlower::onSouthCollision(Player& player) {
     if (doCollisionOnGround) {
+        vel.y = 0;  // Stop vertical movement when hitting ground
         blinking = false;
         doBlink = false;
         doCollisionOnGround = false;
