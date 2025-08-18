@@ -7,6 +7,7 @@
 #include <iostream>
 #include <cstdio>
 #include <cstring>
+#include <algorithm>
 
 const int MapEditorScreen2::GRID_WIDTH_IN_TILES = 200;
 const int MapEditorScreen2::GRID_HEIGHT_IN_TILES = 60;
@@ -22,7 +23,7 @@ MapEditorScreen2::MapEditorScreen2(MapEditorScreen1* parentScreen)
                                     selectedEntityID(0), lastSelectedEntityID(1), selectedCategoryIndex(0), toolsScrollOffset({0.0f, 0.0f}),
                                     hoveredGridPos({-1, -1}), isHoveringGrid(false), isDrawing(false), 
                                     eraserSize(1), brushSize(1), colorPickerRed(0.7f), colorPickerGreen(0.7f), 
-                                    colorPickerBlue(0.7f), colorPickerAlpha(1.0f),
+                                    colorPickerBlue(0.7f), colorPickerAlpha(1.0f), playButton(nullptr), returnButton(nullptr),
                                     font1(ResourceManager::getInstance().getFont("SuperMario256")), 
                                     font2(ResourceManager::getInstance().getFont("fixedsys")),
                                     colorPalette({
@@ -45,6 +46,11 @@ MapEditorScreen2::MapEditorScreen2(MapEditorScreen1* parentScreen)
         // Initialize categories and entity IDs
         initializeCategories();
 
+        playButton = new ButtonTextTexture("playButton", 
+            {GetScreenWidth() - 500.0f, 30.0f}, 2.0f);
+        returnButton = new ButtonTextTexture("returnButton", 
+            {GetScreenWidth() - 585.0f, 30.0f}, 2.0f);
+
         try {
             // Set the parent screen
             parentScreen->setMapEditorScreen2(this);
@@ -52,6 +58,26 @@ MapEditorScreen2::MapEditorScreen2(MapEditorScreen1* parentScreen)
             std::cerr << "Error initializing MapEditorScreen2: " << e.what() << std::endl;
         }
 } 
+
+MapEditorScreen2::~MapEditorScreen2() {
+    // Clean up buttons
+    delete playButton;
+    delete returnButton;
+    
+    // Note: currentMapData is managed by MapEditorScreen1, so we do not delete it here
+}
+
+ButtonTextTexture* MapEditorScreen2::getPlayButton() const {
+    return playButton;
+}
+
+ButtonTextTexture* MapEditorScreen2::getReturnButton() const {
+    return returnButton;
+}
+
+UserMapData* MapEditorScreen2::getCurrentMapData() const {
+    return currentMapData;
+}
 
 // MapEditorScreen1 will handle the deletion of the currentMapData pointer
 
@@ -145,7 +171,15 @@ void MapEditorScreen2::draw() {
     DrawTextEx(font1, title, 
                {20.0f, 20.0f}, 
                40.0f, 0.0f, colorPalette[3]);
-    
+
+    if (playButton) {
+        playButton->draw();
+    }
+
+    if (returnButton) {
+        returnButton->draw();
+    }
+
     // Display current map name
     if (currentMapData) {
         const char* mapName = currentMapData->displayName.c_str();
@@ -411,7 +445,7 @@ void MapEditorScreen2::drawGrid() {
 }
 
 void MapEditorScreen2::initializeCategories() {
-    categories = {"TILES", "BLOCKS", "ITEMS", "BADDIES", "BGCOLOR"};
+    categories = {"TILES", "BLOCKS", "ITEMS", "BADDIES", "BGCOLOR", "BACKGROUNDID"};
     categoryEntityIDs.resize(categories.size());
     
     // Tiles (IDs 1-87)
@@ -432,6 +466,13 @@ void MapEditorScreen2::initializeCategories() {
     // Baddies (IDs 121-158)
     for (int i = 121; i <= 158; i++) {
         categoryEntityIDs[3].push_back(i);
+    }
+    
+    // Background IDs (0 for none, 1-10 for 10 different background textures)
+    // This will create 4 rows with 3 columns: None + 10 backgrounds = 11 items
+    categoryEntityIDs[5].push_back(0); // None option
+    for (int i = 1; i <= 10; i++) {
+        categoryEntityIDs[5].push_back(i);
     }
     
 }
@@ -494,24 +535,44 @@ void MapEditorScreen2::drawToolsArea() {
     
     currentY += categoryHeight + 5.0f; // Small spacing between rows
     
-    // Second row: BGCOLOR (centered)
-    if (categories.size() > 4) { // Make sure BGCOLOR exists
-        Color categoryColor = (4 == selectedCategoryIndex) ? BLUE : BLACK;
+    // Second row: BGCOLOR (left-aligned) and BACKGROUNDID (right-aligned)
+    if (categories.size() > 4) { // Make sure both BGCOLOR and BACKGROUNDID exist
+        float secondRowWidth = firstRowWidth * 0.8f; // Make each button a bit larger
+        float spacing = 8.0f; // Space between the two buttons
         
-        float bgColorWidth = firstRowWidth * 1.5f; // Make it a bit wider
-        float categoryX = toolsAreaX + 5.0f + (toolsAreaWidth - 20.0f - bgColorWidth) / 2.0f; // Center it
+        // BGColor button (left-aligned)
+        Color bgColorCategoryColor = (4 == selectedCategoryIndex) ? BLUE : BLACK;
+        float bgColorX = toolsAreaX + 5.0f; // Left align
         
-        // Draw category header
-        Rectangle categoryRect = {categoryX, currentY, bgColorWidth, categoryHeight};
-        DrawRectangleRec(categoryRect, Fade(categoryColor, 0.3f));
-        DrawRectangleLinesEx(categoryRect, 1.0f, categoryColor);
+        Rectangle bgColorRect = {bgColorX, currentY, secondRowWidth, categoryHeight};
+        DrawRectangleRec(bgColorRect, Fade(bgColorCategoryColor, 0.3f));
+        DrawRectangleLinesEx(bgColorRect, 1.0f, bgColorCategoryColor);
         
-        // Draw category text (centered)
-        Vector2 textSize = MeasureTextEx(font1, categories[4].c_str(), 14.0f, 0.0f);
-        float textX = categoryX + (bgColorWidth - textSize.x) / 2.0f;
-        DrawTextEx(font1, categories[4].c_str(), 
-                   {textX, currentY + 8.0f}, 
-                   14.0f, 0.0f, categoryColor);
+        // Use shorter text and smaller font for BGColor
+        const char* bgColorText = "BGCOLOR";
+        Vector2 bgColorTextSize = MeasureTextEx(font1, bgColorText, 12.0f, 0.0f);
+        float bgColorTextX = bgColorX + (secondRowWidth - bgColorTextSize.x) / 2.0f;
+        DrawTextEx(font1, bgColorText, 
+                   {bgColorTextX, currentY + 8.0f}, 
+                   12.0f, 0.0f, bgColorCategoryColor);
+        
+        // BackgroundID button (right-aligned)
+        if (categories.size() > 5) {
+            Color backgroundIdCategoryColor = (5 == selectedCategoryIndex) ? BLUE : BLACK;
+            float backgroundIdX = bgColorX + secondRowWidth + spacing;
+            
+            Rectangle backgroundIdRect = {backgroundIdX, currentY, secondRowWidth, categoryHeight};
+            DrawRectangleRec(backgroundIdRect, Fade(backgroundIdCategoryColor, 0.3f));
+            DrawRectangleLinesEx(backgroundIdRect, 1.0f, backgroundIdCategoryColor);
+            
+            // Use shorter text for BackgroundID
+            const char* backgroundIdText = "BG_TEX";
+            Vector2 backgroundIdTextSize = MeasureTextEx(font1, backgroundIdText, 12.0f, 0.0f);
+            float backgroundIdTextX = backgroundIdX + (secondRowWidth - backgroundIdTextSize.x) / 2.0f;
+            DrawTextEx(font1, backgroundIdText, 
+                       {backgroundIdTextX, currentY + 8.0f}, 
+                       12.0f, 0.0f, backgroundIdCategoryColor);
+        }
     }
     
     currentY += categoryHeight + 15.0f; // Increased spacing to lower the object sections
@@ -521,6 +582,9 @@ void MapEditorScreen2::drawToolsArea() {
         if (selectedCategoryIndex == 4) {
             // BGColor category - show color picker instead of entity items
             drawColorPicker(toolsAreaX, toolsAreaWidth, currentY);
+        } else if (selectedCategoryIndex == 5) {
+            // BackgroundID category - show background texture selector
+            drawBackgroundSelector(toolsAreaX, toolsAreaWidth, currentY);
         } else {
             // Regular entity categories
             float itemX = toolsAreaX + 10.0f;
@@ -716,15 +780,29 @@ void MapEditorScreen2::handleToolSelection(Vector2 mousePos) {
     
     currentY += categoryHeight + 5.0f; // Small spacing between rows
     
-    // Check category header - second row (BGCOLOR)
-    if (categories.size() > 4) { // Make sure BGCOLOR exists
-        float bgColorWidth = firstRowWidth * 1.5f;
-        float categoryX = toolsAreaX + 5.0f + (toolsAreaWidth - 20.0f - bgColorWidth) / 2.0f; // Center it
-        Rectangle categoryRect = {categoryX, currentY, bgColorWidth, categoryHeight};
+    // Check category headers - second row (BGCOLOR and BACKGROUNDID)
+    if (categories.size() > 4) { // Make sure both BGCOLOR and BACKGROUNDID exist
+        float secondRowWidth = firstRowWidth * 0.8f; // Make each button a bit larger
+        float spacing = 8.0f; // Space between the two buttons
         
-        if (CheckCollisionPointRec(mousePos, categoryRect)) {
+        // BGColor button (left-aligned)
+        float bgColorX = toolsAreaX + 5.0f; // Left align
+        Rectangle bgColorRect = {bgColorX, currentY, secondRowWidth, categoryHeight};
+        
+        if (CheckCollisionPointRec(mousePos, bgColorRect)) {
             selectedCategoryIndex = 4; // BGCOLOR index
             return;
+        }
+        
+        // BackgroundID button (right-aligned)
+        if (categories.size() > 5) {
+            float backgroundIdX = bgColorX + secondRowWidth + spacing;
+            Rectangle backgroundIdRect = {backgroundIdX, currentY, secondRowWidth, categoryHeight};
+            
+            if (CheckCollisionPointRec(mousePos, backgroundIdRect)) {
+                selectedCategoryIndex = 5; // BACKGROUNDID index
+                return;
+            }
         }
     }
     
@@ -732,8 +810,9 @@ void MapEditorScreen2::handleToolSelection(Vector2 mousePos) {
     
     if (selectedCategoryIndex >= 0 && selectedCategoryIndex < categoryEntityIDs.size()) {
         // Skip color picker handling for BGColor category (index 4) since it doesn't have entity IDs
-        if (selectedCategoryIndex == 4) {
-            // BGColor category - color picker interaction is handled in the color picker function
+        // Skip background selector handling for BackgroundID category (index 5) since it's handled in the selector function
+        if (selectedCategoryIndex == 4 || selectedCategoryIndex == 5) {
+            // BGColor and BackgroundID categories - interactions are handled in their respective functions
             return;
         }
         
@@ -1079,6 +1158,129 @@ void MapEditorScreen2::drawColorPicker(float toolsAreaX, float toolsAreaWidth, f
     // Auto-apply color changes to map background in real-time
     if (currentMapData) {
         currentMapData->backgroundColor = previewColor;
+    }
+}
+
+void MapEditorScreen2::drawBackgroundSelector(float toolsAreaX, float toolsAreaWidth, float& currentY) {
+    // Background selector area
+    float selectorHeight = 400.0f; // Increased for bigger previews
+    Rectangle selectorArea = {toolsAreaX + 5.0f, currentY, toolsAreaWidth - 10.0f, selectorHeight};
+    DrawRectangleRec(selectorArea, Fade(SKYBLUE, 0.1f));
+    DrawRectangleLinesEx(selectorArea, 1.0f, SKYBLUE);
+    
+    // Title
+    const char* title = "Background Textures";
+    Vector2 titleSize = MeasureTextEx(font1, title, 16.0f, 0.0f);
+    DrawTextEx(font1, title, 
+               {toolsAreaX + 10.0f, currentY + 10.0f}, 
+               16.0f, 0.0f, BLACK);
+    
+    // Background texture preview area
+    float previewStartY = currentY + 35.0f;
+    float previewWidth = 96.0f;  // Adjusted for 3 columns
+    float previewHeight = 81.0f; // Made it bigger and more square-like
+    float spacingX = 6.0f;       // Reduced spacing to fit 3 columns
+    float spacingY = 8.0f;       
+    int columns = 3;             // Changed to 3 columns
+    
+    // Current background ID (default to 1 if not set, 0 for none)
+    int currentBackgroundId = currentMapData ? currentMapData->backgroundID : 1;
+    
+    // Calculate starting X position to center the 2-column layout
+    float totalWidth = columns * previewWidth + (columns - 1) * spacingX;
+    float startX = toolsAreaX + 15.0f + ((toolsAreaWidth - 30.0f) - totalWidth) / 2.0f;
+    
+    // Draw "None" option first (ID 0)
+    int row = 0;
+    int col = 0;
+    float x = startX + col * (previewWidth + spacingX);
+    float y = previewStartY + row * (previewHeight + spacingY);
+    
+    Rectangle noneRect = {x, y, previewWidth, previewHeight};
+    
+    // Check if "None" is selected
+    bool isNoneSelected = (currentBackgroundId == 0);
+    
+    // Draw selection highlight for None
+    if (isNoneSelected) {
+        DrawRectangleRec({x - 2, y - 2, previewWidth + 4, previewHeight + 4}, BLUE);
+    }
+    
+    // Draw "None" preview (empty/crossed box)
+    DrawRectangleRec(noneRect, WHITE);
+    DrawRectangleLinesEx(noneRect, 2.0f, BLACK);
+    // Draw X pattern for "none" - adjusted for square size
+    DrawLineEx({x + 10, y + 10}, {x + previewWidth - 10, y + previewHeight - 10}, 2.0f, RED);
+    DrawLineEx({x + 10, y + previewHeight - 10}, {x + previewWidth - 10, y + 10}, 2.0f, RED);
+    
+    // Handle click for None option
+    if (CheckCollisionPointRec(GetMousePosition(), noneRect) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        if (currentMapData) {
+            currentMapData->backgroundID = 0;
+        }
+    }
+    
+    // Draw background texture previews (1-10) in 5 rows, 2 columns layout
+    for (int i = 1; i <= 10; i++) {
+        // Calculate position (continuing from where "None" left off)
+        int totalIndex = i; // i starts from 1, so totalIndex 1-10
+        row = totalIndex / columns;
+        col = totalIndex % columns;
+        x = startX + col * (previewWidth + spacingX);
+        y = previewStartY + row * (previewHeight + spacingY);
+        
+        Rectangle previewRect = {x, y, previewWidth, previewHeight};
+        
+        // Check if this background is selected
+        bool isSelected = (currentBackgroundId == i);
+        
+        // Draw selection highlight
+        if (isSelected) {
+            DrawRectangleRec({x - 2, y - 2, previewWidth + 4, previewHeight + 4}, BLUE);
+        }
+        
+        // Draw background preview
+        DrawRectangleRec(previewRect, WHITE);
+        
+        // Try to load and draw the background texture preview
+        std::string backgroundTextureKey = "background" + std::to_string(i);
+        auto& textures = ResourceManager::getInstance().getTextures();
+        if (textures.find(backgroundTextureKey) != textures.end()) {
+            Texture2D backgroundTexture = ResourceManager::getInstance().getTexture(backgroundTextureKey);
+            
+            // Scale texture to fit preview size while maintaining aspect ratio
+            float scaleX = previewWidth / backgroundTexture.width;
+            float scaleY = previewHeight / backgroundTexture.height;
+            float scale = std::min(scaleX, scaleY);
+            
+            float scaledWidth = backgroundTexture.width * scale;
+            float scaledHeight = backgroundTexture.height * scale;
+            float offsetX = (previewWidth - scaledWidth) / 2.0f;
+            float offsetY = (previewHeight - scaledHeight) / 2.0f;
+            
+            Rectangle sourceRect = {0, 0, (float)backgroundTexture.width, (float)backgroundTexture.height};
+            Rectangle destRect = {x + offsetX, y + offsetY, scaledWidth, scaledHeight};
+            
+            DrawTexturePro(backgroundTexture, sourceRect, destRect, {0, 0}, 0.0f, WHITE);
+        } else {
+            // Fallback: draw a colored rectangle with the background ID
+            Color fallbackColors[] = {
+                SKYBLUE, LIGHTGRAY, DARKBLUE, LIME, ORANGE, 
+                PURPLE, PINK, YELLOW, RED, GREEN
+            };
+            Color fallbackColor = fallbackColors[(i - 1) % 10];
+            DrawRectangleRec(previewRect, fallbackColor);
+        }
+        
+        // Draw border
+        DrawRectangleLinesEx(previewRect, 1.0f, BLACK);
+        
+        // Handle clicks
+        if (CheckCollisionPointRec(GetMousePosition(), previewRect) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+            if (currentMapData) {
+                currentMapData->backgroundID = i;
+            }
+        }
     }
 }
 

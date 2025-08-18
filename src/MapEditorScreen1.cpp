@@ -356,13 +356,41 @@ void MapEditorScreen1::loadUserDesignedMap(int mapIndex) {
 
 void MapEditorScreen1::createNewMap() {
     std::cout << "Creating new map..." << std::endl;
-    int mapIndex = userDesignedMaps.size() + 1; // New map will be added at the end
+    
+    // Calculate the next map number based on existing maps (both saved and unsaved)
+    int nextMapNumber = 1;
+    for (const auto& mapData : userDesignedMaps) {
+        // Check if displayName follows the "des" + number format
+        if (mapData.displayName.find("des") == 0) {
+            std::string numberPart = mapData.displayName.substr(3); // Skip "des"
+            try {
+                int mapNumber = std::stoi(numberPart);
+                if (mapNumber >= nextMapNumber) {
+                    nextMapNumber = mapNumber + 1;
+                }
+            } catch (const std::exception&) {
+                // If conversion fails, just continue
+            }
+        }
+    }
     
     // Create a new default UserMapData
     UserMapData newMapData;
-    newMapData.displayName = "New Map";
-    newMapData.filename = "des" + std::to_string(mapIndex) + ".json";
+    newMapData.displayName = "des" + std::to_string(nextMapNumber);
+    newMapData.filename = "des" + std::to_string(nextMapNumber) + ".json";
+    
+    // Initialize with default values
+    newMapData.entitiesID = std::vector<int>(12000, 0); // Empty map with 12000 tiles
+    newMapData.backgroundColor = {255, 255, 255, 255}; // White background
+    newMapData.backgroundID = 1; // Default background
+    
+    // Add to the existing userDesignedMaps vector (don't clear it!)
     userDesignedMaps.push_back(newMapData);
+
+    // Just add the new map to the display list without clearing existing ones
+    availableMaps.push_back(newMapData.displayName);
+
+    std::cout << "Created new map: " << newMapData.displayName << " (not saved to file yet)" << std::endl;
 
     // Pass the new map data to MapEditorScreen2
     if (mapEditorScreen2) {

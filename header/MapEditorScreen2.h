@@ -23,6 +23,9 @@ private:
     Font& font1;
     Font& font2;
 
+    ButtonTextTexture* playButton;
+    ButtonTextTexture* returnButton;
+
     friend class MapEditorScreen1; 
     void setCurrentMapData(UserMapData* mapData);
 
@@ -66,7 +69,7 @@ private:
 
 public:
     MapEditorScreen2(MapEditorScreen1* parentScreen);
-    ~MapEditorScreen2() override = default;
+    ~MapEditorScreen2() override;
 
     MapEditorScreen2(const MapEditorScreen2&) = delete;
     MapEditorScreen2& operator=(const MapEditorScreen2&) = delete;
@@ -74,7 +77,10 @@ public:
     void draw() override;
     void update();
     
-    // Additional methods for map editing functionality can be added here
+    ButtonTextTexture* getPlayButton() const;
+    ButtonTextTexture* getReturnButton() const;
+    UserMapData* getCurrentMapData() const;
+
 private:
     void drawGrid();
     void drawToolsArea();
@@ -86,6 +92,7 @@ private:
     void drawEraserSizeArea(float toolsAreaX, float toolsAreaWidth, float& currentY);
     void drawBrushSizeArea(float toolsAreaX, float toolsAreaWidth, float& currentY);
     void drawColorPicker(float toolsAreaX, float toolsAreaWidth, float& currentY);
+    void drawBackgroundSelector(float toolsAreaX, float toolsAreaWidth, float& currentY);
     void drawMinimap(float toolsAreaX, float toolsAreaWidth, float& currentY);
     
 public:
