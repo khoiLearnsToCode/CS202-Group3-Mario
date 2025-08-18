@@ -1,5 +1,4 @@
 #include "GameWorld.h"
-﻿#include "GameWorld.h"
 #include "Item.h"
 #include "utils.h"
 #include "TitleScreen.h"
@@ -22,6 +21,7 @@ GameWorld::GameWorld() :
         -600,           // jumpSpeed
         false           
     ),
+    map(player, 3, true, this),
     camera(nullptr),
     settingBoardIsOpen(false),
     helpingBoardIsOpen(false),
