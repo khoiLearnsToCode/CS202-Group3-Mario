@@ -5,6 +5,7 @@
 #include "MenuScreen.h"
 #include "MapEditorScreen1.h"
 #include "MapEditorScreen2.h"
+#include"LoadGameScreen.h"
 
 GameState GameWorld::state = GAME_STATE_TITLE_SCREEN;
 float GameWorld::gravity = 1200;
@@ -43,11 +44,14 @@ GameWorld::GameWorld() :
     mapEditorScreen2(nullptr),
     selectCharacterScreen(nullptr),
     settingScreen(nullptr),
+    loadGameScreen(nullptr),
+    loadBoardIsOpen(false),
     helpingScreen(nullptr),
     guardScreen(nullptr)
     {
         player.setGameWorld(this);
         player.setMap(&map);
+        careTaker = new CareTaker(this);
     }
 
 GameWorld::~GameWorld() {
@@ -100,22 +104,41 @@ GameWorld::~GameWorld() {
         delete helpButton;
         helpButton = nullptr;
     }
+    if (loadGameScreen != nullptr) {
+        delete loadGameScreen;
+        loadGameScreen = nullptr;
+    }
+    delete careTaker;
 }
 
 Memento* GameWorld::dataFromGameWorldToSave() {
-    // Data data(map.getId(), remainingTimePointCount, player.getPoints(), player.getLives(),
-    //          map.getBlocks(), map.getBaddies(), map.getItems(), map.getStaticItems());
-    // return new ConcreteMemento(data);
-    return nullptr;
+    if (!hasCheckpoint) {
+        Data now(
+            map.getId(),
+            player.getPoints(),
+            player.getLives(),
+            player.getCoins(),
+            player.getYoshiCoins(),
+            player.getRemainingTime(),
+            player.getType()
+        );
+        return new ConcreteMemento(now);
+    }
+    return new ConcreteMemento(lastCheckpointData);
 }
 
-void GameWorld::restoreDataFromMemento(const Memento* memento) const {
-    // Implement later
-    // Data data = memento->getData();
-    // map.loadFromJsonFile(data.mapID, true);
-    // map.setRemainingTime(data.remainingTime);
-    // map.setScore(data.score);
-    // map.setLives(data.lives);
+void GameWorld::restoreDataFromMemento(const Memento* memento) {
+    Data data = memento->getData();
+    player.setType(data.playerType);
+    player.setLives(data.lives);
+    player.setCoins(data.coins);
+    player.setYoshiCoins(data.yoshiCoins);
+    player.setPoints(data.score);
+    player.setRemainingTime(data.clearanceTime);  // Assume method exists
+    map.loadFromJsonFile(data.mapID);  // Assume params, reset map
+    player.reset(false, true);  // Reset player vị trí, giữ state
+    hasCheckpoint = true;  // Added: Set checkpoint sau load
+    state = GAME_STATE_PLAYING;
 }
 
 Memento* GameWorld::dataFromGameWorldToLeaderboard() {
@@ -161,6 +184,9 @@ void GameWorld::initScreensAndButtons() {
 
     if (guardScreen == nullptr) {
         guardScreen = new GuardScreen();
+    }
+    if (loadGameScreen == nullptr) {
+        loadGameScreen = new LoadGameScreen(this);
     }
 
     if (settingButton == nullptr) {
@@ -214,6 +240,7 @@ void GameWorld::inputAndUpdate() {
          state != GAME_STATE_MAP_EDITOR_SCREEN2 &&
          state != GAME_STATE_FINISHED &&
          state != GAME_STATE_SETTINGS_SCREEN &&
+         state != GAME_STATE_LOADGAME_SCREEN &&
          state != GAME_STATE_HELPING_SCREEN &&
          state != GAME_STATE_GUARD_SCREEN ) {
         player.setActivationWidth( GetScreenWidth() * 2 );
@@ -239,6 +266,7 @@ void GameWorld::inputAndUpdate() {
          state != GAME_STATE_CREDITS_SCREEN &&
          state != GAME_STATE_FINISHED &&
          state != GAME_STATE_SETTINGS_SCREEN &&
+         state != GAME_STATE_LOADGAME_SCREEN &&
          state != GAME_STATE_HELPING_SCREEN &&
          state != GAME_STATE_GUARD_SCREEN ) {
 
@@ -851,6 +879,7 @@ void GameWorld::inputAndUpdate() {
         }
     }
 
+
     else if ( state == GAME_STATE_HELPING_SCREEN ) {
         if ((IsKeyPressed(KEY_H) || helpingScreen->helpingBoardShouldClose()) && pauseButtonsCooldownAcum <= 0.0f) {
             unpauseGame();
@@ -870,6 +899,7 @@ void GameWorld::inputAndUpdate() {
         else if (guardScreen->getAcceptButton()->isReleased()) {
             // Execute the guarded action
             if (guardScreen->getCurrentAction() == GUARD_ACTION_HOME) {
+                careTaker->save();
                 resetGame();
                 state = GAME_STATE_TITLE_SCREEN;
                 settingBoardIsOpen = false;
@@ -986,8 +1016,9 @@ void GameWorld::inputAndUpdate() {
             }
 
             else if (menuScreen->getButton("LOAD GAME")->isReleased()) {
-                // implement later
-                std::cout << "Load Game button pressed. Implement load game functionality later." << std::endl;
+				/*loadBoardIsOpen = true;
+                state = GAME_STATE_LOADGAME_SCREEN;*/
+				std::cout << "Load Game button pressed. Load game functionality will be implemented later." << std::endl;
             }
 
             else if (menuScreen->getButton("DESIGN MAP")->isReleased()) {
@@ -1113,6 +1144,7 @@ void GameWorld::draw() {
         selectCharacterScreen->draw();
     }
 
+
     else if (state == GAME_STATE_GAME_OVER){
         DrawRectangle( 0, 0, GetScreenWidth(), GetScreenHeight(), BLACK );
         Texture2D* t = &textures["guiGameOver"];
@@ -1200,6 +1232,9 @@ void GameWorld::draw() {
     if (settingBoardIsOpen) {
         settingScreen->draw();
     }
+    if (loadBoardIsOpen) { 
+        loadGameScreen->draw();
+    }
 
     if (helpingBoardIsOpen) {
         helpingScreen->draw();
@@ -1249,11 +1284,23 @@ void GameWorld::resetGame() {
     map.first();
     map.reset();
     totalPlayedTime = 0; // Reset total played time when starting a new game
+    hasCheckpoint = false;
     state = GAME_STATE_TITLE_SCREEN;
 }
 
 void GameWorld::nextMap() {
     if (map.hasNext()) {
+        const int nextMapId = map.getId() + 1;
+        lastCheckpointData = Data(
+            nextMapId,
+            player.getPoints(),
+            player.getLives(),
+            player.getCoins(),
+            player.getYoshiCoins(),
+            player.getRemainingTime(),
+            player.getType()
+        );
+        hasCheckpoint = true;
         state = GAME_STATE_PLAYING;
         // Add Player's elapsed time to total played time when map is completed
         totalPlayedTime += static_cast<int>(player.getEllapsedTime());
@@ -1306,7 +1353,6 @@ void GameWorld::showGuardScreen(GuardAction action) {
         helpingBoardIsOpen = false;
     }
 }
-
 // Distance threshold getter and setter
 float GameWorld::getMaxDistForCollisionCheck() const {
     return maxDistForCollisionCheck;
