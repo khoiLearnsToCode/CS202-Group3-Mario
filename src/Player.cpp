@@ -725,6 +725,17 @@ void Player::setMaxTime(float maxTime) {
 void Player::setLastStateBeforeTransition(SpriteState lastStateBeforeTransition) {
     this->lastStateBeforeTransition = lastStateBeforeTransition;
 }
+void Player::setType(PlayerType pT)
+{
+    if (pT == PLAYER_TYPE_SMALL) this->changeToSmall();
+    else if (pT == PLAYER_TYPE_SUPER) this->changeToSuper();
+    else if (pT == PLAYER_TYPE_FLOWER) this->changeToFlower();
+}
+
+void Player::setRemainingTime(int remainingTime) {
+    ellapsedTime = maxTime - static_cast<float>(remainingTime); 
+    if (ellapsedTime < 0) ellapsedTime = 0; 
+}
 
 void Player::setGameWorld(GameWorld* gw) {
     this->gw = gw;

@@ -112,6 +112,8 @@ public:
     void setPointsFromPreviousMap(int pointsFromPreviousMap);
     void setMaxTime(float maxTime);
     void setLastStateBeforeTransition(SpriteState lastStateBeforeTransition);
+    void setType(PlayerType pT);
+    void setRemainingTime(int remainingTime);
 
     void setGameWorld(GameWorld* gw);
     void setMap(Map* map);

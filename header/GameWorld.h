@@ -14,6 +14,7 @@ class Player;
 #include "MapEditorScreen2.h"
 #include "SelectCharacterScreen.h"
 #include "SettingScreen.h"
+#include"LoadGameScreen.h"
 #include "HelpingScreen.h"
 #include "GuardScreen.h"
 #include "LeaderBoardScreen.h"
@@ -34,9 +35,11 @@ class GameWorld : public virtual Drawable {
     HelpingScreen* helpingScreen;
     GuardScreen* guardScreen;
     LeaderBoardScreen* leaderBoardScreen;
+    LoadGameScreen* loadGameScreen;
 
     friend class CareTaker;
     friend class SettingScreen;
+    friend class LoadGameScreen;
 
     Player player;
     Map map;
@@ -44,6 +47,7 @@ class GameWorld : public virtual Drawable {
     bool settingBoardIsOpen;
     bool helpingBoardIsOpen;
     bool leaderBoardIsOpen;
+    bool loadBoardIsOpen;
     GameState stateBeforePause;
     int remainingTimePointCount;
     int totalPlayedTime;
@@ -67,9 +71,14 @@ class GameWorld : public virtual Drawable {
     const float maxDistForCollisionCheck;
 
     Memento* dataFromGameWorldToSave();
-    void restoreDataFromMemento(const Memento* memento) const;
+    void restoreDataFromMemento(const Memento* memento);
 
     Memento* dataFromGameWorldToLeaderboard();
+    
+    Data lastCheckpointData;
+    bool hasCheckpoint = false;
+    CareTaker* careTaker;
+
 
 public:
 
@@ -102,7 +111,8 @@ public:
     void nextMap();
     void pauseGame(bool playPauseSFX, bool pauseMusic, bool pausePlayer, bool showSettingBoard, bool showHelpingBoard);
     void unpauseGame();
-    void showGuardScreen(GuardAction action);
+    void showGuardScreen(GuardAction action); 
+    CareTaker* getCareTaker() const { return careTaker; } 
 
     // Distance threshold getter for collision optimization
     float getMaxDistForCollisionCheck() const;
