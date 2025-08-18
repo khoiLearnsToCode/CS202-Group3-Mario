@@ -270,7 +270,7 @@ void Player::update() {
                 }
             }
 
-            if (IsKeyPressed(KEY_LEFT_CONTROL) && type == PLAYER_TYPE_FLOWER) {
+            if ((IsKeyPressed(KEY_LEFT_SHIFT) || IsKeyPressed(KEY_RIGHT_SHIFT)) && type == PLAYER_TYPE_FLOWER) {
 
                 if (facingDirection == DIRECTION_RIGHT) {
                     fireballs.push_back(Fireball(Vector2{ pos.x + dim.x / 2, pos.y + dim.y / 2 - 3 }, Vector2{ 16, 16 }, Vector2{ 400, 100 }, RED, DIRECTION_RIGHT, 2));
