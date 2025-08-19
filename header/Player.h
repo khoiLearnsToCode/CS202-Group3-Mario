@@ -51,8 +51,6 @@ class Player : public Sprite {
 
 	PlayerType reservedPowerUp; // Power-Up stored in reserve
 
-	std::vector<Fireball> fireballs;
-
 	float runningAcum;
 	float runningTime;
 	bool drawRunningFrames; // Whether to draw running frames (faster) or not
@@ -83,6 +81,8 @@ class Player : public Sprite {
     bool isLuigi;
 
 public:
+
+    std::vector<Fireball> fireballs;
 
     Player(Vector2 pos, Vector2 dim, Vector2 vel, Color color, float speedX, float maxSpeedX, float jumpSpeed, bool immortal);
     ~Player() override;
