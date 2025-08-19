@@ -21,7 +21,8 @@ GameWorld::GameWorld() :
         -600,           // jumpSpeed
         false           
     ),
-    map(player, 3, true, this),
+
+    map(mario, 1, true, this),
     camera(nullptr),
     settingBoardIsOpen(false),
     helpingBoardIsOpen(false),
@@ -47,7 +48,8 @@ GameWorld::GameWorld() :
     loadGameScreen(nullptr),
     loadBoardIsOpen(false),
     helpingScreen(nullptr),
-    guardScreen(nullptr)
+    guardScreen(nullptr),
+    leaderBoardScreen(nullptr)
     {
         player.setGameWorld(this);
         player.setMap(&map);
@@ -95,6 +97,16 @@ GameWorld::~GameWorld() {
         guardScreen = nullptr;
     }
 
+    if (leaderBoardScreen != nullptr) {
+        delete leaderBoardScreen;
+        leaderBoardScreen = nullptr;
+    }
+  
+    if (loadGameScreen != nullptr) {
+        delete loadGameScreen;
+        loadGameScreen = nullptr;
+    }
+
     if (settingButton != nullptr) {
         delete settingButton;
         settingButton = nullptr;
@@ -104,10 +116,7 @@ GameWorld::~GameWorld() {
         delete helpButton;
         helpButton = nullptr;
     }
-    if (loadGameScreen != nullptr) {
-        delete loadGameScreen;
-        loadGameScreen = nullptr;
-    }
+    
     delete careTaker;
 }
 
@@ -160,6 +169,10 @@ void GameWorld::initScreensAndButtons() {
 
     if (menuScreen == nullptr) {
         menuScreen = new MenuScreen();
+    }
+
+    if (leaderBoardScreen == nullptr) {
+        leaderBoardScreen = new LeaderBoardScreen();
     }
 
     if (mapEditorScreen1 == nullptr) {
@@ -599,7 +612,11 @@ void GameWorld::inputAndUpdate() {
                     if ( item->checkCollision( &player ) != COLLISION_TYPE_NONE ) {
                         item->setState( SPRITE_STATE_HIT );
                         item->playCollisionSound();
+
+                        // item->updateMario( mario );
+
                         item->updatePlayer( player );
+
                     }
                 } else if ( item->getY() > map.getMaxHeight() ) {
                     item->setState( SPRITE_STATE_TO_BE_REMOVED );
@@ -1032,6 +1049,12 @@ void GameWorld::inputAndUpdate() {
                 settingScreen->setSettingBoardIsOpenInMenuScreen(true);
             }
 
+            else if (menuScreen->getButton("LEADERBOARD")->isReleased()) {
+                state = GAME_STATE_LEADERBOARD_SCREEN;
+                CareTaker caretaker(this);
+                caretaker.releaseLeaderBoardData();
+            }
+
             else if (menuScreen->getButton("EXIT")->isReleased()) {
                 state = GAME_STATE_TITLE_SCREEN;
             }
@@ -1110,9 +1133,19 @@ void GameWorld::inputAndUpdate() {
     }
 
     else if ( state == GAME_STATE_GAME_OVER ) {
-        player.playGameOverMusicStream();
+        mario.playGameOverMusicStream();
+        CareTaker caretaker(this);
+        caretaker.saveToCareTakerLeaderBoard();
+		state = GAME_STATE_LEADERBOARD_SCREEN;
     }
-      
+    else if (state == GAME_STATE_LEADERBOARD_SCREEN) {
+        if (IsKeyPressed(KEY_ESCAPE)) {
+            state = GAME_STATE_MENU_SCREEN;
+        }
+        else if (leaderBoardScreen && leaderBoardScreen->getReturnButton()->isReleased()) {
+        state = GAME_STATE_MENU_SCREEN;
+        }
+    }
 }
 
 void GameWorld::draw() {
@@ -1156,6 +1189,10 @@ void GameWorld::draw() {
         selectCharacterScreen->draw();
     }
 
+    else if (state == GAME_STATE_LEADERBOARD_SCREEN) {
+        if(leaderBoardScreen)
+            leaderBoardScreen->draw();
+    }
 
     else if (state == GAME_STATE_GAME_OVER){
         DrawRectangle( 0, 0, GetScreenWidth(), GetScreenHeight(), BLACK );
@@ -1226,6 +1263,9 @@ void GameWorld::draw() {
 
             if ( GetKeyPressed() ) {
                 StopMusicStream( musics["ending"] );
+                CareTaker caretaker(this);
+                caretaker.releaseLeaderBoardData();
+                state = GAME_STATE_LEADERBOARD_SCREEN;
                 resetGame();
             }
 
@@ -1332,13 +1372,18 @@ void GameWorld::nextMap() {
         );
         hasCheckpoint = true;
         state = GAME_STATE_PLAYING;
+
         // Add Player's elapsed time to total played time when map is completed
         totalPlayedTime += static_cast<int>(player.getEllapsedTime());
         player.setPointsFromPreviousMap(player.getPoints());
         player.setCoinsFromPreviousMap(player.getCoins());
+        CareTaker caretaker(this);
+		    caretaker.saveToCareTakerLeaderBoard();
         player.reset(false, false);
     } else {
         state = GAME_STATE_FINISHED;
+        CareTaker caretaker(this);
+        caretaker.saveToCareTakerLeaderBoard();
     }
 }
 

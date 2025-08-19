@@ -3,6 +3,7 @@
 #include "Screen.h"
 #include "raylib.h"
 #include "ResourceManager.h"
+#include "Button.h"
 
 
 class LeaderBoardScreen : public Screen {
@@ -18,6 +19,8 @@ public:
 
     friend class CareTaker;
 
+    Button* getReturnButton() const;
+
 private:
     Texture2D backgroundTexture;
     Texture2D leaderboardLogo;
@@ -28,4 +31,6 @@ private:
     std::vector<std::string> leaderboardDataAsStrings;
 
     void setLeaderboardDataAsStrings(const std::vector<std::string>& data);
+
+    Button* returnButton;
 };
