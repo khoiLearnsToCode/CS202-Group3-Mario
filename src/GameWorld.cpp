@@ -22,7 +22,7 @@ GameWorld::GameWorld() :
         false           
     ),
 
-    map(mario, 1, true, this),
+    map(player, 1, true, this),
     camera(nullptr),
     settingBoardIsOpen(false),
     helpingBoardIsOpen(false),
@@ -53,7 +53,6 @@ GameWorld::GameWorld() :
     {
         player.setGameWorld(this);
         player.setMap(&map);
-        careTaker = new CareTaker(this);
     }
 
 GameWorld::~GameWorld() {
@@ -239,6 +238,8 @@ void GameWorld::inputAndUpdate() {
          state != GAME_STATE_MAP_EDITOR_SCREEN2 &&
          state != GAME_STATE_SELECT_CHARACTER_SCREEN &&
          state != GAME_STATE_CREDITS_SCREEN &&
+         state != GAME_STATE_LEADERBOARD_SCREEN &&
+         state != GAME_STATE_LOADGAME_SCREEN &&
          state != GAME_STATE_FINISHED &&
          state != GAME_STATE_GUARD_SCREEN && 
          !pauseMusic ) {
@@ -254,6 +255,7 @@ void GameWorld::inputAndUpdate() {
          state != GAME_STATE_FINISHED &&
          state != GAME_STATE_SETTINGS_SCREEN &&
          state != GAME_STATE_LOADGAME_SCREEN &&
+         state != GAME_STATE_LEADERBOARD_SCREEN &&
          state != GAME_STATE_HELPING_SCREEN &&
          state != GAME_STATE_GUARD_SCREEN ) {
         player.setActivationWidth( GetScreenWidth() * 2 );
@@ -263,7 +265,9 @@ void GameWorld::inputAndUpdate() {
         state != GAME_STATE_MAP_EDITOR_SCREEN1 &&
         state != GAME_STATE_MAP_EDITOR_SCREEN2 &&
         state != GAME_STATE_SELECT_CHARACTER_SCREEN &&
-        state != GAME_STATE_CREDITS_SCREEN) {
+        state != GAME_STATE_CREDITS_SCREEN &&
+        state != GAME_STATE_LEADERBOARD_SCREEN &&
+        state != GAME_STATE_LOADGAME_SCREEN ) {
 
         player.update();
     }
@@ -279,6 +283,7 @@ void GameWorld::inputAndUpdate() {
          state != GAME_STATE_CREDITS_SCREEN &&
          state != GAME_STATE_FINISHED &&
          state != GAME_STATE_SETTINGS_SCREEN &&
+         state != GAME_STATE_LEADERBOARD_SCREEN &&
          state != GAME_STATE_LOADGAME_SCREEN &&
          state != GAME_STATE_HELPING_SCREEN &&
          state != GAME_STATE_GUARD_SCREEN ) {
@@ -387,6 +392,7 @@ void GameWorld::inputAndUpdate() {
                             case COLLISION_TYPE_NORTH:
                                 baddie->setY( tile->getY() + tile->getHeight() );
                                 baddie->setVelY( 0 );
+                                baddie->onNorthCollision();
                                 baddie->updateCollisionProbes();
                                 break;
                             case COLLISION_TYPE_SOUTH:
@@ -500,6 +506,7 @@ void GameWorld::inputAndUpdate() {
                             case COLLISION_TYPE_NORTH:
                                 baddie->setY( block->getY() + block->getHeight() );
                                 baddie->setVelY( 0 );
+                                baddie->onNorthCollision();
                                 baddie->updateCollisionProbes();
                                 break;
                             case COLLISION_TYPE_SOUTH:
@@ -613,7 +620,7 @@ void GameWorld::inputAndUpdate() {
                         item->setState( SPRITE_STATE_HIT );
                         item->playCollisionSound();
 
-                        // item->updateMario( mario );
+                        // item->updateMario( player );
 
                         item->updatePlayer( player );
 
@@ -990,6 +997,8 @@ void GameWorld::inputAndUpdate() {
         state == GAME_STATE_MAP_EDITOR_SCREEN1 ||
         state == GAME_STATE_MAP_EDITOR_SCREEN2 ||
         state == GAME_STATE_SELECT_CHARACTER_SCREEN ||
+        state == GAME_STATE_LEADERBOARD_SCREEN ||
+        state == GAME_STATE_LOADGAME_SCREEN ||
         state == GAME_STATE_CREDITS_SCREEN) {
 
         if (!IsMusicStreamPlaying(musics["title"])) {
@@ -1130,22 +1139,24 @@ void GameWorld::inputAndUpdate() {
                 }
             }
         }
-    }
 
+        else if (state == GAME_STATE_LEADERBOARD_SCREEN) {
+            if (IsKeyPressed(KEY_ESCAPE)) {
+                state = GAME_STATE_MENU_SCREEN;
+            }
+            else if (leaderBoardScreen && leaderBoardScreen->getReturnButton()->isReleased()) {
+            state = GAME_STATE_MENU_SCREEN;
+            }
+        }
+    }
+    
     else if ( state == GAME_STATE_GAME_OVER ) {
-        mario.playGameOverMusicStream();
+        player.playGameOverMusicStream();
         CareTaker caretaker(this);
         caretaker.saveToCareTakerLeaderBoard();
 		state = GAME_STATE_LEADERBOARD_SCREEN;
     }
-    else if (state == GAME_STATE_LEADERBOARD_SCREEN) {
-        if (IsKeyPressed(KEY_ESCAPE)) {
-            state = GAME_STATE_MENU_SCREEN;
-        }
-        else if (leaderBoardScreen && leaderBoardScreen->getReturnButton()->isReleased()) {
-        state = GAME_STATE_MENU_SCREEN;
-        }
-    }
+
 }
 
 void GameWorld::draw() {
@@ -1431,4 +1442,9 @@ void GameWorld::showGuardScreen(GuardAction action) {
 // Distance threshold getter and setter
 float GameWorld::getMaxDistForCollisionCheck() const {
     return maxDistForCollisionCheck;
+}
+
+
+void GameWorld::setCaretaker(CareTaker* caretaker) {
+    this->careTaker = caretaker;
 }

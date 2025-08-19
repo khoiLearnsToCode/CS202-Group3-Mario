@@ -4,7 +4,7 @@
 using json = nlohmann::json;
 
 CareTaker::CareTaker(GameWorld* gw) : gw(gw) {
-
+    gw->setCaretaker(this);
     fin.open("../../../../resource/leaderboardData.json");
     if (!fin.is_open()) {
         std::cerr << "WARNING: Error opening leaderBoardData.json file." << std::endl;

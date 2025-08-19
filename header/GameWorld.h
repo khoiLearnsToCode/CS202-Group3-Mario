@@ -72,12 +72,13 @@ class GameWorld : public virtual Drawable {
 
     Memento* dataFromGameWorldToSave();
     void restoreDataFromMemento(const Memento* memento);
-
     Memento* dataFromGameWorldToLeaderboard();
-    
+    void setCaretaker(CareTaker* caretaker);
+
     Data lastCheckpointData;
     bool hasCheckpoint = false;
     CareTaker* careTaker;
+
 
 
 public:

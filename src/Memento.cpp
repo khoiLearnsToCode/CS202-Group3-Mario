@@ -16,7 +16,7 @@ std::string ConcreteMemento::display() const {
     return "Map ID: " + std::to_string(data.mapID) + "\n" +
            "Score: " + std::to_string(data.score) + "\n" +
            "Lives: " + std::to_string(data.lives) + "\n" +
-           "Date: " + date + "\n" ;
+           "Date: " + date + "\n" +
            "Time: " + time + "\n";
 }
 
