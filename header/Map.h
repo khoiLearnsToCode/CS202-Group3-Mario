@@ -2,15 +2,17 @@
 
 class Block;
 class GameWorld;
+struct UserMapData;
 
 #include "raylib.h"
 #include "json.hpp"
 #include "Tile.h"
-#include "Mario.h"
+#include "Player.h"
 #include "Baddie.h"
 #include "Tile.h"
 #include "Block.h"
 #include "Item.h"
+#include "Data.h"
 #include <vector>
 
 class Map : public virtual Drawable {
@@ -31,8 +33,8 @@ class Map : public virtual Drawable {
     float maxWidth;
     float maxHeight;
 
-    Mario& mario;
-    float marioOffset;
+    Player& player;
+    float playerOffset;
 
     int backgroundId;
     int maxBackgroundId;
@@ -47,35 +49,36 @@ class Map : public virtual Drawable {
     float drawBlackScreenFadeTime;
 
     // Near sight vision effect for map3
-    Vector2 lastValidMarioPos;
-    
-    //bool parseBlocks;
-    //bool parseItems;
-    //bool parseBaddies;
+    Vector2 lastValidPlayerPos;
 
     bool loadTestMap;
+    bool loadFromUserDesignedMap;
     bool parsed;
+    UserMapData* currentData;
 
     //bool drawMessage;
     //std::string message;
     Camera2D* camera;
     GameWorld* gw;
 
+    void loadUserData();
 public:
 
     static constexpr int TILE_WIDTH = 32;
 
-    Map(Mario& mario, int id, bool loadTestMap, GameWorld* gw);
+    Map(Player& player, int id, bool loadTestMap, GameWorld* gw);
     ~Map() override;
     void draw() override;
 
     //void parseMap();
     void loadFromJsonFile(bool shouldLoadTestMap = false);
 
-    void setMarioOffset(float marioOffset);
+    void setPlayerOffset(float playerOffset);
     void setDrawBlackScreen(bool drawBlackScreen);
     void setCamera(Camera2D* camera);
     void setGameWorld(GameWorld* gw);
+    void setCurrentData(UserMapData* data);
+    void setLoadFromUserDesignedMap(bool loadFromUser);
 
     std::vector<Tile*>& getTiles();
     std::vector<Block*>& getBlocks();
@@ -97,7 +100,6 @@ public:
 // Returns true if there is a next map to load and jump to next map
     bool hasNext();
     void first();
-    //void pauseGameToShowMessage() const;
 
     void eraseBaddieFromDrawingVectors(Baddie* baddie);
 

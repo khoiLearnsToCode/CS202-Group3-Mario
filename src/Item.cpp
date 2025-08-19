@@ -1,6 +1,6 @@
 ﻿#include "Item.h"
 #include "ResourceManager.h"
-#include "Mario.h"
+#include "Player.h"
 #include "GameWorld.h"
 #include "raylib.h"
 #include "Sprite.h"
@@ -41,7 +41,7 @@ Item::Item(Vector2 pos, Vector2 dim, Vector2 vel, Color color, float frameTime, 
 }
 
 Item::~Item() = default;
-void Item::onSouthCollision(Mario& mario) {}
+void Item::onSouthCollision(Player& player) {}
 bool Item::isPauseGameOnHit() {
     return pauseGameOnHit;
 }
@@ -106,12 +106,12 @@ void Coin::playCollisionSound() {
   
 }
 
-void Coin::updateMario(Mario& mario) {
-    mario.addCoins(1);
-    mario.addPoints(earnedPoints);
-    if (mario.getCoins() >= 100) {
-        mario.addLives(1);
-        mario.setCoins(mario.getCoins() - 100);
+void Coin::updatePlayer(Player& player) {
+    player.addCoins(1);
+    player.addPoints(earnedPoints);
+    if (player.getCoins() >= 100) {
+        player.addLives(1);
+        player.setCoins(player.getCoins() - 100);
     }
 }
 
@@ -203,48 +203,48 @@ void Mushroom::playCollisionSound() {
     
 }
 
-void Mushroom::updateMario(Mario& mario) {
+void Mushroom::updatePlayer(Player& player) {
 
-    mario.addPoints(earnedPoints);
+    player.addPoints(earnedPoints);
 
-    switch (mario.getType()) {
-    case MARIO_TYPE_SMALL:
-        mario.setY(mario.getY() - 16);
-        mario.setLastStateBeforeTransition(mario.getState());
-        mario.setState(SPRITE_STATE_TRANSITIONING_SMALL_TO_SUPER);
+    switch (player.getType()) {
+    case PLAYER_TYPE_SMALL:
+        player.setY(player.getY() - 16);
+        player.setLastStateBeforeTransition(player.getState());
+        player.setState(SPRITE_STATE_TRANSITIONING_SMALL_TO_SUPER);
         break;
-    case MARIO_TYPE_SUPER:
-        switch (mario.getReservedPowerUp()) {
-        case MARIO_TYPE_SMALL:
-            mario.setReservedPowerUp(MARIO_TYPE_SUPER);
+    case PLAYER_TYPE_SUPER:
+        switch (player.getReservedPowerUp()) {
+        case PLAYER_TYPE_SMALL:
+            player.setReservedPowerUp(PLAYER_TYPE_SUPER);
             break;
-        case MARIO_TYPE_SUPER:
+        case PLAYER_TYPE_SUPER:
             break;
-        case MARIO_TYPE_FLOWER:
+        case PLAYER_TYPE_FLOWER:
             break;
         }
-        mario.getGameWorld()->unpauseGame();
+        player.getGameWorld()->unpauseGame();
         break;
-    case MARIO_TYPE_FLOWER:
-        switch (mario.getReservedPowerUp()) {
-        case MARIO_TYPE_SMALL:
-            mario.setReservedPowerUp(MARIO_TYPE_SUPER);
+    case PLAYER_TYPE_FLOWER:
+        switch (player.getReservedPowerUp()) {
+        case PLAYER_TYPE_SMALL:
+            player.setReservedPowerUp(PLAYER_TYPE_SUPER);
             break;
-        case MARIO_TYPE_SUPER:
+        case PLAYER_TYPE_SUPER:
             break;
-        case MARIO_TYPE_FLOWER:
+        case PLAYER_TYPE_FLOWER:
             break;
         }
-        mario.getGameWorld()->unpauseGame();
+        player.getGameWorld()->unpauseGame();
         break;
     }
 
 }
 
-void Mushroom::onSouthCollision(Mario& mario) {
+void Mushroom::onSouthCollision(Player& player) {
     if (doCollisionOnGround) {
         vel.x = 200;
-        facingDirection = mario.getFacingDirection();
+        facingDirection = player.getFacingDirection();
         blinking = false;
         doBlink = false;
         doCollisionOnGround = false;
@@ -312,8 +312,8 @@ void OneUpMushroom::playCollisionSound() {
     
 }
 
-void OneUpMushroom::updateMario(Mario& mario) {
-    mario.addLives(1); 
+void OneUpMushroom::updatePlayer(Player& player) {
+    player.addLives(1); 
     state = SPRITE_STATE_HIT; 
 	//play sound
 }
@@ -345,9 +345,8 @@ void FireFlower::update() {
             currentFrame = (currentFrame + 1) % maxFrames;
         }
         pos.y += vel.y * delta;
-        if (doCollisionOnGround && pos.y + dim.y > GetScreenHeight()) {
-            pos.y = GetScreenHeight() - dim.y;
-            vel.y = 0;
+        if (doCollisionOnGround) {
+            vel.y += GameWorld::gravity * delta;  // Apply gravity when doCollisionOnGround is true
         }
         if (blinking) {
             blinkingAcum += delta;
@@ -365,6 +364,7 @@ void FireFlower::update() {
         }
         pointsFrameAcum = std::min(pointsFrameAcum + delta, pointsFrameTime);
     }
+    updateCollisionProbes();  // Add collision probe updates like other items
 }
 
 void FireFlower::draw() {
@@ -396,48 +396,49 @@ void FireFlower::playCollisionSound() {
     
 }
 
-void FireFlower::updateMario(Mario& mario) {
+void FireFlower::updatePlayer(Player& player) {
 
-    mario.addPoints(earnedPoints);
+    player.addPoints(earnedPoints);
 
-    switch (mario.getType()) {
-    case MARIO_TYPE_SMALL:
-        mario.setY(mario.getY() - 16);
-        mario.setLastStateBeforeTransition(mario.getState());
-        mario.setState(SPRITE_STATE_TRANSITIONING_SMALL_TO_FLOWER);
+    switch (player.getType()) {
+    case PLAYER_TYPE_SMALL:
+        player.setY(player.getY() - 16);
+        player.setLastStateBeforeTransition(player.getState());
+        player.setState(SPRITE_STATE_TRANSITIONING_SMALL_TO_FLOWER);
         break;
-    case MARIO_TYPE_SUPER:
-        mario.setLastStateBeforeTransition(mario.getState());
-        mario.setState(SPRITE_STATE_TRANSITIONING_SUPER_TO_FLOWER);
-        switch (mario.getReservedPowerUp()) {
-        case MARIO_TYPE_SMALL:
-            mario.setReservedPowerUp(MARIO_TYPE_SUPER);
+    case PLAYER_TYPE_SUPER:
+        player.setLastStateBeforeTransition(player.getState());
+        player.setState(SPRITE_STATE_TRANSITIONING_SUPER_TO_FLOWER);
+        switch (player.getReservedPowerUp()) {
+        case PLAYER_TYPE_SMALL:
+            player.setReservedPowerUp(PLAYER_TYPE_SUPER);
             break;
-        case MARIO_TYPE_SUPER:
+        case PLAYER_TYPE_SUPER:
             break;
-        case MARIO_TYPE_FLOWER:
+        case PLAYER_TYPE_FLOWER:
             break;
         }
         break;
-    case MARIO_TYPE_FLOWER:
-        switch (mario.getReservedPowerUp()) {
-        case MARIO_TYPE_SMALL:
-            mario.setReservedPowerUp(MARIO_TYPE_FLOWER);        
+    case PLAYER_TYPE_FLOWER:
+        switch (player.getReservedPowerUp()) {
+        case PLAYER_TYPE_SMALL:
+            player.setReservedPowerUp(PLAYER_TYPE_FLOWER);        
             break;
-        case MARIO_TYPE_SUPER:
-            mario.setReservedPowerUp(MARIO_TYPE_FLOWER);           
+        case PLAYER_TYPE_SUPER:
+            player.setReservedPowerUp(PLAYER_TYPE_FLOWER);           
             break;
-        case MARIO_TYPE_FLOWER:
+        case PLAYER_TYPE_FLOWER:
             break;
         }
-        mario.getGameWorld()->unpauseGame();
+        player.getGameWorld()->unpauseGame();
         break;
     }
 
 }
 
-void FireFlower::onSouthCollision(Mario& mario) {
+void FireFlower::onSouthCollision(Player& player) {
     if (doCollisionOnGround) {
+        vel.y = 0;  // Stop vertical movement when hitting ground
         blinking = false;
         doBlink = false;
         doCollisionOnGround = false;
@@ -503,13 +504,13 @@ void Star::playCollisionSound() {
 
 }
 
-void Star::updateMario(Mario& mario) {
-    mario.setInvincible(true); 
+void Star::updatePlayer(Player& player) {
+    player.setInvincible(true); 
     state = SPRITE_STATE_HIT; 
 	//play sound
 }
 
-void Star::onSouthCollision(Mario& mario) {
+void Star::onSouthCollision(Player& player) {
     vel.y = -400;
 }
 
@@ -567,8 +568,8 @@ void ThreeUpMoon::playCollisionSound() {
 
 }
 
-void ThreeUpMoon::updateMario(Mario& mario) {
-    mario.addLives(3); 
+void ThreeUpMoon::updatePlayer(Player& player) {
+    player.addLives(3); 
     state = SPRITE_STATE_HIT; 
 	//play sound
 }
@@ -652,12 +653,12 @@ void YoshiCoin::playCollisionSound() {
 
 }
 
-void YoshiCoin::updateMario(Mario& mario) {
-    mario.addYoshiCoins(1);
-    mario.addPoints(earnedPoints);
-    if (mario.getYoshiCoins() == 5) {
-        mario.addLives(1);
-        mario.setYoshiCoins(0);
+void YoshiCoin::updatePlayer(Player& player) {
+    player.addYoshiCoins(1);
+    player.addPoints(earnedPoints);
+    if (player.getYoshiCoins() == 5) {
+        player.addLives(1);
+        player.setYoshiCoins(0);
     }
 }
 
@@ -726,9 +727,9 @@ void CourseClearToken::playCollisionSound() {
  
 }
 
-void CourseClearToken::updateMario(Mario& mario) {
-    mario.addPoints(earnedPoints);
-    mario.setState(SPRITE_STATE_VICTORY);
+void CourseClearToken::updatePlayer(Player& player) {
+    player.addPoints(earnedPoints);
+    player.setState(SPRITE_STATE_VICTORY);
 }
 
 CollisionType CourseClearToken::checkCollision(Sprite* sprite) {

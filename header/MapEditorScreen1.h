@@ -8,6 +8,7 @@
 #include "Data.h"
 #include "GameState.h"
 #include "MapEditorScreen2.h"
+#include "Map.h"
 #include <unordered_map>
 #include <vector>
 #include <string>
@@ -19,8 +20,13 @@ class GameWorld;
 class MapEditorScreen1 : public Screen {
 private:
     std::unordered_map<std::string, Button*> buttons;
-    Font& font;
+    Font& font1;
+    Font& font2;
+    int frame;
+    const int maxFrame;
     float fontSize;
+    float frameTimeAccum;
+    const float frameTime;
     bool showSavedMapDialog;
     Rectangle dialogBox;
     
@@ -35,6 +41,7 @@ private:
     MapEditorScreen2* mapEditorScreen2;
     void setMapEditorScreen2(MapEditorScreen2* screen); 
     friend class MapEditorScreen2;
+    friend class Map;
     
     // Double-click detection
     int lastClickedIndex;
@@ -49,6 +56,7 @@ private:
     void saveMapToFile(const UserMapData& mapData, const std::string& filename);
     UserMapData loadMapFromFile(const std::string& filepath);
     std::string getUserDesignedMapsDirectory() const;
+    void updateFrameAnimation();
 
 public:
     MapEditorScreen1();

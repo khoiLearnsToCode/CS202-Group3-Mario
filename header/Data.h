@@ -5,7 +5,7 @@
 #include "Block.h"
 #include "Baddie.h"
 #include "Item.h"
-#include "MarioType.h"
+#include "PlayerType.h"
 #include "raylib.h"
 
 struct Data{
@@ -15,9 +15,14 @@ struct Data{
     int coins;
     int yoshiCoins;
     int clearanceTime;
+    PlayerType playerType;
+	Data() : mapID(0), score(0), lives(0), coins(0), yoshiCoins(0), clearanceTime(0), playerType(PlayerType::PLAYER_TYPE_SMALL) {}
 
 	Data(int mID, int sc, int lv, int c, int yC, int cT)
-		: mapID(mID), score(sc), lives(lv), coins(c), yoshiCoins(yC), clearanceTime(cT) {}
+		: mapID(mID), score(sc), lives(lv), coins(c), yoshiCoins(yC), clearanceTime(cT), playerType(PlayerType::PLAYER_TYPE_SMALL) {}
+    Data(int mID, int sc, int lv, int c, int yC, int cT, PlayerType pT)
+        : mapID(mID), score(sc), lives(lv), coins(c), yoshiCoins(yC), clearanceTime(cT), playerType(pT) {
+    }
 };
 
 struct bigData : public Data {
@@ -26,8 +31,8 @@ struct bigData : public Data {
     std::vector<Item*> items;
     std::vector<Item*> staticItems;
 
-    bigData(int mID, int sc, int lv, int c, int yC, MarioType mType)
-        : Data(mID, sc, lv, c, yC, mType) {}
+    bigData(int mID, int sc, int lv, int c, int yC, PlayerType mType)
+        : Data(mID, sc, lv, c, yC, mType) {} 
 
 	bigData(int mID, int sc, int lv, int c, int yC, int cT, std::vector<Block*> blks,
 			std::vector<Baddie*> bds, std::vector<Item*> its, std::vector<Item*> staticIts)

@@ -1,6 +1,6 @@
 #pragma once
 
-class Mario;
+class Player;
 
 #include "Drawable.h"
 #include "GameState.h"
@@ -14,12 +14,13 @@ class Mario;
 #include "MapEditorScreen2.h"
 #include "SelectCharacterScreen.h"
 #include "SettingScreen.h"
+#include"LoadGameScreen.h"
 #include "HelpingScreen.h"
 #include "GuardScreen.h"
 #include "LeaderBoardScreen.h"
 #include "CareTaker.h"
 #include "Memento.h"
-#include "Mario.h"
+#include "Player.h"
 #include "raylib.h"
 #include <iostream>
 
@@ -34,22 +35,25 @@ class GameWorld : public virtual Drawable {
     HelpingScreen* helpingScreen;
     GuardScreen* guardScreen;
     LeaderBoardScreen* leaderBoardScreen;
+    LoadGameScreen* loadGameScreen;
 
     friend class CareTaker;
     friend class SettingScreen;
+    friend class LoadGameScreen;
 
-    Mario mario;
+    Player player;
     Map map;
     Camera2D* camera;
     bool settingBoardIsOpen;
     bool helpingBoardIsOpen;
     bool leaderBoardIsOpen;
+    bool loadBoardIsOpen;
     GameState stateBeforePause;
     int remainingTimePointCount;
     int totalPlayedTime;
 
     bool pauseMusic;
-    bool pauseMario;
+    bool pausePlayer;
     // bool showOverlayOnPause;
 
     bool outroFinished;
@@ -67,13 +71,18 @@ class GameWorld : public virtual Drawable {
     const float maxDistForCollisionCheck;
 
     Memento* dataFromGameWorldToSave();
-    void restoreDataFromMemento(const Memento* memento) const;
+    void restoreDataFromMemento(const Memento* memento);
 
     Memento* dataFromGameWorldToLeaderboard();
+    
+    Data lastCheckpointData;
+    bool hasCheckpoint = false;
+    CareTaker* careTaker;
+
 
 public:
 
-    // static bool immortalMario;
+    // static bool immortalPlayer;
     static GameState state;
     static float gravity;
 
@@ -96,12 +105,14 @@ public:
 
     void addToTotalPlayedTime(float timeToAdd);
 
+    void stopAllMusic();
     void resetMap();
     void resetGame();
     void nextMap();
-    void pauseGame(bool playPauseSFX, bool pauseMusic, bool pauseMario, bool showSettingBoard, bool showHelpingBoard);
+    void pauseGame(bool playPauseSFX, bool pauseMusic, bool pausePlayer, bool showSettingBoard, bool showHelpingBoard);
     void unpauseGame();
-    void showGuardScreen(GuardAction action);
+    void showGuardScreen(GuardAction action); 
+    CareTaker* getCareTaker() const { return careTaker; } 
 
     // Distance threshold getter for collision optimization
     float getMaxDistForCollisionCheck() const;
