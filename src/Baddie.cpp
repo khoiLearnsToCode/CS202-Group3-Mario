@@ -59,6 +59,9 @@ void Baddie::setAttributesOnDying() {
     vel.y = -200;
 }
 
+void Baddie::onNorthCollision() {
+}
+
 void Baddie::onSouthCollision() {
 }
 

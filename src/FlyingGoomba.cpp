@@ -18,7 +18,8 @@ FlyingGoomba::FlyingGoomba(Vector2 pos, Vector2 dim, Vector2 vel, Color color) :
     timeAcum(0.0f),
     amplitude(50.0f),      // Biên độ dao động: 50 pixel lên xuống
     frequency(2.0f),       // Tần số: hoàn thành 2 chu kỳ mỗi giây
-    initialY(pos.y) {      // Lưu vị trí y ban đầu
+    initialY(pos.y),       // Lưu vị trí y ban đầu
+    phaseOffset(0.0f) {    // Không có độ lệch pha ban đầu
 }
 
 FlyingGoomba::~FlyingGoomba() = default;
@@ -42,22 +43,43 @@ void FlyingGoomba::update() {
             facingDirection = DIRECTION_LEFT;
         }
 
-        // Cập nhật chuyển động ngang (qua lại)
-        moveDistance += fabs(vel.x) * delta;
-        if (moveDistance >= maxMoveDistance) {
-            vel.x = -vel.x; // Đảo ngược hướng di chuyển ngang
-            moveDistance = 0.0f; // Đặt lại bộ đếm khoảng cách
+        if (hitsToDie == 2) {
+            // Chuyển động bay (khi còn 2 mạng)
+            // Cập nhật chuyển động ngang (qua lại)
+            moveDistance += fabs(vel.x) * delta;
+            if (moveDistance >= maxMoveDistance) {
+                vel.x = -vel.x; // Đảo ngược hướng di chuyển ngang
+                moveDistance = 0.0f; // Đặt lại bộ đếm khoảng cách
+            }
+
+            // Cập nhật vị trí x
+            pos.x = pos.x + vel.x * delta;
+
+            // Cập nhật vị trí y theo chuyển động hình sin
+            timeAcum += delta;
+
+            pos.y = initialY + amplitude * sin(frequency * timeAcum + phaseOffset);
         }
+        else {
+            // Chuyển động như Goomba thường (khi còn 1 mạng - đi bộ với trọng lực)
+            pos.x = pos.x + vel.x * delta;
+            pos.y = pos.y + vel.y * delta;
 
-        // Cập nhật vị trí x
-        pos.x = pos.x + vel.x * delta;
-
-        // Cập nhật vị trí y theo chuyển động hình sin
-        timeAcum += delta;
-        pos.y = initialY + amplitude * sin(frequency * timeAcum);
+            vel.y += GameWorld::gravity * delta;
+        }
 
     }
     else if (state == SPRITE_STATE_HIT) {
+        // When hit once, Flying Goomba should behave like a regular Goomba (fall with gravity)
+        // Update facing direction based on velocity
+        if (vel.x >= 0) {
+            facingDirection = DIRECTION_RIGHT;
+        }
+        else {
+            facingDirection = DIRECTION_LEFT;
+        }
+
+        // Apply horizontal and vertical movement with gravity
         pos.x = pos.x + vel.x * delta;
         pos.y = pos.y + vel.y * delta;
 
@@ -75,6 +97,7 @@ void FlyingGoomba::update() {
             dyingFrameAcum = 0;
             currentDyingFrame++;
             if (currentDyingFrame == maxDyingFrames) {
+                // Transition back to ACTIVE but as a walking Goomba (not flying)
                 state = SPRITE_STATE_ACTIVE;
             }
         }
@@ -151,9 +174,36 @@ void FlyingGoomba::updateCollisionProbes() {
     cpW.setY(pos.y + dim.y / 2 - cpW.getHeight() / 2);
 }
 
+void FlyingGoomba::onNorthCollision() {
+    // Properly reverse y-axis motion when hitting ceiling while flying
+    if (hitsToDie == 2) {
+        // Calculate current phase angle
+        float currentPhase = frequency * timeAcum + phaseOffset;
+        
+        // To reverse direction: new phase should be (π - current phase)
+        // This ensures continuity: sin(π - x) = sin(x) but with opposite derivative
+        float newPhase = 3.14159265359f - currentPhase;
+        
+        // Adjust phase offset to achieve the new phase with current timeAcum
+        phaseOffset = newPhase - frequency * timeAcum;
+    }
+}
+
 void FlyingGoomba::onSouthCollision() {
+    // Only bounce if still flying (has 2 hits remaining)
     if (hitsToDie == 2) {
         vel.y = -400;
+        
+        // Properly reverse y-axis motion when hitting ground while flying
+        // Calculate current phase angle
+        float currentPhase = frequency * timeAcum + phaseOffset;
+        
+        // To reverse direction: new phase should be (π - current phase)
+        // This ensures continuity: sin(π - x) = sin(x) but with opposite derivative
+        float newPhase = 3.14159265359f - currentPhase;
+        
+        // Adjust phase offset to achieve the new phase with current timeAcum
+        phaseOffset = newPhase - frequency * timeAcum;
     }
 }
 
@@ -171,6 +221,10 @@ void FlyingGoomba::onHit() {
         dim.x = 32;
         dim.y = 32;
         pos.y += 18;
+        
+        // When hit once, stop flying and start falling
+        vel.y = 0; // Start falling from current position
+        
         maxFrames = 2;
         currentFrame = 0;
         frameAcum = 0;

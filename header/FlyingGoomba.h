@@ -11,6 +11,7 @@ private:
     float amplitude;         // Biên độ dao động (độ cao lên xuống)
     float frequency;         // Tần số dao động (tốc độ lên xuống)
     float initialY;          // Vị trí y ban đầu để làm mốc cho dao động
+    float phaseOffset;       // Độ lệch pha để điều chỉnh sine wave
 public:
 
     FlyingGoomba( Vector2 pos, Vector2 dim, Vector2 vel, Color color );
@@ -19,6 +20,7 @@ public:
     void update() override;
     void draw() override;
     void updateCollisionProbes() override;
+    void onNorthCollision() override;
     void onSouthCollision() override;
     void onHit() override;
 
