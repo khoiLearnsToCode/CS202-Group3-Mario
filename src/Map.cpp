@@ -554,37 +554,37 @@ void Map::loadUserData() {
             else if (entityID >= 121 && entityID <= 158) {
                 Baddie* newBaddie = nullptr;
 
-                if (entityID == 121) {
+                if (entityID == 121 || entityID == 122) {
                     newBaddie = new BlueKoopaTroopa(pos, {32,54}, {-100,0}, BLUE);
-                } else if (entityID == 123) {
+                } else if (entityID == 123 || entityID == 124) {
                     newBaddie = new BobOmb(pos, {24,30}, {-100,0}, BLACK);
                 } else if (entityID == 125) { // bullet bill
                     newBaddie = new BulletBill({pos.x, pos.y + 2 * TILE_WIDTH}, {32,28}, {-200,0}, BLACK);
-                } else if (entityID == 126) { // buzzy beetle
+                } else if (entityID == 126 || entityID == 127) { // buzzy beetle
                     newBaddie = new BuzzyBeetle(pos, {32,32}, {-80,0}, BLUE);
-                } else if (entityID == 128) { // flying goomba
+                } else if (entityID >= 128 && entityID <= 131) { // flying goomba
                     newBaddie = new FlyingGoomba(pos, {66,50}, {-100,0}, MAROON);
-                } else if (entityID == 132) { // goomba
+                } else if (entityID == 132 || entityID == 133) { // goomba
                     newBaddie = new Goomba(pos, {32,30}, {-100,0}, MAROON);
-                } else if (entityID == 134) { // green koopa troopa
+                } else if (entityID == 134 || entityID == 135) { // green koopa troopa
                     newBaddie = new GreenKoopaTroopa(pos, {32,54}, {-100,0}, GREEN);
-                } else if (entityID == 136) { // jumping piranha plant
+                } else if (entityID >= 136 && entityID <= 139) { // jumping piranha plant
                     newBaddie = new JumpingPiranhaPlant({pos.x + 16, pos.y + 34}, {32,42}, RED);
-                } else if (entityID == 140) { // monty mole
+                } else if (entityID == 140 || entityID == 141) { // monty mole
                     newBaddie = new MontyMole(pos, {32,30}, {-200,0}, BROWN);
-                } else if (entityID == 142) { // mummy beetle
+                } else if (entityID == 142 || entityID == 143) { // mummy beetle
                     newBaddie = new MummyBeetle(pos, {32,32}, {-80,0}, GRAY);
-                } else if (entityID == 144) { // muncher
+                } else if (entityID == 144 || entityID == 145) { // muncher
                     newBaddie = new Muncher(pos, {32,30}, BROWN);
-                } else if (entityID == 146) { // piranha plant
+                } else if (entityID == 146 || entityID == 147) { // piranha plant
                     newBaddie = new PiranhaPlant(pos, {32,66}, RED);
-                } else if (entityID == 148) { // red koopa troopa
+                } else if (entityID == 148 || entityID == 149) { // red koopa troopa
                     newBaddie = new RedKoopaTroopa(pos, {32,54}, {-100,0}, RED);
-                } else if (entityID == 152) { // rex
+                } else if (entityID >= 150 && entityID <= 153) { // rex
                     newBaddie = new Rex(pos, {40,64}, {-100,0}, VIOLET);
-                } else if (entityID == 154) { // swooper
+                } else if (entityID >= 154 && entityID <= 156) { // swooper
                     newBaddie = new Swooper(pos, {32,34}, {-100,0}, BLACK);
-                } else if (entityID == 157) { // yellow koopa troopa
+                } else if (entityID == 157 || entityID == 158) { // yellow koopa troopa
                     newBaddie = new YellowKoopaTroopa(pos, {32,54}, {-100,0}, YELLOW);
                 }
 
