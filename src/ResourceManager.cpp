@@ -232,9 +232,9 @@ void ResourceManager::loadTextures() {
         textures["transitioningLuigiSS1L"] = texture2DFlipHorizontal(textures["transitioningLuigiSS1R"]);
         textures["transitioningLuigiSS2L"] = texture2DFlipHorizontal(textures["transitioningLuigiSS2R"]);
 
-        textures["transitioningLuigiSF0R"] = textureColorReplace(textures["transitioningLuigiSS0R"], flowerMarioReplacePallete);
-        textures["transitioningLuigiSF1R"] = textureColorReplace(textures["transitioningLuigiSS1R"], flowerMarioReplacePallete);
-        textures["transitioningLuigiSF2R"] = textureColorReplace(textures["transitioningLuigiSS2R"], flowerMarioReplacePallete);
+        textures["transitioningLuigiSF0R"] = LoadTexture("../resource/graphic/sprites/luigi/TransitioningFireLuigi_0.png");
+        textures["transitioningLuigiSF1R"] = LoadTexture("../resource/graphic/sprites/luigi/TransitioningFireLuigi_1.png");
+        textures["transitioningLuigiSF2R"] = LoadTexture("../resource/graphic/sprites/luigi/TransitioningFireLuigi_2.png");
         textures["transitioningLuigiSF0L"] = texture2DFlipHorizontal(textures["transitioningLuigiSF0R"]);
         textures["transitioningLuigiSF1L"] = texture2DFlipHorizontal(textures["transitioningLuigiSF1R"]);
         textures["transitioningLuigiSF2L"] = texture2DFlipHorizontal(textures["transitioningLuigiSF2R"]);
@@ -274,40 +274,40 @@ void ResourceManager::loadTextures() {
         textures["superLuigi0TfR"] = LoadTexture("../resource/graphic/sprites/luigi/SuperLuigiThrowingFireball_0.png");
         textures["superLuigi0TfL"] = texture2DFlipHorizontal(textures["superLuigi0TfR"]);
 
-        //// flower luigi
-        //textures["flowerLuigi0R"] = textureColorReplace(textures["superLuigi0R"], flowerLuigiReplacePallete);
-        //textures["flowerLuigi1R"] = textureColorReplace(textures["superLuigi1R"], flowerLuigiReplacePallete);
-        //textures["flowerLuigi2R"] = textureColorReplace(textures["superLuigi2R"], flowerLuigiReplacePallete);
-        //textures["flowerLuigi0L"] = texture2DFlipHorizontal(textures["flowerLuigi0R"]);
-        //textures["flowerLuigi1L"] = texture2DFlipHorizontal(textures["flowerLuigi1R"]);
-        //textures["flowerLuigi2L"] = texture2DFlipHorizontal(textures["flowerLuigi2R"]);
+        // flower luigi
+        textures["flowerLuigi0R"] = LoadTexture("../resource/graphic/sprites/luigi/FireLuigi_0.png");
+        textures["flowerLuigi1R"] = LoadTexture("../resource/graphic/sprites/luigi/FireLuigi_1.png");
+        textures["flowerLuigi2R"] = LoadTexture("../resource/graphic/sprites/luigi/FireLuigi_2.png");
+        textures["flowerLuigi0L"] = texture2DFlipHorizontal(textures["flowerLuigi0R"]);
+        textures["flowerLuigi1L"] = texture2DFlipHorizontal(textures["flowerLuigi1R"]);
+        textures["flowerLuigi2L"] = texture2DFlipHorizontal(textures["flowerLuigi2R"]);
 
-        //textures["flowerLuigi0RuR"] = textureColorReplace(textures["superLuigi0RuR"], flowerLuigiReplacePallete);
-        //textures["flowerLuigi1RuR"] = textureColorReplace(textures["superLuigi1RuR"], flowerLuigiReplacePallete);
-        //textures["flowerLuigi2RuR"] = textureColorReplace(textures["superLuigi2RuR"], flowerLuigiReplacePallete);
-        //textures["flowerLuigi0RuL"] = texture2DFlipHorizontal(textures["flowerLuigi0RuR"]);
-        //textures["flowerLuigi1RuL"] = texture2DFlipHorizontal(textures["flowerLuigi1RuR"]);
-        //textures["flowerLuigi2RuL"] = texture2DFlipHorizontal(textures["flowerLuigi2RuR"]);
+        textures["flowerLuigi0RuR"] = LoadTexture("../resource/graphic/sprites/luigi/FireLuigiRunning_0.png");
+        textures["flowerLuigi1RuR"] = LoadTexture("../resource/graphic/sprites/luigi/FireLuigiRunning_1.png");
+        textures["flowerLuigi2RuR"] = LoadTexture("../resource/graphic/sprites/luigi/FireLuigiRunning_2.png");
+        textures["flowerLuigi0RuL"] = texture2DFlipHorizontal(textures["flowerLuigi0RuR"]);
+        textures["flowerLuigi1RuL"] = texture2DFlipHorizontal(textures["flowerLuigi1RuR"]);
+        textures["flowerLuigi2RuL"] = texture2DFlipHorizontal(textures["flowerLuigi2RuR"]);
 
-        //textures["flowerLuigi0JuR"] = textureColorReplace(textures["superLuigi0JuR"], flowerLuigiReplacePallete);
-        //textures["flowerLuigi0JuL"] = texture2DFlipHorizontal(textures["flowerLuigi0JuR"]);
+        textures["flowerLuigi0JuR"] = LoadTexture("../resource/graphic/sprites/luigi/FireLuigiJumping_0.png");
+        textures["flowerLuigi0JuL"] = texture2DFlipHorizontal(textures["flowerLuigi0JuR"]);
 
-        //textures["flowerLuigi0JuRuR"] = textureColorReplace(textures["superLuigi0JuRuR"], flowerLuigiReplacePallete);
-        //textures["flowerLuigi0JuRuL"] = texture2DFlipHorizontal(textures["flowerLuigi0JuRuR"]);
+        textures["flowerLuigi0JuRuR"] = LoadTexture("../resource/graphic/sprites/luigi/FireLuigiJumpingAndRunning_0.png");
+        textures["flowerLuigi0JuRuL"] = texture2DFlipHorizontal(textures["flowerLuigi0JuRuR"]);
 
-        //textures["flowerLuigi0FaR"] = textureColorReplace(textures["superLuigi0FaR"], flowerLuigiReplacePallete);
-        //textures["flowerLuigi0FaL"] = texture2DFlipHorizontal(textures["flowerLuigi0FaR"]);
+        textures["flowerLuigi0FaR"] = LoadTexture("../resource/graphic/sprites/luigi/FireLuigiFalling_0.png");
+        textures["flowerLuigi0FaL"] = texture2DFlipHorizontal(textures["flowerLuigi0FaR"]);
 
-        //textures["flowerLuigi0LuR"] = textureColorReplace(textures["superLuigi0LuR"], flowerLuigiReplacePallete);
-        //textures["flowerLuigi0LuL"] = texture2DFlipHorizontal(textures["flowerLuigi0LuR"]);
+        textures["flowerLuigi0LuR"] = LoadTexture("../resource/graphic/sprites/luigi/FireLuigiLookingUp_0.png");
+        textures["flowerLuigi0LuL"] = texture2DFlipHorizontal(textures["flowerLuigi0LuR"]);
 
-        //textures["flowerLuigi0DuR"] = textureColorReplace(textures["superLuigi0DuR"], flowerLuigiReplacePallete);
-        //textures["flowerLuigi0DuL"] = texture2DFlipHorizontal(textures["flowerLuigi0DuR"]);
+        textures["flowerLuigi0DuR"] = LoadTexture("../resource/graphic/sprites/luigi/FireLuigiDucking_0.png");
+        textures["flowerLuigi0DuL"] = texture2DFlipHorizontal(textures["flowerLuigi0DuR"]);
 
-        //textures["flowerLuigi0Vic"] = textureColorReplace(textures["superLuigi0Vic"], flowerLuigiReplacePallete);
+        textures["flowerLuigi0Vic"] = LoadTexture("../resource/graphic/sprites/luigi/FireLuigiVictory.png");
 
-        //textures["flowerLuigi0TfR"] = textureColorReplace(textures["superLuigi0TfR"], flowerLuigiReplacePallete);
-        //textures["flowerLuigi0TfL"] = texture2DFlipHorizontal(textures["flowerLuigi0TfR"]);
+        textures["flowerLuigi0TfR"] = LoadTexture("../resource/graphic/sprites/luigi/FireLuigiThrowingFireball_0.png");
+        textures["flowerLuigi0TfL"] = texture2DFlipHorizontal(textures["flowerLuigi0TfR"]);
 
         // fireball
         textures["fireball0R"] = LoadTexture("../resource/graphic/sprites/mario/FlowerMarioFireball_0.png");

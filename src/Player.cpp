@@ -225,7 +225,7 @@ void Player::update() {
                     transitionCurrentFramePos = 0;
                     state = lastStateBeforeTransition;
                     changeToSmall();
-                    // releaseReservedPowerUp();
+                    releaseReservedPowerUp();
                     gw->unpauseGame();
                 }
             }
@@ -830,6 +830,30 @@ void Player::setReservedPowerUp(PlayerType reservedPowerUp) {
 
 PlayerType Player::getReservedPowerUp() const {
     return reservedPowerUp;
+}
+
+void Player::releaseReservedPowerUp() {
+
+    Item* item = nullptr;
+	Vector2 itemPos = { getX() + getWidth() / 2 - 16, getY() - 32 }; // Set item position to be above the player
+    itemPos.x -= 16;
+
+    if (reservedPowerUp == PLAYER_TYPE_SUPER) {
+        item = new Mushroom(itemPos, Vector2{ 32, 32 }, Vector2{ 0, 150 }, RED, false, true, true);
+    }
+    else if (reservedPowerUp == PLAYER_TYPE_FLOWER) {
+        item = new FireFlower(itemPos, Vector2{ 32, 32 }, Vector2{ 0, 150 }, RED, true, true);
+    }
+
+    if (item != nullptr) {
+        item->setState(SPRITE_STATE_ACTIVE);
+        item->setFacingDirection(facingDirection);
+        map->getItems().push_back(item);
+        PlaySound(ResourceManager::getInstance().getSounds()["reserveItemRelease"]);
+    }
+
+    reservedPowerUp = PLAYER_TYPE_SMALL;
+
 }
 
 PlayerType Player::getType() const {
