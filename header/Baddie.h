@@ -29,6 +29,7 @@ public:
     void draw() override = 0;
     void activateWithPlayerProximity( Player &player );
     virtual void setAttributesOnDying();
+    virtual void onNorthCollision();
     virtual void onSouthCollision();
     virtual void onHit();
     virtual void followTheLeader( Sprite *sprite );
