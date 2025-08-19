@@ -22,7 +22,7 @@ GameWorld::GameWorld() :
         false           
     ),
 
-    map(mario, 1, true, this),
+    map(player, 3, true, this),
     camera(nullptr),
     settingBoardIsOpen(false),
     helpingBoardIsOpen(false),
@@ -1133,7 +1133,7 @@ void GameWorld::inputAndUpdate() {
     }
 
     else if ( state == GAME_STATE_GAME_OVER ) {
-        mario.playGameOverMusicStream();
+        player.playGameOverMusicStream();
         CareTaker caretaker(this);
         caretaker.saveToCareTakerLeaderBoard();
 		state = GAME_STATE_LEADERBOARD_SCREEN;
