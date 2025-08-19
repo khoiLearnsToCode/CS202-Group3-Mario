@@ -1147,8 +1147,9 @@ void GameWorld::inputAndUpdate() {
         }
     }
 
-    // After updating player, baddies, items, etc.
+	// Added additional fireball collision checks
     for (auto& fireball : player.fireballs) {
+
 		// Check fireball collisions with baddies
         /*for (auto& baddie : Baddies) {
             if (baddie->getState() != SPRITE_STATE_DYING && baddie->getState() != SPRITE_STATE_TO_BE_REMOVED) {
@@ -1162,6 +1163,7 @@ void GameWorld::inputAndUpdate() {
                 }
             }
         }*/
+
 		// Check fireball collisions with tiles
         for (auto& tile : Tiles) {
             if (shouldCheckCollision(fireball.getPos(), fireball.getDim(), tile->getPos(), tile->getDim(), maxDistForCollisionCheck)) {
@@ -1182,6 +1184,7 @@ void GameWorld::inputAndUpdate() {
                 }
             }
         }
+
 		// Check fireball collisions with blocks
         for (auto& block : Blocks) {
             if (shouldCheckCollision(fireball.getPos(), fireball.getDim(), block->getPos(), block->getDim(), maxDistForCollisionCheck)) {

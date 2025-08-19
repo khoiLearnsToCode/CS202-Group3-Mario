@@ -144,7 +144,7 @@ public:
 
     void setReservedPowerUp(PlayerType reservedPowerUp);
     PlayerType getReservedPowerUp() const;
-	/*void releaseReservedPowerUp();*/ // Needs Item class implementation
+	void releaseReservedPowerUp();
 
     PlayerType getType() const;
     void setInvulnerable(bool invulnerable);
