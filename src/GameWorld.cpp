@@ -1153,6 +1153,8 @@ void GameWorld::inputAndUpdate() {
     else if ( state == GAME_STATE_GAME_OVER ) {
         player.playGameOverMusicStream();
         careTaker -> saveToCareTakerLeaderBoard();
+        careTaker->releaseLeaderBoardData();
+        leaderBoardScreen->setLatestDataLoaded(true);
 		state = GAME_STATE_LEADERBOARD_SCREEN;
     }
 
@@ -1459,6 +1461,8 @@ void GameWorld::nextMap() {
     } else {
         state = GAME_STATE_FINISHED;
         careTaker->saveToCareTakerLeaderBoard();
+		careTaker->releaseLeaderBoardData();
+		leaderBoardScreen->setLatestDataLoaded(true);
     }
 }
 
