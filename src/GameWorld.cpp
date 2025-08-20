@@ -172,6 +172,7 @@ void GameWorld::initScreensAndButtons() {
 
     if (leaderBoardScreen == nullptr) {
         leaderBoardScreen = new LeaderBoardScreen();
+		//leaderBoardScreen->initData(); // Initialize leaderboard data
     }
 
     if (mapEditorScreen1 == nullptr) {
@@ -1060,8 +1061,7 @@ void GameWorld::inputAndUpdate() {
 
             else if (menuScreen->getButton("LEADERBOARD")->isReleased()) {
                 state = GAME_STATE_LEADERBOARD_SCREEN;
-                CareTaker caretaker(this);
-                caretaker.releaseLeaderBoardData();
+                careTaker->releaseLeaderBoardData();
             }
 
             else if (menuScreen->getButton("EXIT")->isReleased()) {
@@ -1152,8 +1152,7 @@ void GameWorld::inputAndUpdate() {
     
     else if ( state == GAME_STATE_GAME_OVER ) {
         player.playGameOverMusicStream();
-        CareTaker caretaker(this);
-        caretaker.saveToCareTakerLeaderBoard();
+        careTaker -> saveToCareTakerLeaderBoard();
 		state = GAME_STATE_LEADERBOARD_SCREEN;
     }
 
@@ -1342,8 +1341,7 @@ void GameWorld::draw() {
 
             if ( GetKeyPressed() ) {
                 StopMusicStream( musics["ending"] );
-                CareTaker caretaker(this);
-                caretaker.releaseLeaderBoardData();
+                careTaker->releaseLeaderBoardData();
                 state = GAME_STATE_LEADERBOARD_SCREEN;
                 resetGame();
             }
@@ -1456,13 +1454,11 @@ void GameWorld::nextMap() {
         totalPlayedTime += static_cast<int>(player.getEllapsedTime());
         player.setPointsFromPreviousMap(player.getPoints());
         player.setCoinsFromPreviousMap(player.getCoins());
-        CareTaker caretaker(this);
-		    caretaker.saveToCareTakerLeaderBoard();
+	    // careTaker -> saveToCareTakerLeaderBoard();
         player.reset(false, false);
     } else {
         state = GAME_STATE_FINISHED;
-        CareTaker caretaker(this);
-        caretaker.saveToCareTakerLeaderBoard();
+        careTaker->saveToCareTakerLeaderBoard();
     }
 }
 

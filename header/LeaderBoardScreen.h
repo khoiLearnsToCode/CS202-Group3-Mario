@@ -4,7 +4,7 @@
 #include "raylib.h"
 #include "ResourceManager.h"
 #include "Button.h"
-
+#include "CareTaker.h"
 
 class LeaderBoardScreen : public Screen {
 public:
@@ -20,6 +20,8 @@ public:
     friend class CareTaker;
 
     Button* getReturnButton() const;
+
+    //void initData();
 
 private:
     Texture2D backgroundTexture;

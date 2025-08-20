@@ -27,7 +27,6 @@ CareTaker::CareTaker(GameWorld* gw) : gw(gw) {
                 std::string formattedDate = rawDate;
                 std::istringstream iss(rawDate);
                 std::string weekday, month, day, time, year;
-                std::string formattedTime = time;
                 if (iss >> weekday >> month >> day >> time >> year) {
                     std::string monthNum = "01";
                     if (month == "Jan") monthNum = "01";
@@ -46,11 +45,10 @@ CareTaker::CareTaker(GameWorld* gw) : gw(gw) {
                 }
                 else {
                     formattedDate = rawDate;
-                    formattedTime = "";
                 }
 
                 Data data(0, score, lives, coins, yoshiCoins, clearanceTime);
-                Memento* memento = new ConcreteMemento(data, formattedDate , formattedTime);
+                Memento* memento = new ConcreteMemento(data, formattedDate , time);
                 leaderboardMementos.push_back(memento);
             }
             std::sort(leaderboardMementos.begin(), leaderboardMementos.end(),
@@ -118,36 +116,36 @@ CareTaker::CareTaker(GameWorld* gw) : gw(gw) {
 }
 
 CareTaker::~CareTaker() {
-    fout.open("../../../../resource/leaderboardData.json");
-    if (!fout.is_open()) {
-		std::cerr << "Error opening leaderBoardData.json for writing." << std::endl;
-    }
-    else {
-        try {
-            json j;
-            j["leaderboard"] = json::array();
-            if (!leaderboardMementos.empty()){
-                for (const auto& memento : leaderboardMementos) {
-                    Data data = memento->getData();
-                    json entry;
-                    entry["score"] = data.score;
-                    entry["lives"] = data.lives;
-                    entry["coins"] = data.coins;
-                    entry["yoshiCoins"] = data.yoshiCoins;
-                    entry["clearanceTime"] = data.clearanceTime;
-                    entry["date"] = memento->getDate();
-                    entry["time"] = memento->getTime();
-                    j["leaderboard"].push_back(entry);
-                }
-                fout << j.dump(4);
-            }
-            fout.close();
-        }
-        catch (const std::exception& e) {
-			std::cerr << "WARNING: Error writing to leaderBoardData.json: " << e.what() << std::endl;
-            fout.close();
-        }
-    }
+    //out.open("../../../../resource/leaderboardData.json");
+    //f (!fout.is_open()) {
+	//	std::cerr << "Error opening leaderBoardData.json for writing." << std::endl;
+    //
+    //lse {
+    //   try {
+    //       json j;
+    //       j["leaderboard"] = json::array();
+    //       if (!leaderboardMementos.empty()){
+    //           for (const auto& memento : leaderboardMementos) {
+    //               Data data = memento->getData();
+    //               json entry;
+    //               entry["score"] = data.score;
+    //               entry["lives"] = data.lives;
+    //               entry["coins"] = data.coins;
+    //               entry["yoshiCoins"] = data.yoshiCoins;
+    //               entry["clearanceTime"] = data.clearanceTime;
+    //               entry["date"] = memento->getDate();
+    //               entry["time"] = memento->getTime();
+    //               j["leaderboard"].push_back(entry);
+    //           }
+    //           fout << j.dump(4);
+    //       }
+    //       fout.close();
+    //   }
+    //   catch (const std::exception& e) {
+	//		std::cerr << "WARNING: Error writing to leaderBoardData.json: " << e.what() << std::endl;
+    //       fout.close();
+    //   }
+    //
     // fout.open("../savedGame.json");
     // if (!fout.is_open()) {
     //     std::cerr << "Error opening save data file for writing." << std::endl;
@@ -248,6 +246,34 @@ void CareTaker::saveToCareTakerLeaderBoard() {
             delete leaderboardMementos[i];
         }
         leaderboardMementos.resize(5);
+    }
+    std::ofstream fout("../../../../resource/leaderboardData.json");
+    if (!fout.is_open()) {
+        std::cerr << "Error: Cannot open leaderboardData.json for writing." << std::endl;
+        return;
+    }
+
+    try {
+        json j;
+        j["leaderboard"] = json::array();
+        for (const auto& memento : leaderboardMementos) {
+            Data data = memento->getData();
+            json entry;
+            entry["score"] = data.score;
+            entry["lives"] = data.lives;
+            entry["coins"] = data.coins;
+            entry["yoshiCoins"] = data.yoshiCoins;
+            entry["clearanceTime"] = data.clearanceTime;
+            entry["date"] = memento->getDate();
+            j["leaderboard"].push_back(entry);
+        }
+        fout << j.dump(4);
+        fout.close();
+        std::cout << "Leaderboard saved to file with " << leaderboardMementos.size() << " entries." << std::endl;
+    }
+    catch (const std::exception& e) {
+        std::cerr << "Error writing to leaderboardData.json: " << e.what() << std::endl;
+        fout.close();
     }
     std::cout << "Score saved to leaderboard." << std::endl;
 }

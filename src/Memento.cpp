@@ -1,9 +1,13 @@
 #include "Memento.h"
+#include <sstream>
+#include <iomanip>
 
 ConcreteMemento::ConcreteMemento(const Data& data) : data(data) {
     std::time_t now = std::time(nullptr);
-    date = std::ctime(&now);
-    time = std::to_string(now);
+    std::stringstream date_ss;
+    date_ss << std::put_time(std::localtime(&now), "%Y-%m-%d");
+    date = date_ss.str();
+    time = "";
 }
 
 ConcreteMemento::ConcreteMemento(const Data& data, const std::string& date) : 
