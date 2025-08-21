@@ -45,8 +45,6 @@ GameWorld::GameWorld() :
     mapEditorScreen2(nullptr),
     selectCharacterScreen(nullptr),
     settingScreen(nullptr),
-    loadGameScreen(nullptr),
-    loadBoardIsOpen(false),
     helpingScreen(nullptr),
     guardScreen(nullptr),
     leaderBoardScreen(nullptr)
@@ -99,11 +97,6 @@ GameWorld::~GameWorld() {
     if (leaderBoardScreen != nullptr) {
         delete leaderBoardScreen;
         leaderBoardScreen = nullptr;
-    }
-  
-    if (loadGameScreen != nullptr) {
-        delete loadGameScreen;
-        loadGameScreen = nullptr;
     }
 
     if (settingButton != nullptr) {
@@ -196,9 +189,6 @@ void GameWorld::initScreensAndButtons() {
 
     if (guardScreen == nullptr) {
         guardScreen = new GuardScreen();
-    }
-    if (loadGameScreen == nullptr) {
-        loadGameScreen = new LoadGameScreen(this);
     }
 
     if (settingButton == nullptr) {
@@ -923,7 +913,6 @@ void GameWorld::inputAndUpdate() {
         else if (guardScreen->getAcceptButton()->isReleased()) {
             // Execute the guarded action
             if (guardScreen->getCurrentAction() == GUARD_ACTION_HOME) {
-                careTaker->save();
                 resetGame();
                 state = GAME_STATE_TITLE_SCREEN;
                 settingBoardIsOpen = false;
@@ -1044,9 +1033,7 @@ void GameWorld::inputAndUpdate() {
             }
 
             else if (menuScreen->getButton("LOAD GAME")->isReleased()) {
-				/*loadBoardIsOpen = true;
-                state = GAME_STATE_LOADGAME_SCREEN;*/
-				std::cout << "Load Game button pressed. Load game functionality will be implemented later." << std::endl;
+                state = GAME_STATE_LOADGAME_SCREEN;
             }
 
             else if (menuScreen->getButton("DESIGN MAP")->isReleased()) {
@@ -1148,6 +1135,7 @@ void GameWorld::inputAndUpdate() {
             state = GAME_STATE_MENU_SCREEN;
             }
         }
+    
     }
     
     else if ( state == GAME_STATE_GAME_OVER ) {
@@ -1359,12 +1347,10 @@ void GameWorld::draw() {
         } 
         
     }
+    
 
     if (settingBoardIsOpen) {
         settingScreen->draw();
-    }
-    if (loadBoardIsOpen) { 
-        loadGameScreen->draw();
     }
 
     if (helpingBoardIsOpen) {
@@ -1516,3 +1502,4 @@ float GameWorld::getMaxDistForCollisionCheck() const {
 void GameWorld::setCaretaker(CareTaker* caretaker) {
     this->careTaker = caretaker;
 }
+

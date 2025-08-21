@@ -35,7 +35,6 @@ class GameWorld : public virtual Drawable {
     HelpingScreen* helpingScreen;
     GuardScreen* guardScreen;
     LeaderBoardScreen* leaderBoardScreen;
-    LoadGameScreen* loadGameScreen;
 
     friend class CareTaker;
     friend class SettingScreen;
@@ -47,7 +46,6 @@ class GameWorld : public virtual Drawable {
     bool settingBoardIsOpen;
     bool helpingBoardIsOpen;
     bool leaderBoardIsOpen;
-    bool loadBoardIsOpen;
     GameState stateBeforePause;
     int remainingTimePointCount;
     int totalPlayedTime;
@@ -78,8 +76,6 @@ class GameWorld : public virtual Drawable {
     Data lastCheckpointData;
     bool hasCheckpoint = false;
     CareTaker* careTaker;
-
-
 
 public:
 

@@ -1,4 +1,4 @@
-#include "CareTaker.h"
+﻿#include "CareTaker.h"
 #include <string>
 #include <sstream>
 using json = nlohmann::json;
@@ -95,7 +95,7 @@ CareTaker::CareTaker(GameWorld* gw) : gw(gw) {
     // }  
     // fin.close(); 
 
-    fin.open("../resource/savedGame.json");
+    fin.open("../../../../resource/savedGame.json");
     if (fin.is_open()) {
         json j; fin >> j; fin.close();
         int n = j.value("numberOfSavedGames", 0);
@@ -164,7 +164,7 @@ CareTaker::~CareTaker() {
     //     j["savedGames"][i]["date"] = mementos[i]->getDate();
   
     ////////////////////////////////////////////////////////////////////////////////
-    fout.open("../resource/savedGame.json");
+    fout.open("../../../../resource/savedGame.json");
     if (!fout.is_open()) {
         std::cerr << "Error opening save data file for writing." << std::endl;
     }
@@ -195,23 +195,10 @@ CareTaker::~CareTaker() {
     leaderboardMementos.clear();
 }
 
-// Not implemented yet
 void CareTaker::save() {   
     Memento* memento = gw->dataFromGameWorldToSave();
     mementos.push_back(memento);
     std::cout << "Game saved successfully." << std::endl;
-}
-
-void CareTaker::restore(int index) {
-    if (index < 0 || index >= mementos.size()) {
-        std::cerr << "Invalid index for restore." << std::endl;
-        return;
-    }
-    Memento* memento = mementos[index];
-    gw->restoreDataFromMemento(memento);
-    delete memento; 
-    mementos.erase(mementos.begin() + index);
-    std::cout << "Game restored successfully from index " << index << "." << std::endl;
 }
 
 void CareTaker::showSavedData() const {
@@ -280,3 +267,4 @@ void CareTaker::releaseLeaderBoardData() const {
 std::vector<Memento*>& CareTaker::getLeaderBoard() {
     return leaderboardMementos;
 }
+
