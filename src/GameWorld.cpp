@@ -1359,11 +1359,9 @@ void GameWorld::draw() {
 
         }
         else if (state == GAME_STATE_LEADERBOARD_SCREEN) {
-            /*leaderBoardScreen->update(dt);*/
             if (leaderBoardScreen->leaderBoardShouldClose() || leaderBoardScreen->getReturnButton()->isReleased()) {
                 state = GAME_STATE_MENU_SCREEN;
-                resetGame(); // Reset game khi thoát khỏi LeaderBoardScreen
-                std::cout << "Exiting LeaderBoardScreen, game reset." << std::endl;
+                resetGame();
             }
         }
         
