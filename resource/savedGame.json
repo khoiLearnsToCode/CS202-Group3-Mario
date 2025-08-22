@@ -1,11 +1,11 @@
 {
     "savedGame": {
-        "coins": 0,
-        "date": "Fri Aug 22 03:10:41 2025\n",
+        "coins": 46,
+        "date": "Fri Aug 22 10:12:33 2025\n",
         "lives": 5,
         "mapID": 1,
-        "score": 0,
-        "timeRemaining": 398,
+        "score": 9200,
+        "timeRemaining": 386,
         "type": 0,
         "yoshiCoins": 0
     }

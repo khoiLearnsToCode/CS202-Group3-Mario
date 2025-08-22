@@ -1033,7 +1033,7 @@ void GameWorld::inputAndUpdate() {
             }
 
             else if (menuScreen->getButton("LOAD GAME")->isReleased()) {
-                state = GAME_STATE_LOADGAME_SCREEN;
+                careTaker->restore();
             }
 
             else if (menuScreen->getButton("DESIGN MAP")->isReleased()) {

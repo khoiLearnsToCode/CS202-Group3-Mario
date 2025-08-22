@@ -169,9 +169,6 @@ CareTaker::~CareTaker() {
 
 void CareTaker::save() {
     Memento* newMemento = gw->dataFromGameWorldToSave();
-    if (savedMemento != nullptr) {
-        delete savedMemento;  // Overwrite previous save
-    }
     savedMemento = newMemento;
     std::cout << "Game saved successfully (overwriting previous save)." << std::endl;
 }
