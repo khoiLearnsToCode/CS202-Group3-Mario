@@ -33,8 +33,9 @@ isMutedMusic(false), isMutedSFX(false), settingBoardIsOpenInMenuScreen(true), gw
     buttons.emplace("MUTESFX", new ButtonTextTexture("muteButton", {border.x + 100, border.y + 175}, 2.0f));
     buttons.emplace("UNMUTESFX", new ButtonTextTexture("unmuteButton", {border.x + 100, border.y + 175}, 2.0f));
 
-    buttons.emplace("HOME", new ButtonTextTexture("homeButton", {border.x + 100, border.y + 250}, 2.0f));
-    buttons.emplace("RESET", new ButtonTextTexture("resetButton", {border.x + 100, border.y + 325}, 2.0f));
+    buttons.emplace("HOME", new ButtonTextTexture("homeButton", {border.x + 100, border.y + 250}, 2.5f));
+    buttons.emplace("RESET", new ButtonTextTexture("resetButton", {border.x + 350, border.y + 250}, 2.5f));
+	buttons.emplace("SAVE", new ButtonTextTexture("saveButton", { border.x + 600, border.y + 250 }, 2.5f));
 
     GuiLoadStyle("../resource/font/candy.rgs");
 }
@@ -90,6 +91,17 @@ void SettingScreen::update() {
                 std::cerr << "GameWorld pointer is null. Cannot show guard screen." << std::endl;
             }
         }
+        if(buttons["SAVE"]->isReleased()) {
+            if (gw && gw->getCareTaker()) {
+                gw->getCareTaker()->save();
+                if (!isMutedSFX) {
+                    PlaySound(ResourceManager::getInstance().getSound("pause"));
+                }
+            }
+            else {
+                std::cerr << "Error: GameWorld or CareTaker is null, cannot save game." << std::endl;
+            }
+        }
     }
 }
 
@@ -101,7 +113,7 @@ void SettingScreen::draw() {
                         border.y - 60.0f };
     DrawTexture(settingLogo, logoPos.x, logoPos.y, WHITE);
     for (const auto& buttonPair : buttons) {
-        if ((buttonPair.first == "HOME" || buttonPair.first == "RESET") && settingBoardIsOpenInMenuScreen) {
+        if ((buttonPair.first == "HOME" || buttonPair.first == "RESET" || buttonPair.first == "SAVE") && settingBoardIsOpenInMenuScreen) {
             continue;
         }
         // Don't draw HOME and RESET buttons when guard screen is active

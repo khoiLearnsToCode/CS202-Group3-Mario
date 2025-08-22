@@ -592,6 +592,8 @@ void ResourceManager::loadTextures() {
         textures["helpButtonRelease"] = LoadTexture("../resource/graphic/ui/helpButtonRelease.png");
         textures["returnButtonPress"] = LoadTexture("../resource/graphic/ui/returnButtonPress.png");
         textures["returnButtonRelease"] = LoadTexture("../resource/graphic/ui/returnButtonRelease.png");
+        textures["saveButtonRelease"] = LoadTexture("../resource/graphic/ui/saveButtonRelease.png");
+        textures["saveButtonPress"] = LoadTexture("../resource/graphic/ui/saveButtonPress.png");
 
         textures["leaderButtonPress"] = LoadTexture("../resource/graphic/ui/leaderButtonPress.png");
         textures["leaderButtonRelease"] = LoadTexture("../resource/graphic/ui/leaderButtonRelease.png");

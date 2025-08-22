@@ -3,7 +3,7 @@
 #include <sstream>
 using json = nlohmann::json;
 
-CareTaker::CareTaker(GameWorld* gw) : gw(gw) {
+CareTaker::CareTaker(GameWorld* gw) : gw(gw), savedMemento(nullptr) {
     gw->setCaretaker(this);
     fin.open("../../../../resource/leaderboardData.json");
     if (!fin.is_open()) {
@@ -50,7 +50,7 @@ CareTaker::CareTaker(GameWorld* gw) : gw(gw) {
                 }
 
                 Data data(0, score, lives, coins, yoshiCoins, clearanceTime);
-                Memento* memento = new ConcreteMemento(data, formattedDate , formattedTime);
+                Memento* memento = new ConcreteMemento(data, formattedDate, formattedTime);
                 leaderboardMementos.push_back(memento);
             }
             std::sort(leaderboardMementos.begin(), leaderboardMementos.end(),
@@ -66,67 +66,47 @@ CareTaker::CareTaker(GameWorld* gw) : gw(gw) {
         }
     }
     catch (const std::exception& e) {
-		std::cerr << "WARNING: Error parsing leaderBoardData.json: " << e.what() << std::endl;
+        std::cerr << "WARNING: Error parsing leaderBoardData.json: " << e.what() << std::endl;
         fin.close();
     }
-    // fin.open("../resource/savedGame.json");
-    // if (!fin.is_open()) {
-    //     std::cerr << "WARNING: Error opening save data file." << std::endl;
-    // }
-
-    // json j;
-    // fin >> j;
-
-    // if (!j.contains("numberOfSavedGames")) {
-    //     std::cerr << "WARNING: No saved games found." << std::endl;
-    //     fin.close();
-    //     return;
-    // }
-    // int numberOfSavedGames = j["numberOfSavedGames"];
-    // for (int i = 0; i < numberOfSavedGames; ++i) {
-    //     int mapID = j["savedGames"][i]["mapID"];
-    //     int remainingTime = j["savedGames"][i]["remainingTime"];
-    //     int score = j["savedGames"][i]["score"];
-    //     int lives = j["savedGames"][i]["lives"];
-    //     std::string date = j["savedGames"][i]["date"];
-    //     Data data(mapID, remainingTime, score, lives);
-    //     Memento* memento = new ConcreteMemento(data, date);
-    //     mementos.push_back(memento);
-    // }  
-    // fin.close(); 
 
     fin.open("../../../../resource/savedGame.json");
     if (fin.is_open()) {
-        json j; fin >> j; fin.close();
-        int n = j.value("numberOfSavedGames", 0);
-        for (int i = 0; i < n; ++i) {
-            int mapID = j["savedGames"][i].value("mapID", 1);
-            int score = j["savedGames"][i].value("score", 0);
-            int lives = j["savedGames"][i].value("lives", 3);
-            int coins = j["savedGames"][i].value("coins", 0);
-            int yoshiCoins = j["savedGames"][i].value("yoshiCoins", 0);
-            int timeRemain = j["savedGames"][i].value("timeRemaining", 400);
-            int typeInt = j["savedGames"][i].value("type", 0);
-            std::string date = j["savedGames"][i].value("date", "");
+        try {
+            json j;
+            fin >> j;
+            fin.close();
+            if (j.contains("savedGame")) {
+                int mapID = j["savedGame"].value("mapID", 1);
+                int score = j["savedGame"].value("score", 0);
+                int lives = j["savedGame"].value("lives", 3);
+                int coins = j["savedGame"].value("coins", 0);
+                int yoshiCoins = j["savedGame"].value("yoshiCoins", 0);
+                int timeRemain = j["savedGame"].value("timeRemaining", 400);
+                int typeInt = j["savedGame"].value("type", 0);
+                std::string date = j["savedGame"].value("date", "");
 
-            Data d(mapID, score, lives, coins, yoshiCoins, timeRemain, (PlayerType)typeInt);
-            Memento* m = new ConcreteMemento(d, date);
-            mementos.push_back(m);
+                Data d(mapID, score, lives, coins, yoshiCoins, timeRemain, (PlayerType)typeInt);
+                savedMemento = new ConcreteMemento(d, date);
+            }
+        }
+        catch (const std::exception& e) {
+            std::cerr << "WARNING: Error parsing savedGame.json: " << e.what() << std::endl;
+            fin.close();
         }
     }
-    //leaderboardMementos.clear();
 }
 
 CareTaker::~CareTaker() {
     fout.open("../../../../resource/leaderboardData.json");
     if (!fout.is_open()) {
-		std::cerr << "Error opening leaderBoardData.json for writing." << std::endl;
+        std::cerr << "Error opening leaderBoardData.json for writing." << std::endl;
     }
     else {
         try {
             json j;
             j["leaderboard"] = json::array();
-            if (!leaderboardMementos.empty()){
+            if (!leaderboardMementos.empty()) {
                 for (const auto& memento : leaderboardMementos) {
                     Data data = memento->getData();
                     json entry;
@@ -144,94 +124,91 @@ CareTaker::~CareTaker() {
             fout.close();
         }
         catch (const std::exception& e) {
-			std::cerr << "WARNING: Error writing to leaderBoardData.json: " << e.what() << std::endl;
+            std::cerr << "WARNING: Error writing to leaderBoardData.json: " << e.what() << std::endl;
             fout.close();
         }
     }
-    // fout.open("../savedGame.json");
-    // if (!fout.is_open()) {
-    //     std::cerr << "Error opening save data file for writing." << std::endl;
-    // }
 
-    // json j;
-    // j["numberOfSavedGames"] = mementos.size();
-    // for (int i = 0; i < mementos.size(); ++i) {
-    //     Data data = mementos[i]->getData();
-    //     j["savedGames"][i]["mapID"] = data.mapID;
-    //     j["savedGames"][i]["remainingTime"] = data.remainingTime;
-    //     j["savedGames"][i]["score"] = data.score;
-    //     j["savedGames"][i]["lives"] = data.lives;
-    //     j["savedGames"][i]["date"] = mementos[i]->getDate();
-  
-    ////////////////////////////////////////////////////////////////////////////////
     fout.open("../../../../resource/savedGame.json");
     if (!fout.is_open()) {
-        std::cerr << "Error opening save data file for writing." << std::endl;
+        std::cerr << "Error opening savedGame.json for writing." << std::endl;
+    }
+    else {
+        try {
+            json j;
+            j["savedGame"] = json::object();  // Single object, not array
+            if (savedMemento != nullptr) {
+                Data data = savedMemento->getData();
+                j["savedGame"]["mapID"] = data.mapID;
+                j["savedGame"]["score"] = data.score;
+                j["savedGame"]["lives"] = data.lives;
+                j["savedGame"]["coins"] = data.coins;
+                j["savedGame"]["yoshiCoins"] = data.yoshiCoins;
+                j["savedGame"]["timeRemaining"] = data.clearanceTime;
+                j["savedGame"]["type"] = (int)data.playerType;
+                j["savedGame"]["date"] = savedMemento->getDate();
+            }
+            fout << j.dump(4);
+            fout.close();
+        }
+        catch (const std::exception& e) {
+            std::cerr << "WARNING: Error writing to savedGame.json: " << e.what() << std::endl;
+            fout.close();
+        }
     }
 
-    json j;
-    j["numberOfSavedGames"] = mementos.size();
-    for (int i = 0; i < mementos.size(); ++i) {
-        Data data = mementos[i]->getData();
-        j["savedGames"][i]["mapID"] = data.mapID;
-        j["savedGames"][i]["remainingTime"] = data.clearanceTime;
-        j["savedGames"][i]["score"] = data.score;
-        j["savedGames"][i]["lives"] = data.lives;
-        j["savedGames"][i]["coins"] = data.coins;  
-        j["savedGames"][i]["yoshiCoins"] = data.yoshiCoins;  
-        j["savedGames"][i]["date"] = mementos[i]->getDate();
-		j["savedGames"][i]["type"] = (int)data.playerType;
-    
+    if (savedMemento != nullptr) {
+        delete savedMemento;
+        savedMemento = nullptr;
     }
-    fout << j.dump(4);
-    fout.close();
-    for (auto memento : mementos) {
-        delete memento;
-    }
-    mementos.clear();
     for (auto memento : leaderboardMementos) {
         delete memento;
     }
     leaderboardMementos.clear();
 }
 
-void CareTaker::save() {   
-    Memento* memento = gw->dataFromGameWorldToSave();
-    mementos.push_back(memento);
-    std::cout << "Game saved successfully." << std::endl;
+void CareTaker::save() {
+    Memento* newMemento = gw->dataFromGameWorldToSave();
+    if (savedMemento != nullptr) {
+        delete savedMemento;  // Overwrite previous save
+    }
+    savedMemento = newMemento;
+    std::cout << "Game saved successfully (overwriting previous save)." << std::endl;
+}
+
+void CareTaker::restore() {
+    if (savedMemento != nullptr) {
+        gw->restoreDataFromMemento(savedMemento);
+        std::cout << "Game restored successfully." << std::endl;
+    }
+    else {
+        std::cout << "No saved game available." << std::endl;
+    }
 }
 
 void CareTaker::showSavedData() const {
-    if (mementos.empty()) {
-        std::cout << "No saved games available." << std::endl;
+    if (savedMemento == nullptr) {
+        std::cout << "No saved game available." << std::endl;
         return;
     }
-    for (int i = 0; i < mementos.size(); ++i) {
-        std::cout << "Saved Game " << i + 1 << ": " << mementos[i]->display() << std::endl;
-    }
+    std::cout << "Saved Game: " << savedMemento->display() << std::endl;
 }
 
-std::vector<Memento*> CareTaker::getSavedData() const {
-    // copy the mementos to a new vector to avoid exposing internal state
-    std::vector<Memento*> savedData;
-    for (const auto& memento : mementos) {
-        savedData.push_back(new ConcreteMemento(memento->getData(), memento->getDate()));
+Memento* CareTaker::getSavedData() const {
+    if (savedMemento == nullptr) {
+        return nullptr;
     }
-    return savedData;
+    return new ConcreteMemento(savedMemento->getData(), savedMemento->getDate());
 }
 
 void CareTaker::saveToCareTakerLeaderBoard() {
     Memento* memento = gw->dataFromGameWorldToLeaderboard();
     leaderboardMementos.push_back(memento);
-
-    // sort leaderboardMementos based on score
     std::sort(leaderboardMementos.begin(), leaderboardMementos.end(), [](const Memento* a, const Memento* b) {
         return a->getData().score > b->getData().score;
-    });
-
-    // keep only top 5, memory leak prevention
+        });
     if (leaderboardMementos.size() > 5) {
-        for (int i = 5; i < leaderboardMementos.size(); ++i) {
+        for (size_t i = 5; i < leaderboardMementos.size(); ++i) {
             delete leaderboardMementos[i];
         }
         leaderboardMementos.resize(5);
@@ -244,7 +221,6 @@ void CareTaker::releaseLeaderBoardData() const {
         std::cout << "No leaderboard data available." << std::endl;
         return;
     }
-
     std::vector<std::string> leaderboardData;
     for (const auto& memento : leaderboardMementos) {
         Data data = memento->getData();
@@ -260,11 +236,10 @@ void CareTaker::releaseLeaderBoardData() const {
             shortDate = rawDate.substr(pos + 1, 10);
         }
         leaderboardData.push_back(shortDate);
-    }  
-    gw->leaderBoardScreen->setLeaderboardDataAsStrings(leaderboardData);  
+    }
+    gw->leaderBoardScreen->setLeaderboardDataAsStrings(leaderboardData);
 }
 
 std::vector<Memento*>& CareTaker::getLeaderBoard() {
     return leaderboardMementos;
 }
-
