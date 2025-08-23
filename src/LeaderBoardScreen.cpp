@@ -2,7 +2,7 @@
 
 LeaderBoardScreen::LeaderBoardScreen() : Screen(), 
                                          font(ResourceManager::getInstance().getFont("SuperMario256")),
-                                         fontSize(20.0f), isLatestDataLoaded(false) {
+                                         fontSize(20.0f), isLatestDataLoaded(false){
 
     Image img = LoadImageFromTexture(textures["leaderboardScreen"]);
     //ImageResize(&img, img.width, img.height);
@@ -50,7 +50,6 @@ void LeaderBoardScreen::draw() {
     float rowSpacing = tableHeight / maxRow;
     for (int row = 0; row < rowCount; ++row) {
         float y = tableStartY + 40.0f + row * rowSpacing;
-        // Xử lý ngày thành yyyy/mm/dd
         std::string rawDate = leaderboardDataAsStrings[row * 6 + 5];
         std::string shortDate = rawDate;
         size_t pos = rawDate.find(' ');
@@ -92,3 +91,9 @@ void LeaderBoardScreen::setLatestDataLoaded(bool isLoaded) {
 Button* LeaderBoardScreen::getReturnButton() const {
     return returnButton;
 }
+
+//void LeaderBoardScreen::initData() {
+//    if (careTaker) {
+//        careTaker->releaseLeaderBoardData();
+//    }
+//}

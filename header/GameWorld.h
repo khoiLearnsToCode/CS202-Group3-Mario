@@ -1,6 +1,7 @@
 #pragma once
 
 class Player;
+class LeaderBoardScreen;
 
 #include "Drawable.h"
 #include "GameState.h"

@@ -2,11 +2,42 @@
     "leaderboard": [
         {
             "clearanceTime": 0,
-            "coins": 29,
-            "date": "2025-08-22",
-            "lives": 6,
-            "score": 54300,
-            "time": "",
+            "coins": 81,
+            "date": "2025-08-21",
+            "lives": 7,
+            "score": 127300,
+            "yoshiCoins": 0
+        },
+        {
+            "clearanceTime": 0,
+            "coins": 84,
+            "date": "2025-08-21",
+            "lives": 1,
+            "score": 126500,
+            "yoshiCoins": 0
+        },
+        {
+            "clearanceTime": 0,
+            "coins": 47,
+            "date": "2025-08-21",
+            "lives": -1,
+            "score": 87750,
+            "yoshiCoins": 0
+        },
+        {
+            "clearanceTime": 0,
+            "coins": 22,
+            "date": "2025-08-21",
+            "lives": -1,
+            "score": 53200,
+            "yoshiCoins": 0
+        },
+        {
+            "clearanceTime": 0,
+            "coins": 27,
+            "date": "2025-08-21",
+            "lives": 3,
+            "score": 33850,
             "yoshiCoins": 0
         }
     ]
