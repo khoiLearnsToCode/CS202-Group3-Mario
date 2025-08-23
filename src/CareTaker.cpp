@@ -252,7 +252,6 @@ void CareTaker::saveToCareTakerLeaderBoard() {
         std::cerr << "Error: Cannot open leaderboardData.json for writing." << std::endl;
         return;
     }
-
     try {
         json j;
         j["leaderboard"] = json::array();

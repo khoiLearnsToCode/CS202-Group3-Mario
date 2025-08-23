@@ -54,8 +54,7 @@ void LeaderBoardScreen::draw() {
         std::string shortDate = rawDate;
         size_t pos = rawDate.find(' ');
         if (pos != std::string::npos && rawDate.length() >= pos + 10) {
-            shortDate = rawDate.substr(pos + 1, 10); // lấy yyyy-mm-dd
-            //std::replace(shortDate.begin(), shortDate.end(), '-', '/'); // đổi - thành /
+            shortDate = rawDate.substr(pos + 1, 10);
         }
         DrawTextEx(font, std::to_string(row + 1).c_str(), { tableStartX + 0 * colWidth, y }, fontSize, 2.0f, BLACK); // Rank
         DrawTextEx(font, shortDate.c_str(), { tableStartX + 1 * colWidth, y }, fontSize, 2.0f, BLACK); // Date
@@ -91,9 +90,3 @@ void LeaderBoardScreen::setLatestDataLoaded(bool isLoaded) {
 Button* LeaderBoardScreen::getReturnButton() const {
     return returnButton;
 }
-
-//void LeaderBoardScreen::initData() {
-//    if (careTaker) {
-//        careTaker->releaseLeaderBoardData();
-//    }
-//}
