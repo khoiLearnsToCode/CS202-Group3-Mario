@@ -11,6 +11,7 @@ class LoadGame
 private:
     savedData* data;
     GameWorld* gw;
+
     std::ifstream fin;
     std::ofstream fout;
 public:
@@ -21,5 +22,6 @@ public:
 
     void save();
     void load();
+
     savedData* getsavedData();
 };

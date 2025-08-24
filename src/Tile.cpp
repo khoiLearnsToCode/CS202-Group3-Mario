@@ -54,12 +54,8 @@ void Tile::draw() {
         }
 
     }
-
-    //if (GameWorld::debug && color.a != 0) {
-    //    DrawRectangle(pos.x, pos.y, dim.x, dim.y, Fade(color, 0.5));
-    //}
-
 }
+   
 
 TileType Tile::getType() const {
     return type;

@@ -2,6 +2,7 @@
 #include <string>
 #include <sstream>
 using json = nlohmann::json;
+
 LoadGame::LoadGame(GameWorld* gw) :gw(gw), data(nullptr)
 {
     gw->setLoadGame(this);
@@ -37,9 +38,11 @@ LoadGame::LoadGame(GameWorld* gw) :gw(gw), data(nullptr)
         fin.close();
     }
 }
+
 LoadGame::~LoadGame() {
     delete data;
 }
+
 void LoadGame::save()
 {
     savedData* newdata = gw->dataFromGameWorldToLoad();
@@ -80,6 +83,7 @@ void LoadGame::save()
     }
     std::cout << "Score saved to savedGame." << std::endl;
 }
+
 void LoadGame::load()
 {
     if (data != nullptr) {
@@ -89,6 +93,7 @@ void LoadGame::load()
         std::cout << "No saved data to load." << std::endl;
     }
 }
+
 savedData* LoadGame::getsavedData()
 {
     return data;
