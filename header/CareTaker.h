@@ -9,6 +9,7 @@
 
 class CareTaker {
     Memento* savedMemento;
+    std::vector<Memento*> mementos;
     std::vector<Memento*> leaderboardMementos;
     GameWorld* gw;
     std::ifstream fin;
@@ -21,10 +22,11 @@ public:
     ~CareTaker();
 
     void save(); 
-    void restore(); 
+    void restore(int index); 
     void showSavedData() const;
-    Memento* getSavedData() const;  
+    std:: vector<Memento*>getSavedData() const;  
     void saveToCareTakerLeaderBoard();
     void releaseLeaderBoardData() const;
     std::vector<Memento*>& getLeaderBoard();
 };
+

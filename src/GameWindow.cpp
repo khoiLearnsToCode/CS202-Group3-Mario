@@ -17,6 +17,7 @@ GameWindow::GameWindow(int width, int height, std::string title) :
     gw(),
     camera(Camera2D()),
     careTaker(&gw),
+    loadGame(&gw),
     initialized(false) 
 {}
 

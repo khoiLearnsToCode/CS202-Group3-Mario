@@ -5,7 +5,7 @@
 #include "MenuScreen.h"
 #include "MapEditorScreen1.h"
 #include "MapEditorScreen2.h"
-#include"LoadGameScreen.h"
+#include"LoadGame.h"
 
 GameState GameWorld::state = GAME_STATE_TITLE_SCREEN;
 float GameWorld::gravity = 1200;
@@ -47,6 +47,7 @@ GameWorld::GameWorld() :
     settingScreen(nullptr),
     helpingScreen(nullptr),
     guardScreen(nullptr),
+	lastCheckpointData(1,5,0,0,PLAYER_TYPE_SMALL,false),
     leaderBoardScreen(nullptr)
     {
         player.setGameWorld(this);
@@ -111,34 +112,24 @@ GameWorld::~GameWorld() {
     
     delete careTaker;
 }
-
-Memento* GameWorld::dataFromGameWorldToSave() {
-    if (!hasCheckpoint) {
-        Data now(
-            map.getId(),
-            player.getPoints(),
-            player.getLives(),
-            player.getCoins(),
-            player.getYoshiCoins(),
-            player.getRemainingTime(),
-            player.getType()
-        );
-        return new ConcreteMemento(now);
-    }
-    return new ConcreteMemento(lastCheckpointData);
+savedData* GameWorld::dataFromGameWorldToLoad()
+{
+    return &lastCheckpointData;
 }
+void GameWorld::dataFromLoadToGameWorld(savedData* data)
+{
+    player.setType(data->pT);
+    player.setLives(data->lives);
+    player.setCoins(data->coins);
+    player.setPoints(data->score);
+    player.setMaxTime(400.0f);
+    if (data->isLuigi) player.toLuigi();
+    if (data->mapID == 1) map.first();
+    else if(data->mapID==2) map.second();
+	else if (data->mapID == 3) map.third();
+    player.reset(false, true);
 
-void GameWorld::restoreDataFromMemento(const Memento* memento) {
-    Data data = memento->getData();
-    player.setType(data.playerType);
-    player.setLives(data.lives);
-    player.setCoins(data.coins);
-    player.setYoshiCoins(data.yoshiCoins);
-    player.setPoints(data.score);
-    player.setRemainingTime(data.clearanceTime);  // Assume method exists
-    map.loadFromJsonFile(data.mapID);  // Assume params, reset map
-    player.reset(false, true);  // Reset player vị trí, giữ state
-    hasCheckpoint = true;  // Added: Set checkpoint sau load
+    map.reset();
     state = GAME_STATE_PLAYING;
 }
 
@@ -1034,7 +1025,7 @@ void GameWorld::inputAndUpdate() {
             }
 
             else if (menuScreen->getButton("LOAD GAME")->isReleased()) {
-                careTaker->restore();
+                loadGame->load();
             }
 
             else if (menuScreen->getButton("DESIGN MAP")->isReleased()) {
@@ -1076,6 +1067,7 @@ void GameWorld::inputAndUpdate() {
 
                 player.resetAll();
 				player.toLuigi(); // Switch to Luigi
+                lastCheckpointData.isLuigi = true;
                 map.loadFromJsonFile(); // Load the map immediately
                 player.setMaxTime(400.0f); // Set the time limit (400 seconds = typical Mario game time)
 
@@ -1418,24 +1410,11 @@ void GameWorld::resetGame() {
     map.reset();
     totalPlayedTime = 0; // Reset total played time when starting a new game
     pauseMusic = false;  // Ensure music isn't paused after reset
-    hasCheckpoint = false;
-
     state = GAME_STATE_TITLE_SCREEN;
 }
 
 void GameWorld::nextMap() {
     if (map.hasNext()) {
-        const int nextMapId = map.getId() + 1;
-        lastCheckpointData = Data(
-            nextMapId,
-            player.getPoints(),
-            player.getLives(),
-            player.getCoins(),
-            player.getYoshiCoins(),
-            player.getRemainingTime(),
-            player.getType()
-        );
-        hasCheckpoint = true;
         state = GAME_STATE_PLAYING;
 
         // Add Player's elapsed time to total played time when map is completed
@@ -1443,6 +1422,14 @@ void GameWorld::nextMap() {
         player.setPointsFromPreviousMap(player.getPoints());
         player.setCoinsFromPreviousMap(player.getCoins());
 	    // careTaker -> saveToCareTakerLeaderBoard();
+        lastCheckpointData = savedData(
+            map.getId(),
+            player.getLives(),
+            player.getPoints(),
+            player.getCoins(),
+			player.getType(),
+            lastCheckpointData.isLuigi
+            );
         player.reset(false, false);
     } else {
         state = GAME_STATE_FINISHED;
@@ -1501,5 +1488,8 @@ float GameWorld::getMaxDistForCollisionCheck() const {
 
 void GameWorld::setCaretaker(CareTaker* caretaker) {
     this->careTaker = caretaker;
+}
+void GameWorld::setLoadGame( LoadGame* loadgame) {
+    this->loadGame = loadgame;
 }
 

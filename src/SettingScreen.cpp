@@ -92,14 +92,18 @@ void SettingScreen::update() {
             }
         }
         if(buttons["SAVE"]->isReleased()) {
-            if (gw && gw->getCareTaker()) {
-                gw->getCareTaker()->save();
+            if (gw && gw->getLoadGame()) {
+                gw->getLoadGame()->save();
                 if (!isMutedSFX) {
                     PlaySound(ResourceManager::getInstance().getSound("pause"));
                 }
+				gw->state = GAME_STATE_TITLE_SCREEN;
+                gw->settingBoardIsOpen = false;
+                gw->pauseMusic = false;
+                gw->pausePlayer = false;
             }
             else {
-                std::cerr << "Error: GameWorld or CareTaker is null, cannot save game." << std::endl;
+                std::cerr << "Error: GameWorld or LoadGame is null, cannot save game." << std::endl;
             }
         }
     }
