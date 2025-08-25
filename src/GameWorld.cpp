@@ -38,7 +38,7 @@ GameWorld::GameWorld() :
     helpButton(nullptr),
     pauseButtonsCooldownAcum(0.0f),
     pauseButtonsCooldownTime(0.5f),
-    maxDistForCollisionCheck(1000.0f),
+    maxDistForCollisionCheck(150.0f),
     titleScreen(nullptr),
     menuScreen(nullptr),
     mapEditorScreen1(nullptr),
