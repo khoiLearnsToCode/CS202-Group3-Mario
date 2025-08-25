@@ -507,6 +507,10 @@ void ResourceManager::loadTextures() {
         textures["guiGameOver"] = LoadTexture("../resource/graphic/gui/guiGameOver.png");
         textures["guiLetters"] = LoadTexture("../resource/graphic/gui/guiLetters.png");
         textures["guiMario"] = LoadTexture("../resource/graphic/gui/guiMario.png");
+        Image imgGuiLuigi = LoadImage("../resource/graphic/gui/guiLuigi.png");
+        ImageResize(&imgGuiLuigi, 80, 16);
+        textures["guiLuigi"] = LoadTextureFromImage(imgGuiLuigi);
+        UnloadImage(imgGuiLuigi);
         textures["guiMarioStart"] = LoadTexture("../resource/graphic/gui/guiMarioStart.png");
         textures["guiNextItem"] = LoadTexture("../resource/graphic/gui/guiNextItem.png");
         textures["guiNumbersBig"] = LoadTexture("../resource/graphic/gui/guiNumbersBig.png");

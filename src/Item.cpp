@@ -103,7 +103,7 @@ void Coin::draw() {
 }
 
 void Coin::playCollisionSound() {
-  
+    PlaySound(ResourceManager::getInstance().getSounds()["coin"]);
 }
 
 void Coin::updatePlayer(Player& player) {
@@ -200,7 +200,7 @@ void Mushroom::draw() {
 }
 
 void Mushroom::playCollisionSound() {
-    
+    PlaySound(ResourceManager::getInstance().getSounds()["powerup"]);
 }
 
 void Mushroom::updatePlayer(Player& player) {
@@ -309,7 +309,7 @@ void OneUpMushroom::draw() {
 }
 
 void OneUpMushroom::playCollisionSound() {
-    
+    PlaySound(ResourceManager::getInstance().getSounds()["1up"]);
 }
 
 void OneUpMushroom::updatePlayer(Player& player) {
@@ -565,7 +565,7 @@ void ThreeUpMoon::draw() {
 }
 
 void ThreeUpMoon::playCollisionSound() {
-
+    PlaySound(ResourceManager::getInstance().getSounds()["1up"]);
 }
 
 void ThreeUpMoon::updatePlayer(Player& player) {
@@ -650,7 +650,7 @@ void YoshiCoin::draw() {
 }
 
 void YoshiCoin::playCollisionSound() {
-
+    PlaySound(ResourceManager::getInstance().getSounds()["dragonCoin"]);
 }
 
 void YoshiCoin::updatePlayer(Player& player) {

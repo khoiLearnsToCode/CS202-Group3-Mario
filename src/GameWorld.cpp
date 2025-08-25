@@ -110,7 +110,7 @@ GameWorld::~GameWorld() {
         helpButton = nullptr;
     }
     
-    /*delete careTaker;*/
+    // delete careTaker;
 }
 savedData* GameWorld::dataFromGameWorldToLoad()
 {
