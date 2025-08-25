@@ -575,7 +575,11 @@ void Player::drawHud() const {
 	std::map<std::string, Texture2D>& textures = ResourceManager::getInstance().getTextures(); // Getting textures from ResourceManager
 
 	// Left side of the screen
-	DrawTexture(textures["guiMario"], 34, 32, WHITE); // Draw Mario icon
+	if (isLuigi) {
+        DrawTexture(textures["guiLuigi"], 34, 32, WHITE); // Draw Luigi icon
+    } else {
+        DrawTexture(textures["guiMario"], 34, 32, WHITE); // Draw Mario icon
+    }
 	DrawTexture(textures["guiX"], 54, 49, WHITE); // Draw "X" icon for lives
 	drawWhiteSmallNumber(lives < 0 ? 0 : lives, 68, 49); // Draw lives number
 
