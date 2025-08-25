@@ -56,7 +56,7 @@ void LeaderBoardScreen::draw() {
         if (pos != std::string::npos && rawDate.length() >= pos + 10) {
             shortDate = rawDate.substr(pos + 1, 10);
         }
-        DrawTextEx(font, std::to_string(row + 1).c_str(), { tableStartX + 0 * colWidth, y }, fontSize, 2.0f, BLACK); // Rank
+        DrawTextEx(font, std::to_string(row + 1).c_str(), { tableStartX + 0 * colWidth, y }, fontSize, 2.0f, RED); // Rank
         DrawTextEx(font, shortDate.c_str(), { tableStartX + 1 * colWidth, y }, fontSize, 2.0f, BLACK); // Date
         DrawTextEx(font, leaderboardDataAsStrings[row * 6 + 4].c_str(), { tableStartX + 2 * colWidth, y }, fontSize, 2.0f, BLACK); // Time
         DrawTextEx(font, leaderboardDataAsStrings[row * 6 + 1].c_str(), { tableStartX + 3 * colWidth, y }, fontSize, 2.0f, BLACK); // Live
