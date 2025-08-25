@@ -1344,8 +1344,9 @@ void GameWorld::draw() {
             if ( GetKeyPressed() ) {
                 StopMusicStream( musics["ending"] );
                 careTaker->releaseLeaderBoardData();
+                leaderBoardScreen->setLatestDataLoaded(true);
                 state = GAME_STATE_LEADERBOARD_SCREEN;
-                resetGame();
+                //resetGame();
             }
 
             DrawRectangle( 0, 0, GetScreenWidth(), GetScreenHeight(), Fade( RAYWHITE, 0.9 ) );
@@ -1356,9 +1357,16 @@ void GameWorld::draw() {
             drawString( message1, GetScreenWidth() / 2 - getDrawStringWidth( message1 ) / 2, 40 );
             drawString( message2, GetScreenWidth() / 2 - getDrawStringWidth( message2 ) / 2, 65 );
 
-        } 
+        }
+        else if (state == GAME_STATE_LEADERBOARD_SCREEN) {
+            if (leaderBoardScreen->leaderBoardShouldClose() || leaderBoardScreen->getReturnButton()->isReleased()) {
+                state = GAME_STATE_MENU_SCREEN;
+                resetGame();
+            }
+        }
         
     }
+
 
     if (settingBoardIsOpen) {
         settingScreen->draw();
