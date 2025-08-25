@@ -100,6 +100,8 @@ public:
 // Returns true if there is a next map to load and jump to next map
     bool hasNext();
     void first();
+    void second();
+	void third();
 
     void eraseBaddieFromDrawingVectors(Baddie* baddie);
 

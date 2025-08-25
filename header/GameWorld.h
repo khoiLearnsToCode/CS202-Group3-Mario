@@ -15,7 +15,7 @@ class LeaderBoardScreen;
 #include "MapEditorScreen2.h"
 #include "SelectCharacterScreen.h"
 #include "SettingScreen.h"
-#include"LoadGameScreen.h"
+#include"LoadGame.h"
 #include "HelpingScreen.h"
 #include "GuardScreen.h"
 #include "LeaderBoardScreen.h"
@@ -36,11 +36,10 @@ class GameWorld : public virtual Drawable {
     HelpingScreen* helpingScreen;
     GuardScreen* guardScreen;
     LeaderBoardScreen* leaderBoardScreen;
-    LoadGameScreen* loadGameScreen;
 
     friend class CareTaker;
     friend class SettingScreen;
-    friend class LoadGameScreen;
+    friend class LoadGame;
 
     Player player;
     Map map;
@@ -48,7 +47,6 @@ class GameWorld : public virtual Drawable {
     bool settingBoardIsOpen;
     bool helpingBoardIsOpen;
     bool leaderBoardIsOpen;
-    bool loadBoardIsOpen;
     GameState stateBeforePause;
     int remainingTimePointCount;
     int totalPlayedTime;
@@ -71,16 +69,18 @@ class GameWorld : public virtual Drawable {
     // Distance-based collision detection threshold
     const float maxDistForCollisionCheck;
 
-    Memento* dataFromGameWorldToSave();
-    void restoreDataFromMemento(const Memento* memento);
+
     Memento* dataFromGameWorldToLeaderboard();
     void setCaretaker(CareTaker* caretaker);
 
-    Data lastCheckpointData;
-    bool hasCheckpoint = false;
+    savedData* dataFromGameWorldToLoad();
+    void setLoadGame(LoadGame* loadgame);
+	void dataFromLoadToGameWorld(savedData* data);
+
+    savedData lastCheckpointData;
+
     CareTaker* careTaker;
-
-
+	LoadGame* loadGame;
 
 public:
 
@@ -115,6 +115,7 @@ public:
     void unpauseGame();
     void showGuardScreen(GuardAction action); 
     CareTaker* getCareTaker() const { return careTaker; } 
+    LoadGame* getLoadGame()  { return loadGame; }
 
     // Distance threshold getter for collision optimization
     float getMaxDistForCollisionCheck() const;

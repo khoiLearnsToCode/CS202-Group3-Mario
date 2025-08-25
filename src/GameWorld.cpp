@@ -5,7 +5,7 @@
 #include "MenuScreen.h"
 #include "MapEditorScreen1.h"
 #include "MapEditorScreen2.h"
-#include"LoadGameScreen.h"
+#include"LoadGame.h"
 
 GameState GameWorld::state = GAME_STATE_TITLE_SCREEN;
 float GameWorld::gravity = 1200;
@@ -45,10 +45,9 @@ GameWorld::GameWorld() :
     mapEditorScreen2(nullptr),
     selectCharacterScreen(nullptr),
     settingScreen(nullptr),
-    loadGameScreen(nullptr),
-    loadBoardIsOpen(false),
     helpingScreen(nullptr),
     guardScreen(nullptr),
+	lastCheckpointData(1,5,0,0,PLAYER_TYPE_SMALL,false),
     leaderBoardScreen(nullptr)
     {
         player.setGameWorld(this);
@@ -100,11 +99,6 @@ GameWorld::~GameWorld() {
         delete leaderBoardScreen;
         leaderBoardScreen = nullptr;
     }
-  
-    if (loadGameScreen != nullptr) {
-        delete loadGameScreen;
-        loadGameScreen = nullptr;
-    }
 
     if (settingButton != nullptr) {
         delete settingButton;
@@ -118,34 +112,24 @@ GameWorld::~GameWorld() {
     
     delete careTaker;
 }
-
-Memento* GameWorld::dataFromGameWorldToSave() {
-    if (!hasCheckpoint) {
-        Data now(
-            map.getId(),
-            player.getPoints(),
-            player.getLives(),
-            player.getCoins(),
-            player.getYoshiCoins(),
-            player.getRemainingTime(),
-            player.getType()
-        );
-        return new ConcreteMemento(now);
-    }
-    return new ConcreteMemento(lastCheckpointData);
+savedData* GameWorld::dataFromGameWorldToLoad()
+{
+    return &lastCheckpointData;
 }
+void GameWorld::dataFromLoadToGameWorld(savedData* data)
+{
+    player.setType(data->pT);
+    player.setLives(data->lives);
+    player.setCoins(data->coins);
+    player.setPoints(data->score);
+    player.setMaxTime(400.0f);
+    if (data->isLuigi) player.toLuigi();
+    if (data->mapID == 1) map.first();
+    else if(data->mapID==2) map.second();
+	else if (data->mapID == 3) map.third();
+    player.reset(false, true);
 
-void GameWorld::restoreDataFromMemento(const Memento* memento) {
-    Data data = memento->getData();
-    player.setType(data.playerType);
-    player.setLives(data.lives);
-    player.setCoins(data.coins);
-    player.setYoshiCoins(data.yoshiCoins);
-    player.setPoints(data.score);
-    player.setRemainingTime(data.clearanceTime);  // Assume method exists
-    map.loadFromJsonFile(data.mapID);  // Assume params, reset map
-    player.reset(false, true);  // Reset player vị trí, giữ state
-    hasCheckpoint = true;  // Added: Set checkpoint sau load
+    map.reset();
     state = GAME_STATE_PLAYING;
 }
 
@@ -198,9 +182,6 @@ void GameWorld::initScreensAndButtons() {
     if (guardScreen == nullptr) {
         guardScreen = new GuardScreen();
     }
-    if (loadGameScreen == nullptr) {
-        loadGameScreen = new LoadGameScreen(this);
-    }
 
     if (settingButton == nullptr) {
         settingButton = new ButtonTextTexture("settingButton", { GetScreenWidth() - 80.0f, 20.0f }, 2.0f);
@@ -213,7 +194,7 @@ void GameWorld::initScreensAndButtons() {
 
 void GameWorld::inputAndUpdate() {
 
-    map.loadFromJsonFile(); 
+    map.loadFromJsonFile();
 
     // OPTIMIZATION: Cache resource references to avoid repeated lookups
     static std::map<std::string, Sound>& sounds = ResourceManager::getInstance().getSounds();
@@ -227,69 +208,68 @@ void GameWorld::inputAndUpdate() {
     std::vector<Item*>& StaticItems = map.getStaticItems();
 
 
-    // std::cerr << "Player state: " << player.getState() << std::endl;
-    // std::cerr << "GameWorld state: " << state << std::endl;
-    // std::cerr << "gravity: " << gravity << std::endl;
-    if ( player.getState() != SPRITE_STATE_DYING && 
-         player.getState() != SPRITE_STATE_VICTORY &&
-         player.getState() != SPRITE_STATE_WAITING_TO_NEXT_MAP &&
-         state != GAME_STATE_TITLE_SCREEN &&
-         state != GAME_STATE_MENU_SCREEN &&
-         state != GAME_STATE_MAP_EDITOR_SCREEN1 &&
-         state != GAME_STATE_MAP_EDITOR_SCREEN2 &&
-         state != GAME_STATE_SELECT_CHARACTER_SCREEN &&
-         state != GAME_STATE_CREDITS_SCREEN &&
-         state != GAME_STATE_LEADERBOARD_SCREEN &&
-         state != GAME_STATE_LOADGAME_SCREEN &&
-         state != GAME_STATE_FINISHED &&
-         state != GAME_STATE_GUARD_SCREEN && 
-         !pauseMusic ) {
-        map.playMusic();
-    }
 
-    if ( state != GAME_STATE_TITLE_SCREEN &&
-         state != GAME_STATE_MENU_SCREEN &&
-         state != GAME_STATE_SELECT_CHARACTER_SCREEN &&
-         state != GAME_STATE_CREDITS_SCREEN &&
-         state != GAME_STATE_MAP_EDITOR_SCREEN1 &&
-         state != GAME_STATE_MAP_EDITOR_SCREEN2 &&
-         state != GAME_STATE_FINISHED &&
-         state != GAME_STATE_SETTINGS_SCREEN &&
-         state != GAME_STATE_LOADGAME_SCREEN &&
-         state != GAME_STATE_LEADERBOARD_SCREEN &&
-         state != GAME_STATE_HELPING_SCREEN &&
-         state != GAME_STATE_GUARD_SCREEN ) {
-        player.setActivationWidth( GetScreenWidth() * 2 );
-        player.update();
-    } else if ( !pausePlayer && state != GAME_STATE_TITLE_SCREEN && 
+    if (player.getState() != SPRITE_STATE_DYING &&
+        player.getState() != SPRITE_STATE_VICTORY &&
+        player.getState() != SPRITE_STATE_WAITING_TO_NEXT_MAP &&
+        state != GAME_STATE_TITLE_SCREEN &&
         state != GAME_STATE_MENU_SCREEN &&
         state != GAME_STATE_MAP_EDITOR_SCREEN1 &&
         state != GAME_STATE_MAP_EDITOR_SCREEN2 &&
         state != GAME_STATE_SELECT_CHARACTER_SCREEN &&
         state != GAME_STATE_CREDITS_SCREEN &&
         state != GAME_STATE_LEADERBOARD_SCREEN &&
-        state != GAME_STATE_LOADGAME_SCREEN ) {
+        state != GAME_STATE_LOADGAME_SCREEN &&
+        state != GAME_STATE_FINISHED &&
+        state != GAME_STATE_GUARD_SCREEN &&
+        !pauseMusic) {
+        map.playMusic();
+    }
+
+    if (state != GAME_STATE_TITLE_SCREEN &&
+        state != GAME_STATE_MENU_SCREEN &&
+        state != GAME_STATE_SELECT_CHARACTER_SCREEN &&
+        state != GAME_STATE_CREDITS_SCREEN &&
+        state != GAME_STATE_MAP_EDITOR_SCREEN1 &&
+        state != GAME_STATE_MAP_EDITOR_SCREEN2 &&
+        state != GAME_STATE_FINISHED &&
+        state != GAME_STATE_SETTINGS_SCREEN &&
+        state != GAME_STATE_LOADGAME_SCREEN &&
+        state != GAME_STATE_LEADERBOARD_SCREEN &&
+        state != GAME_STATE_HELPING_SCREEN &&
+        state != GAME_STATE_GUARD_SCREEN) {
+        player.setActivationWidth(GetScreenWidth() * 2);
+        player.update();
+    }
+    else if (!pausePlayer && state != GAME_STATE_TITLE_SCREEN &&
+        state != GAME_STATE_MENU_SCREEN &&
+        state != GAME_STATE_MAP_EDITOR_SCREEN1 &&
+        state != GAME_STATE_MAP_EDITOR_SCREEN2 &&
+        state != GAME_STATE_SELECT_CHARACTER_SCREEN &&
+        state != GAME_STATE_CREDITS_SCREEN &&
+        state != GAME_STATE_LEADERBOARD_SCREEN &&
+        state != GAME_STATE_LOADGAME_SCREEN) {
 
         player.update();
     }
 
-    if ( player.getState() != SPRITE_STATE_DYING && 
-         player.getState() != SPRITE_STATE_VICTORY &&
-         player.getState() != SPRITE_STATE_WAITING_TO_NEXT_MAP &&
-         state != GAME_STATE_TITLE_SCREEN &&
-         state != GAME_STATE_MENU_SCREEN &&
-         state != GAME_STATE_MAP_EDITOR_SCREEN1 &&
-         state != GAME_STATE_MAP_EDITOR_SCREEN2 &&
-         state != GAME_STATE_SELECT_CHARACTER_SCREEN &&
-         state != GAME_STATE_CREDITS_SCREEN &&
-         state != GAME_STATE_FINISHED &&
-         state != GAME_STATE_SETTINGS_SCREEN &&
-         state != GAME_STATE_LEADERBOARD_SCREEN &&
-         state != GAME_STATE_LOADGAME_SCREEN &&
-         state != GAME_STATE_HELPING_SCREEN &&
-         state != GAME_STATE_GUARD_SCREEN ) {
+    if (player.getState() != SPRITE_STATE_DYING &&
+        player.getState() != SPRITE_STATE_VICTORY &&
+        player.getState() != SPRITE_STATE_WAITING_TO_NEXT_MAP &&
+        state != GAME_STATE_TITLE_SCREEN &&
+        state != GAME_STATE_MENU_SCREEN &&
+        state != GAME_STATE_MAP_EDITOR_SCREEN1 &&
+        state != GAME_STATE_MAP_EDITOR_SCREEN2 &&
+        state != GAME_STATE_SELECT_CHARACTER_SCREEN &&
+        state != GAME_STATE_CREDITS_SCREEN &&
+        state != GAME_STATE_FINISHED &&
+        state != GAME_STATE_SETTINGS_SCREEN &&
+        state != GAME_STATE_LEADERBOARD_SCREEN &&
+        state != GAME_STATE_LOADGAME_SCREEN &&
+        state != GAME_STATE_HELPING_SCREEN &&
+        state != GAME_STATE_GUARD_SCREEN) {
 
-            std::vector<int> collectedIndexes;
+        std::vector<int> collectedIndexes;
 
         // Update setting button cooldown
         if (pauseButtonsCooldownAcum > 0.0f) {
@@ -299,121 +279,122 @@ void GameWorld::inputAndUpdate() {
             }
         }
 
-        if ( (IsKeyPressed( KEY_P) || settingButton->isReleased()) && pauseButtonsCooldownAcum <= 0.0f ) {
-            pauseGame( true, true, true, true, false );
+        if ((IsKeyPressed(KEY_P) || settingButton->isReleased()) && pauseButtonsCooldownAcum <= 0.0f) {
+            pauseGame(true, true, true, true, false);
             settingScreen->setSettingBoardIsOpenInMenuScreen(false);
         }
 
-        if ( (IsKeyPressed( KEY_H) || helpButton->isReleased()) && pauseButtonsCooldownAcum <= 0.0f) {
-            pauseGame( true, true, true, false, true );
+        if ((IsKeyPressed(KEY_H) || helpButton->isReleased()) && pauseButtonsCooldownAcum <= 0.0f) {
+            pauseGame(true, true, true, false, true);
         }
-        
+
 
         // OPTIMIZATION: Update collision probes once per entity per frame, not multiple times
-        for ( const auto& block : Blocks ) {
+        for (const auto& block : Blocks) {
             block->update();
         }
 
-        for ( const auto& item : Items ) {
+        for (const auto& item : Items) {
             item->update();
         }
 
-        for ( const auto& staticItem : StaticItems ) {
+        for (const auto& staticItem : StaticItems) {
             staticItem->update();
         }
 
-        for ( const auto& baddie : Baddies ) {
+        for (const auto& baddie : Baddies) {
             baddie->update();
-            baddie->followTheLeader( &player );
+            baddie->followTheLeader(&player);
             // OPTIMIZATION: Update collision probes once per baddie
             baddie->updateCollisionProbes();
         }
 
         // OPTIMIZATION: Update item collision probes once
-        for ( const auto& item : Items ) {
+        for (const auto& item : Items) {
             item->updateCollisionProbes();
         }
 
         // tiles collision resolution
         player.updateCollisionProbes();
-        for ( const auto& tile : Tiles ) {
+        for (const auto& tile : Tiles) {
 
             // player x tiles - Distance-based collision optimization
             if (shouldCheckCollision(player.getPos(), player.getDim(), tile->getPos(), tile->getDim(), maxDistForCollisionCheck)) {
-                CollisionType col = player.checkCollision( tile );
+                CollisionType col = player.checkCollision(tile);
 
-                if ( tile->getType() == TILE_TYPE_SOLID ) {
-                    switch ( col ) {
-                        case COLLISION_TYPE_NORTH:
-                            player.setY( tile->getY() + tile->getHeight() );
-                            player.setVelY( 0 );
-                            player.updateCollisionProbes();
-                            break;
-                        case COLLISION_TYPE_SOUTH:
-                            player.setY( tile->getY() - player.getHeight() );
-                            player.setVelY( 0 );
-                            player.setState( SPRITE_STATE_ON_GROUND );
-                            player.updateCollisionProbes();
-                            break;
-                        case COLLISION_TYPE_EAST:
-                            player.setX( tile->getX() - player.getWidth() );
-                            player.setVelX( 0 );
-                            player.updateCollisionProbes();
-                            break;
-                        case COLLISION_TYPE_WEST:
-                            player.setX( tile->getX() + tile->getWidth() );
-                            player.setVelX( 0 );
-                            player.updateCollisionProbes();
-                            break;
-                        default:
-                            break;
+                if (tile->getType() == TILE_TYPE_SOLID) {
+                    switch (col) {
+                    case COLLISION_TYPE_NORTH:
+                        player.setY(tile->getY() + tile->getHeight());
+                        player.setVelY(0);
+                        player.updateCollisionProbes();
+                        break;
+                    case COLLISION_TYPE_SOUTH:
+                        player.setY(tile->getY() - player.getHeight());
+                        player.setVelY(0);
+                        player.setState(SPRITE_STATE_ON_GROUND);
+                        player.updateCollisionProbes();
+                        break;
+                    case COLLISION_TYPE_EAST:
+                        player.setX(tile->getX() - player.getWidth());
+                        player.setVelX(0);
+                        player.updateCollisionProbes();
+                        break;
+                    case COLLISION_TYPE_WEST:
+                        player.setX(tile->getX() + tile->getWidth());
+                        player.setVelX(0);
+                        player.updateCollisionProbes();
+                        break;
+                    default:
+                        break;
                     }
-                } else if ( tile->getType() == TILE_TYPE_SOLID_FROM_ABOVE ) {
-                    if ( col == COLLISION_TYPE_SOUTH && player.getState() == SPRITE_STATE_FALLING ) {
-                        player.setY( tile->getY() - player.getHeight() );
-                        player.setVelY( 0 );
-                        player.setState( SPRITE_STATE_ON_GROUND );
+                }
+                else if (tile->getType() == TILE_TYPE_SOLID_FROM_ABOVE) {
+                    if (col == COLLISION_TYPE_SOUTH && player.getState() == SPRITE_STATE_FALLING) {
+                        player.setY(tile->getY() - player.getHeight());
+                        player.setVelY(0);
+                        player.setState(SPRITE_STATE_ON_GROUND);
                         player.updateCollisionProbes();
                     }
                 }
             }
 
             // baddies x tiles - OPTIMIZATION: Skip redundant updateCollisionProbes + Distance check
-            for ( const auto& baddie : Baddies ) {
+            for (const auto& baddie : Baddies) {
 
-                if ( baddie->getState() != SPRITE_STATE_DYING && 
-                     baddie->getState() != SPRITE_STATE_TO_BE_REMOVED &&
-                     ( tile->getType() == TILE_TYPE_SOLID || 
-                       tile->getType() == TILE_TYPE_SOLID_ONLY_FOR_BADDIES ||
-                       tile->getType() == TILE_TYPE_SOLID_FROM_ABOVE ) ) {
-                    
+                if (baddie->getState() != SPRITE_STATE_DYING &&
+                    baddie->getState() != SPRITE_STATE_TO_BE_REMOVED &&
+                    (tile->getType() == TILE_TYPE_SOLID ||
+                        tile->getType() == TILE_TYPE_SOLID_ONLY_FOR_BADDIES ||
+                        tile->getType() == TILE_TYPE_SOLID_FROM_ABOVE)) {
+
                     // Distance-based collision optimization: Only check collision if objects are nearby
                     if (shouldCheckCollision(baddie->getPos(), baddie->getDim(), tile->getPos(), tile->getDim(), maxDistForCollisionCheck)) {
-                        switch ( baddie->checkCollision( tile ) ) {
-                            case COLLISION_TYPE_NORTH:
-                                baddie->setY( tile->getY() + tile->getHeight() );
-                                baddie->setVelY( 0 );
-                                baddie->onNorthCollision();
-                                baddie->updateCollisionProbes();
-                                break;
-                            case COLLISION_TYPE_SOUTH:
-                                baddie->setY( tile->getY() - baddie->getHeight() );
-                                baddie->setVelY( 0 );
-                                baddie->onSouthCollision();
-                                baddie->updateCollisionProbes();
-                                break;
-                            case COLLISION_TYPE_EAST:
-                                baddie->setX( tile->getX() - baddie->getWidth() );
-                                baddie->setVelX( -baddie->getVelX() );
-                                baddie->updateCollisionProbes();
-                                break;
-                            case COLLISION_TYPE_WEST:
-                                baddie->setX( tile->getX() + tile->getWidth() );
-                                baddie->setVelX( -baddie->getVelX() );
-                                baddie->updateCollisionProbes();
-                                break;
-                            default:
-                                break;
+                        switch (baddie->checkCollision(tile)) {
+                        case COLLISION_TYPE_NORTH:
+                            baddie->setY(tile->getY() + tile->getHeight());
+                            baddie->setVelY(0);
+                            baddie->onNorthCollision();
+                            baddie->updateCollisionProbes();
+                            break;
+                        case COLLISION_TYPE_SOUTH:
+                            baddie->setY(tile->getY() - baddie->getHeight());
+                            baddie->setVelY(0);
+                            baddie->onSouthCollision();
+                            baddie->updateCollisionProbes();
+                            break;
+                        case COLLISION_TYPE_EAST:
+                            baddie->setX(tile->getX() - baddie->getWidth());
+                            baddie->setVelX(-baddie->getVelX());
+                            baddie->updateCollisionProbes();
+                            break;
+                        case COLLISION_TYPE_WEST:
+                            baddie->setX(tile->getX() + tile->getWidth());
+                            baddie->setVelX(-baddie->getVelX());
+                            baddie->updateCollisionProbes();
+                            break;
+                        default:
+                            break;
                         }
                     }
                 }
@@ -421,36 +402,36 @@ void GameWorld::inputAndUpdate() {
             }
 
             // items x tiles - OPTIMIZATION: Skip redundant updateCollisionProbes + Distance check
-            for ( const auto& item : Items ) {
+            for (const auto& item : Items) {
 
-                if ( tile->getType() == TILE_TYPE_SOLID || tile->getType() == TILE_TYPE_SOLID_FROM_ABOVE ) {
+                if (tile->getType() == TILE_TYPE_SOLID || tile->getType() == TILE_TYPE_SOLID_FROM_ABOVE) {
 
                     // Distance-based collision optimization: Only check collision if objects are nearby
                     if (shouldCheckCollision(item->getPos(), item->getDim(), tile->getPos(), tile->getDim(), maxDistForCollisionCheck)) {
-                        switch ( item->checkCollision( tile ) ) {
-                            case COLLISION_TYPE_NORTH:
-                                item->setY( tile->getY() + tile->getHeight() );
-                                item->setVelY( 0 );
-                                item->updateCollisionProbes();
-                                break;
-                            case COLLISION_TYPE_SOUTH:
-                                item->setY( tile->getY() - item->getHeight() );
-                                item->setVelY( 0 );
-                                item->onSouthCollision( player );
-                                item->updateCollisionProbes();
-                                break;
-                            case COLLISION_TYPE_EAST:
-                                item->setX( tile->getX() - item->getWidth() );
-                                item->setVelX( -item->getVelX() );
-                                item->updateCollisionProbes();
-                                break;
-                            case COLLISION_TYPE_WEST:
-                                item->setX( tile->getX() + tile->getWidth() );
-                                item->setVelX( -item->getVelX() );
-                                item->updateCollisionProbes();
-                                break;
-                            default:
-                                break;
+                        switch (item->checkCollision(tile)) {
+                        case COLLISION_TYPE_NORTH:
+                            item->setY(tile->getY() + tile->getHeight());
+                            item->setVelY(0);
+                            item->updateCollisionProbes();
+                            break;
+                        case COLLISION_TYPE_SOUTH:
+                            item->setY(tile->getY() - item->getHeight());
+                            item->setVelY(0);
+                            item->onSouthCollision(player);
+                            item->updateCollisionProbes();
+                            break;
+                        case COLLISION_TYPE_EAST:
+                            item->setX(tile->getX() - item->getWidth());
+                            item->setVelX(-item->getVelX());
+                            item->updateCollisionProbes();
+                            break;
+                        case COLLISION_TYPE_WEST:
+                            item->setX(tile->getX() + tile->getWidth());
+                            item->setVelX(-item->getVelX());
+                            item->updateCollisionProbes();
+                            break;
+                        default:
+                            break;
                         }
                     }
 
@@ -463,71 +444,71 @@ void GameWorld::inputAndUpdate() {
         // blocks collision resolution
         player.updateCollisionProbes();
 
-        for ( const auto& block : Blocks ) {
+        for (const auto& block : Blocks) {
 
             // player x blocks - Distance-based collision optimization
             if (shouldCheckCollision(player.getPos(), player.getDim(), block->getPos(), block->getDim(), maxDistForCollisionCheck)) {
-                switch ( player.checkCollision( block ) ) {
-                    case COLLISION_TYPE_NORTH:
-                        player.setY( block->getY() + block->getHeight() );
-                        player.setVelY( 0 );
-                        player.updateCollisionProbes();
-                        block->doHit( player, &map );
-                        break;
-                    case COLLISION_TYPE_SOUTH:
-                        player.setY( block->getY() - player.getHeight() );
-                        player.setVelY( 0 );
-                        player.setState( SPRITE_STATE_ON_GROUND );
-                        player.updateCollisionProbes();
-                        break;
-                    case COLLISION_TYPE_EAST:
-                        player.setX( block->getX() - player.getWidth() );
-                        player.setVelX( 0 );
-                        player.updateCollisionProbes();
-                        break;
-                    case COLLISION_TYPE_WEST:
-                        player.setX( block->getX() + block->getWidth() );
-                        player.setVelX( 0 );
-                        player.updateCollisionProbes();
-                        break;
-                    default:
-                        break;
+                switch (player.checkCollision(block)) {
+                case COLLISION_TYPE_NORTH:
+                    player.setY(block->getY() + block->getHeight());
+                    player.setVelY(0);
+                    player.updateCollisionProbes();
+                    block->doHit(player, &map);
+                    break;
+                case COLLISION_TYPE_SOUTH:
+                    player.setY(block->getY() - player.getHeight());
+                    player.setVelY(0);
+                    player.setState(SPRITE_STATE_ON_GROUND);
+                    player.updateCollisionProbes();
+                    break;
+                case COLLISION_TYPE_EAST:
+                    player.setX(block->getX() - player.getWidth());
+                    player.setVelX(0);
+                    player.updateCollisionProbes();
+                    break;
+                case COLLISION_TYPE_WEST:
+                    player.setX(block->getX() + block->getWidth());
+                    player.setVelX(0);
+                    player.updateCollisionProbes();
+                    break;
+                default:
+                    break;
                 }
             }
 
             // baddies x blocks - OPTIMIZATION: Skip redundant updateCollisionProbes + Distance check
-            for ( const auto& baddie : Baddies ) {
+            for (const auto& baddie : Baddies) {
 
-                if ( baddie->getState() != SPRITE_STATE_DYING && 
-                     baddie->getState() != SPRITE_STATE_TO_BE_REMOVED ) {
-                    
+                if (baddie->getState() != SPRITE_STATE_DYING &&
+                    baddie->getState() != SPRITE_STATE_TO_BE_REMOVED) {
+
                     // Distance-based collision optimization: Only check collision if objects are nearby
                     if (shouldCheckCollision(baddie->getPos(), baddie->getDim(), block->getPos(), block->getDim(), maxDistForCollisionCheck)) {
-                        switch ( baddie->checkCollision( block ) ) {
-                            case COLLISION_TYPE_NORTH:
-                                baddie->setY( block->getY() + block->getHeight() );
-                                baddie->setVelY( 0 );
-                                baddie->onNorthCollision();
-                                baddie->updateCollisionProbes();
-                                break;
-                            case COLLISION_TYPE_SOUTH:
-                                baddie->setY( block->getY() - baddie->getHeight() );
-                                baddie->setVelY( 0 );
-                                baddie->onSouthCollision();
-                                baddie->updateCollisionProbes();
-                                break;
-                            case COLLISION_TYPE_EAST:
-                                baddie->setX( block->getX() - baddie->getWidth() );
-                                baddie->setVelX( -baddie->getVelX() );
-                                baddie->updateCollisionProbes();
-                                break;
-                            case COLLISION_TYPE_WEST:
-                                baddie->setX( block->getX() + block->getWidth() );
-                                baddie->setVelX( -baddie->getVelX() );
-                                baddie->updateCollisionProbes();
-                                break;
-                            default:
-                                break;
+                        switch (baddie->checkCollision(block)) {
+                        case COLLISION_TYPE_NORTH:
+                            baddie->setY(block->getY() + block->getHeight());
+                            baddie->setVelY(0);
+                            baddie->onNorthCollision();
+                            baddie->updateCollisionProbes();
+                            break;
+                        case COLLISION_TYPE_SOUTH:
+                            baddie->setY(block->getY() - baddie->getHeight());
+                            baddie->setVelY(0);
+                            baddie->onSouthCollision();
+                            baddie->updateCollisionProbes();
+                            break;
+                        case COLLISION_TYPE_EAST:
+                            baddie->setX(block->getX() - baddie->getWidth());
+                            baddie->setVelX(-baddie->getVelX());
+                            baddie->updateCollisionProbes();
+                            break;
+                        case COLLISION_TYPE_WEST:
+                            baddie->setX(block->getX() + block->getWidth());
+                            baddie->setVelX(-baddie->getVelX());
+                            baddie->updateCollisionProbes();
+                            break;
+                        default:
+                            break;
                         }
                     }
                 }
@@ -535,34 +516,34 @@ void GameWorld::inputAndUpdate() {
             }
 
             // items x blocks - OPTIMIZATION: Skip redundant updateCollisionProbes + Distance check  
-            for ( const auto& item : Items ) {
+            for (const auto& item : Items) {
 
                 // Distance-based collision optimization: Only check collision if objects are nearby
                 if (shouldCheckCollision(item->getPos(), item->getDim(), block->getPos(), block->getDim(), maxDistForCollisionCheck)) {
-                    switch ( item->checkCollision( block ) ) {
-                        case COLLISION_TYPE_NORTH:
-                            item->setY( block->getY() + block->getHeight() );
-                            item->setVelY( 0 );
-                            item->updateCollisionProbes();
-                            break;
-                        case COLLISION_TYPE_SOUTH:
-                            item->setY( block->getY() - item->getHeight() );
-                            item->setVelY( 0 );
-                            item->onSouthCollision( player );
-                            item->updateCollisionProbes();
-                            break;
-                        case COLLISION_TYPE_EAST:
-                            item->setX( block->getX() - item->getWidth() );
-                            item->setVelX( -item->getVelX() );
-                            item->updateCollisionProbes();
-                            break;
-                        case COLLISION_TYPE_WEST:
-                            item->setX( block->getX() + block->getWidth() );
-                            item->setVelX( -item->getVelX() );
-                            item->updateCollisionProbes();
-                            break;
-                        default:
-                            break;
+                    switch (item->checkCollision(block)) {
+                    case COLLISION_TYPE_NORTH:
+                        item->setY(block->getY() + block->getHeight());
+                        item->setVelY(0);
+                        item->updateCollisionProbes();
+                        break;
+                    case COLLISION_TYPE_SOUTH:
+                        item->setY(block->getY() - item->getHeight());
+                        item->setVelY(0);
+                        item->onSouthCollision(player);
+                        item->updateCollisionProbes();
+                        break;
+                    case COLLISION_TYPE_EAST:
+                        item->setX(block->getX() - item->getWidth());
+                        item->setVelX(-item->getVelX());
+                        item->updateCollisionProbes();
+                        break;
+                    case COLLISION_TYPE_WEST:
+                        item->setX(block->getX() + block->getWidth());
+                        item->setVelX(-item->getVelX());
+                        item->updateCollisionProbes();
+                        break;
+                    default:
+                        break;
                     }
                 }
 
@@ -571,239 +552,247 @@ void GameWorld::inputAndUpdate() {
         }
 
         // player x items collision resolution and offscreen items removal with distance optimization
-        for ( size_t i = 0; i < Items.size(); i++ ) {
+        for (size_t i = 0; i < Items.size(); i++) {
 
             Item* item = Items[i];
 
-            if ( item->getState() != SPRITE_STATE_HIT &&
-                 item->getState() != SPRITE_STATE_TO_BE_REMOVED ) {
-                
+            if (item->getState() != SPRITE_STATE_HIT &&
+                item->getState() != SPRITE_STATE_TO_BE_REMOVED) {
+
                 // Distance-based collision optimization: Only check collision if Player is close to the item
                 if (shouldCheckCollision(player.getPos(), player.getDim(), item->getPos(), item->getDim(), maxDistForCollisionCheck)) {
-                    if ( item->checkCollision( &player ) != COLLISION_TYPE_NONE ) {
-                        if ( !player.isTransitioning() ) {
-                            item->setState( SPRITE_STATE_HIT );
+                    if (item->checkCollision(&player) != COLLISION_TYPE_NONE) {
+                        if (!player.isTransitioning()) {
+                            item->setState(SPRITE_STATE_HIT);
                             item->playCollisionSound();
-                            if ( item->isPauseGameOnHit() ) {
-                                pauseGame( false, false, false, false, false );
+                            if (item->isPauseGameOnHit()) {
+                                pauseGame(false, false, false, false, false);
                             }
-                            item->updatePlayer( player );
+                            item->updatePlayer(player);
                         }
                     }
-                } else if ( item->getY() > map.getMaxHeight() ) {
-                    item->setState( SPRITE_STATE_TO_BE_REMOVED );
+                }
+                else if (item->getY() > map.getMaxHeight()) {
+                    item->setState(SPRITE_STATE_TO_BE_REMOVED);
                 }
             }
 
-            if ( item->getState() == SPRITE_STATE_TO_BE_REMOVED ) {
-                collectedIndexes.push_back( static_cast<int>( i ) );
+            if (item->getState() == SPRITE_STATE_TO_BE_REMOVED) {
+                collectedIndexes.push_back(static_cast<int>(i));
             }
 
         }
 
-        for ( int i = collectedIndexes.size() - 1; i >= 0; i-- ) {
+        for (int i = collectedIndexes.size() - 1; i >= 0; i--) {
             delete Items[collectedIndexes[i]];
-            Items.erase( Items.begin() + collectedIndexes[i] );
+            Items.erase(Items.begin() + collectedIndexes[i]);
         }
-        
+
         // player x static items collision resolution with distance optimization
         collectedIndexes.clear();
-        for ( size_t i = 0; i < StaticItems.size(); i++ ) {
+        for (size_t i = 0; i < StaticItems.size(); i++) {
 
             Item* item = StaticItems[i];
 
-            if ( item->getState() != SPRITE_STATE_HIT &&
-                 item->getState() != SPRITE_STATE_TO_BE_REMOVED ) {
-                
+            if (item->getState() != SPRITE_STATE_HIT &&
+                item->getState() != SPRITE_STATE_TO_BE_REMOVED) {
+
                 // Distance-based collision optimization: Only check collision if Player is close to the static item
                 if (shouldCheckCollision(player.getPos(), player.getDim(), item->getPos(), item->getDim(), maxDistForCollisionCheck)) {
-                    if ( item->checkCollision( &player ) != COLLISION_TYPE_NONE ) {
-                        item->setState( SPRITE_STATE_HIT );
+                    if (item->checkCollision(&player) != COLLISION_TYPE_NONE) {
+                        item->setState(SPRITE_STATE_HIT);
                         item->playCollisionSound();
 
                         // item->updateMario( player );
 
-                        item->updatePlayer( player );
+                        item->updatePlayer(player);
 
                     }
-                } else if ( item->getY() > map.getMaxHeight() ) {
-                    item->setState( SPRITE_STATE_TO_BE_REMOVED );
+                }
+                else if (item->getY() > map.getMaxHeight()) {
+                    item->setState(SPRITE_STATE_TO_BE_REMOVED);
                 }
             }
 
-            if ( item->getState() == SPRITE_STATE_TO_BE_REMOVED ) {
-                collectedIndexes.push_back( static_cast<int>( i ) );
+            if (item->getState() == SPRITE_STATE_TO_BE_REMOVED) {
+                collectedIndexes.push_back(static_cast<int>(i));
             }
 
         }
 
-        for ( int i = collectedIndexes.size() - 1; i >= 0; i-- ) {
+        for (int i = collectedIndexes.size() - 1; i >= 0; i--) {
             delete StaticItems[collectedIndexes[i]];
-            StaticItems.erase( StaticItems.begin() + collectedIndexes[i] );
+            StaticItems.erase(StaticItems.begin() + collectedIndexes[i]);
         }
 
         // baddies activation and player and fireballs x baddies collision resolution and offscreen baddies removal
         collectedIndexes.clear();
-        if ( player.getState() != SPRITE_STATE_DYING && 
-             player.getState() != SPRITE_STATE_VICTORY &&
-             player.getState() != SPRITE_STATE_WAITING_TO_NEXT_MAP ) {
+        if (player.getState() != SPRITE_STATE_DYING &&
+            player.getState() != SPRITE_STATE_VICTORY &&
+            player.getState() != SPRITE_STATE_WAITING_TO_NEXT_MAP) {
 
             player.updateCollisionProbes();
 
-            for ( size_t i = 0; i < Baddies.size(); i++ ) {
+            for (size_t i = 0; i < Baddies.size(); i++) {
 
                 Baddie* baddie = Baddies[i];
 
                 // baddies activation
-                if ( baddie->getState() == SPRITE_STATE_IDLE ) {
-                    baddie->activateWithPlayerProximity( player );
+                if (baddie->getState() == SPRITE_STATE_IDLE) {
+                    baddie->activateWithPlayerProximity(player);
                 }
 
-                if ( baddie->getState() != SPRITE_STATE_DYING && 
-                     baddie->getState() != SPRITE_STATE_TO_BE_REMOVED ) {
+                if (baddie->getState() != SPRITE_STATE_DYING &&
+                    baddie->getState() != SPRITE_STATE_TO_BE_REMOVED) {
 
                     // Distance-based collision optimization: Only check collision if Player is close to the baddie
                     if (shouldCheckCollision(player.getPos(), player.getDim(), baddie->getPos(), baddie->getDim(), maxDistForCollisionCheck)) {
-                        const CollisionType col = player.checkCollisionBaddie( baddie );
+                        const CollisionType col = player.checkCollisionBaddie(baddie);
 
-                        if ( player.isInvincible() && col ) {
+                        if (player.isInvincible() && col) {
                             baddie->onHit();
-                            PlaySound( sounds["stomp"] );
-                            player.addPoints( baddie->getEarnedPoints() );
-                        } else {
+                            PlaySound(sounds["stomp"]);
+                            player.addPoints(baddie->getEarnedPoints());
+                        }
+                        else {
 
-                            if ( baddie->getAuxiliaryState() != SPRITE_STATE_INVULNERABLE ) {
+                            if (baddie->getAuxiliaryState() != SPRITE_STATE_INVULNERABLE) {
 
                                 // player and fireballs x baddies collision resolution and offscreen baddies removal
-                                switch ( col ) {
-                                    case COLLISION_TYPE_NORTH:
-                                    case COLLISION_TYPE_EAST:
-                                    case COLLISION_TYPE_WEST:
-                                        if ( !player.isImmortal() && !player.isInvulnerable() ) {
-                                            switch ( player.getType() ) {
-                                                case PLAYER_TYPE_SMALL:
-                                                    player.setState( SPRITE_STATE_DYING );
-                                                    player.playPlayerDownMusicStream();
-                                                    player.removeLives( 1 );
-                                                    break;
-                                                case PLAYER_TYPE_SUPER:
-                                                    PlaySound( sounds["pipe"] );
-                                                    player.setLastStateBeforeTransition( player.getState() );
-                                                    player.setState( SPRITE_STATE_TRANSITIONING_SUPER_TO_SMALL );
-                                                player.setInvulnerable( true );
-                                                break;
-                                            case PLAYER_TYPE_FLOWER:
-                                                PlaySound( sounds["pipe"] );
-                                                player.setLastStateBeforeTransition( player.getState() );
-                                                player.setState( SPRITE_STATE_TRANSITIONING_FLOWER_TO_SMALL );
-                                                player.setInvulnerable( true );
-                                                break;
+                                switch (col) {
+                                case COLLISION_TYPE_NORTH:
+                                case COLLISION_TYPE_EAST:
+                                case COLLISION_TYPE_WEST:
+                                    if (!player.isImmortal() && !player.isInvulnerable()) {
+                                        switch (player.getType()) {
+                                        case PLAYER_TYPE_SMALL:
+                                            player.setState(SPRITE_STATE_DYING);
+                                            player.playPlayerDownMusicStream();
+                                            player.removeLives(1);
+                                            break;
+                                        case PLAYER_TYPE_SUPER:
+                                            PlaySound(sounds["pipe"]);
+                                            player.setLastStateBeforeTransition(player.getState());
+                                            player.setState(SPRITE_STATE_TRANSITIONING_SUPER_TO_SMALL);
+                                            player.setInvulnerable(true);
+                                            break;
+                                        case PLAYER_TYPE_FLOWER:
+                                            PlaySound(sounds["pipe"]);
+                                            player.setLastStateBeforeTransition(player.getState());
+                                            player.setState(SPRITE_STATE_TRANSITIONING_FLOWER_TO_SMALL);
+                                            player.setInvulnerable(true);
+                                            break;
                                         }
                                     }
                                     break;
                                 case COLLISION_TYPE_SOUTH:
-                                    if ( player.getState() == SPRITE_STATE_FALLING && 
-                                         baddie->getState() != SPRITE_STATE_DYING && 
-                                         baddie->getState() != SPRITE_STATE_TO_BE_REMOVED ) {
-                                        player.setY( baddie->getY() - player.getHeight() );
-                                        if ( ( IsKeyDown( KEY_LEFT_CONTROL ) ||
-                                               IsGamepadButtonDown( 0, GAMEPAD_BUTTON_RIGHT_FACE_LEFT ) ) ) {
-                                            player.setVelY( -400 );
-                                        } else {
-                                            player.setVelY( -200 );
+                                    if (player.getState() == SPRITE_STATE_FALLING &&
+                                        baddie->getState() != SPRITE_STATE_DYING &&
+                                        baddie->getState() != SPRITE_STATE_TO_BE_REMOVED) {
+                                        player.setY(baddie->getY() - player.getHeight());
+                                        if ((IsKeyDown(KEY_LEFT_CONTROL) ||
+                                            IsGamepadButtonDown(0, GAMEPAD_BUTTON_RIGHT_FACE_LEFT))) {
+                                            player.setVelY(-400);
                                         }
-                                        player.setState( SPRITE_STATE_JUMPING );
+                                        else {
+                                            player.setVelY(-200);
+                                        }
+                                        player.setState(SPRITE_STATE_JUMPING);
                                         baddie->onHit();
-                                        PlaySound( sounds["stomp"] );
-                                        player.addPoints( baddie->getEarnedPoints() );
-                                    } else {
-                                        if ( !player.isImmortal() && !player.isInvulnerable() ) {
-                                            switch ( player.getType() ) {
-                                                case PLAYER_TYPE_SMALL:
-                                                    player.setState( SPRITE_STATE_DYING );
-                                                    player.playPlayerDownMusicStream();
-                                                    player.removeLives( 1 );
-                                                    break;
-                                                case PLAYER_TYPE_SUPER:
-                                                    PlaySound( sounds["pipe"] );
-                                                    player.setLastStateBeforeTransition( player.getState() );
-                                                    player.setState( SPRITE_STATE_TRANSITIONING_SUPER_TO_SMALL );
-                                                    player.setInvulnerable( true );
-                                                    break;
-                                                case PLAYER_TYPE_FLOWER:
-                                                    PlaySound( sounds["pipe"] );
-                                                    player.setLastStateBeforeTransition( player.getState() );
-                                                    player.setState( SPRITE_STATE_TRANSITIONING_FLOWER_TO_SMALL );
-                                                    player.setInvulnerable( true );
-                                                    break;
+                                        PlaySound(sounds["stomp"]);
+                                        player.addPoints(baddie->getEarnedPoints());
+                                    }
+                                    else {
+                                        if (!player.isImmortal() && !player.isInvulnerable()) {
+                                            switch (player.getType()) {
+                                            case PLAYER_TYPE_SMALL:
+                                                player.setState(SPRITE_STATE_DYING);
+                                                player.playPlayerDownMusicStream();
+                                                player.removeLives(1);
+                                                break;
+                                            case PLAYER_TYPE_SUPER:
+                                                PlaySound(sounds["pipe"]);
+                                                player.setLastStateBeforeTransition(player.getState());
+                                                player.setState(SPRITE_STATE_TRANSITIONING_SUPER_TO_SMALL);
+                                                player.setInvulnerable(true);
+                                                break;
+                                            case PLAYER_TYPE_FLOWER:
+                                                PlaySound(sounds["pipe"]);
+                                                player.setLastStateBeforeTransition(player.getState());
+                                                player.setState(SPRITE_STATE_TRANSITIONING_FLOWER_TO_SMALL);
+                                                player.setInvulnerable(true);
+                                                break;
                                             }
                                         }
                                     }
                                     break;
                                 case COLLISION_TYPE_FIREBALL:
                                     baddie->onHit();
-                                    PlaySound( sounds["stomp"] );
-                                    player.addPoints( baddie->getEarnedPoints() );
+                                    PlaySound(sounds["stomp"]);
+                                    player.addPoints(baddie->getEarnedPoints());
                                     break;
                                 default:
                                     break;
 
+                                }
+
                             }
+                            else {
 
-                        } else {
-
-                            if ( col ) {
-                                if ( col == COLLISION_TYPE_FIREBALL ) {
-                                    baddie->onHit();
-                                    PlaySound( sounds["stomp"] );
-                                    player.addPoints( baddie->getEarnedPoints() );
-                                } else {
-                                    if ( !player.isImmortal() && !player.isInvulnerable() ) {
-                                        switch ( player.getType() ) {
+                                if (col) {
+                                    if (col == COLLISION_TYPE_FIREBALL) {
+                                        baddie->onHit();
+                                        PlaySound(sounds["stomp"]);
+                                        player.addPoints(baddie->getEarnedPoints());
+                                    }
+                                    else {
+                                        if (!player.isImmortal() && !player.isInvulnerable()) {
+                                            switch (player.getType()) {
                                             case PLAYER_TYPE_SMALL:
-                                                player.setState( SPRITE_STATE_DYING );
+                                                player.setState(SPRITE_STATE_DYING);
                                                 player.playPlayerDownMusicStream();
-                                                player.removeLives( 1 );
+                                                player.removeLives(1);
                                                 break;
                                             case PLAYER_TYPE_SUPER:
-                                                PlaySound( sounds["pipe"] );
-                                                player.setLastStateBeforeTransition( player.getState() );
-                                                player.setState( SPRITE_STATE_TRANSITIONING_SUPER_TO_SMALL );
-                                                player.setInvulnerable( true );
+                                                PlaySound(sounds["pipe"]);
+                                                player.setLastStateBeforeTransition(player.getState());
+                                                player.setState(SPRITE_STATE_TRANSITIONING_SUPER_TO_SMALL);
+                                                player.setInvulnerable(true);
                                                 break;
                                             case PLAYER_TYPE_FLOWER:
-                                                PlaySound( sounds["pipe"] );
-                                                player.setLastStateBeforeTransition( player.getState() );
-                                                player.setState( SPRITE_STATE_TRANSITIONING_FLOWER_TO_SMALL );
-                                                player.setInvulnerable( true );
+                                                PlaySound(sounds["pipe"]);
+                                                player.setLastStateBeforeTransition(player.getState());
+                                                player.setState(SPRITE_STATE_TRANSITIONING_FLOWER_TO_SMALL);
+                                                player.setInvulnerable(true);
                                                 break;
+                                            }
                                         }
                                     }
                                 }
+
                             }
 
                         }
 
-                    }
-                    
                     } // Close distance check bracket
 
-                    if ( baddie->getX() + baddie->getWidth() < 0 ||
-                         baddie->getX() > map.getMaxWidth() ||
-                         baddie->getY() > map.getMaxHeight() ) {
-                        baddie->setState( SPRITE_STATE_TO_BE_REMOVED );
+                    if (baddie->getX() + baddie->getWidth() < 0 ||
+                        baddie->getX() > map.getMaxWidth() ||
+                        baddie->getY() > map.getMaxHeight()) {
+                        baddie->setState(SPRITE_STATE_TO_BE_REMOVED);
                     }
 
-                } else {
-                    if ( baddie->getX() + baddie->getWidth() < 0 ||
-                         baddie->getX() > map.getMaxWidth() ||
-                         baddie->getY() > map.getMaxHeight() ) {
-                        baddie->setState( SPRITE_STATE_TO_BE_REMOVED );
+                }
+                else {
+                    if (baddie->getX() + baddie->getWidth() < 0 ||
+                        baddie->getX() > map.getMaxWidth() ||
+                        baddie->getY() > map.getMaxHeight()) {
+                        baddie->setState(SPRITE_STATE_TO_BE_REMOVED);
                     }
                 }
 
-                if ( baddie->getState() == SPRITE_STATE_TO_BE_REMOVED ) {
-                    collectedIndexes.push_back( static_cast<int>( i ) );
+                if (baddie->getState() == SPRITE_STATE_TO_BE_REMOVED) {
+                    collectedIndexes.push_back(static_cast<int>(i));
                 }
 
                 player.updateCollisionProbes();
@@ -812,74 +801,73 @@ void GameWorld::inputAndUpdate() {
 
         }
 
-        for ( int i = collectedIndexes.size() - 1; i >= 0; i-- ) {
+        for (int i = collectedIndexes.size() - 1; i >= 0; i--) {
 
-            Baddie *baddie = Baddies[collectedIndexes[i]];
+            Baddie* baddie = Baddies[collectedIndexes[i]];
             delete baddie;
-            Baddies.erase( Baddies.begin() + collectedIndexes[i] );
+            Baddies.erase(Baddies.begin() + collectedIndexes[i]);
 
-            // the map draws baddies in two layers
-            // the baddies are stored in three vectors:
-            //     one for baddies management (all baddies)
-            //     one for drawing in front of the scenario
-            //     one for drawing in back of the scenario
-            map.eraseBaddieFromDrawingVectors( baddie );
+            map.eraseBaddieFromDrawingVectors(baddie);
 
         }
     }
 
     else if (player.getState() == SPRITE_STATE_DYING) {
-            if ( !player.isPlayerDownMusicStreamPlaying() && !player.isGameOverMusicStreamPlaying() ) {
-            
-            if ( player.getLives() > 0 ) {
+        if (!player.isPlayerDownMusicStreamPlaying() && !player.isGameOverMusicStreamPlaying()) {
+
+            if (player.getLives() > 0) {
                 resetMap();
-            } else if ( player.getLives() < 0 ) {
+            }
+            else if (player.getLives() < 0) {
                 resetGame();
-            } else {
+            }
+            else {
                 player.playGameOverMusicStream();
                 state = GAME_STATE_GAME_OVER;
-                player.setLives( -1 );
+                player.setLives(-1);
             }
         }
     }
 
-    else if ( player.getState() == SPRITE_STATE_VICTORY ) {
+    else if (player.getState() == SPRITE_STATE_VICTORY) {
         remainingTimePointCount = player.getRemainingTime();
         state = GAME_STATE_COUNTING_POINTS;
-        map.setDrawBlackScreen( true );
-        player.setState( SPRITE_STATE_WAITING_TO_NEXT_MAP );
+        map.setDrawBlackScreen(true);
+        player.setState(SPRITE_STATE_WAITING_TO_NEXT_MAP);
     }
 
     else if (state == GAME_STATE_COUNTING_POINTS) {
-        if ( !IsMusicStreamPlaying( musics["courseClear"] ) ) {
-            PlayMusicStream( musics["courseClear"] );
-        } else {
-            UpdateMusicStream( musics["courseClear"] );
+        if (!IsMusicStreamPlaying(musics["courseClear"])) {
+            PlayMusicStream(musics["courseClear"]);
+        }
+        else {
+            UpdateMusicStream(musics["courseClear"]);
         }
 
         remainingTimePointCount--;
-        player.addPoints( 50 );
+        player.addPoints(50);
 
-        if ( remainingTimePointCount % 3 == 0 ) {
-            PlaySound( sounds["coin"] );
+        if (remainingTimePointCount % 3 == 0) {
+            PlaySound(sounds["coin"]);
         }
 
-        if ( remainingTimePointCount == 0 ) {
+        if (remainingTimePointCount == 0) {
             state = GAME_STATE_OUTRO;
         }
     }
 
     // pre-outro (music control)
     else if (state == GAME_STATE_OUTRO) {
-        if ( !IsMusicStreamPlaying( musics["courseClear"] ) ) {
-            StopMusicStream( musics["courseClear"] );
-            PlaySound( sounds["goalIrisOut"] );
+        if (!IsMusicStreamPlaying(musics["courseClear"])) {
+            StopMusicStream(musics["courseClear"]);
+            PlaySound(sounds["goalIrisOut"]);
             state = GAME_STATE_GO_TO_NEXT_MAP;
             outroAcum = 0;
-        } else {
-            UpdateMusicStream( musics["courseClear"] );
-            if ( static_cast<int>(GetMusicTimeLength( musics["courseClear"] )) == static_cast<int>(GetMusicTimePlayed( musics["courseClear"] )) ) {
-                StopMusicStream( musics["courseClear"] );
+        }
+        else {
+            UpdateMusicStream(musics["courseClear"]);
+            if (static_cast<int>(GetMusicTimeLength(musics["courseClear"])) == static_cast<int>(GetMusicTimePlayed(musics["courseClear"]))) {
+                StopMusicStream(musics["courseClear"]);
             }
         }
     }
@@ -887,31 +875,31 @@ void GameWorld::inputAndUpdate() {
     // real outro (time control and call next map)
     else if (state == GAME_STATE_GO_TO_NEXT_MAP) {
         outroAcum += GetFrameTime();
-        if ( outroAcum >= outroTime ) {
+        if (outroAcum >= outroTime) {
             outroFinished = true;
         }
 
-        if ( outroFinished ) {
+        if (outroFinished) {
             outroAcum = 0;
             outroFinished = false;
             nextMap();
         }
     }
 
-    else if ( state == GAME_STATE_SETTINGS_SCREEN ) {
+    else if (state == GAME_STATE_SETTINGS_SCREEN) {
         if ((IsKeyPressed(KEY_P) || settingScreen->settingBoardShouldClose()) && pauseButtonsCooldownAcum <= 0.0f) {
             unpauseGame();
         }
     }
 
 
-    else if ( state == GAME_STATE_HELPING_SCREEN ) {
+    else if (state == GAME_STATE_HELPING_SCREEN) {
         if ((IsKeyPressed(KEY_H) || helpingScreen->helpingBoardShouldClose()) && pauseButtonsCooldownAcum <= 0.0f) {
             unpauseGame();
         }
     }
 
-    else if ( state == GAME_STATE_GUARD_SCREEN ) {
+    else if (state == GAME_STATE_GUARD_SCREEN) {
         if (guardScreen->getCancelButton()->isReleased()) {
             // Cancel action, return to settings screen
             state = GAME_STATE_SETTINGS_SCREEN;
@@ -924,7 +912,6 @@ void GameWorld::inputAndUpdate() {
         else if (guardScreen->getAcceptButton()->isReleased()) {
             // Execute the guarded action
             if (guardScreen->getCurrentAction() == GUARD_ACTION_HOME) {
-                careTaker->save();
                 resetGame();
                 state = GAME_STATE_TITLE_SCREEN;
                 settingBoardIsOpen = false;
@@ -939,9 +926,9 @@ void GameWorld::inputAndUpdate() {
     }
 
 
-    if (settingBoardIsOpen){
+    if (settingBoardIsOpen) {
         settingScreen->update();
-        settingScreen->updateVolume(); 
+        settingScreen->updateVolume();
 
         if (settingScreen->settingBoardShouldClose()) {
             settingBoardIsOpen = false;
@@ -956,45 +943,49 @@ void GameWorld::inputAndUpdate() {
         }
     }
 
-    if ( player.getState() != SPRITE_STATE_DYING && 
-         player.getY() > map.getMaxHeight() ) {
+    if (player.getState() != SPRITE_STATE_DYING &&
+        player.getY() > map.getMaxHeight()) {
 
-        player.setState( SPRITE_STATE_DYING );
+        player.setState(SPRITE_STATE_DYING);
         player.playPlayerDownMusicStream();
-        player.removeLives( 1 );
+        player.removeLives(1);
     }
 
     const float xc = GetScreenWidth() / 2.0;
     const float yc = GetScreenHeight() / 2.0;
     const float pxc = player.getX() + player.getWidth() / 2.0;
     const float pyc = player.getY() + player.getHeight() / 2.0;
-    
+
     camera->offset.x = xc;
 
-    if ( pxc < xc ) {
+    if (pxc < xc) {
         camera->target.x = xc + Map::TILE_WIDTH;
-        map.setPlayerOffset( 0 );         // x parallax
-    } else if ( pxc >= map.getMaxWidth() - xc - Map::TILE_WIDTH ) {
+        map.setPlayerOffset(0);         // x parallax
+    }
+    else if (pxc >= map.getMaxWidth() - xc - Map::TILE_WIDTH) {
         camera->target.x = map.getMaxWidth() - GetScreenWidth();
         camera->offset.x = 0;
-    } else {
+    }
+    else {
         camera->target.x = pxc + Map::TILE_WIDTH;
-        map.setPlayerOffset( pxc - xc );  // x parallax
+        map.setPlayerOffset(pxc - xc);  // x parallax
     }
 
     camera->offset.y = yc;
 
-    if ( pyc < yc ) {
+    if (pyc < yc) {
         camera->target.y = yc + Map::TILE_WIDTH;
-    } else if ( pyc >= map.getMaxHeight() - yc - Map::TILE_WIDTH ) {
+    }
+    else if (pyc >= map.getMaxHeight() - yc - Map::TILE_WIDTH) {
         camera->target.y = map.getMaxHeight() - GetScreenHeight();
         camera->offset.y = 0;
-    } else {
+    }
+    else {
         camera->target.y = pyc + Map::TILE_WIDTH;
     }
 
-    if (state == GAME_STATE_TITLE_SCREEN || 
-        state == GAME_STATE_MENU_SCREEN || 
+    if (state == GAME_STATE_TITLE_SCREEN ||
+        state == GAME_STATE_MENU_SCREEN ||
         state == GAME_STATE_MAP_EDITOR_SCREEN1 ||
         state == GAME_STATE_MAP_EDITOR_SCREEN2 ||
         state == GAME_STATE_SELECT_CHARACTER_SCREEN ||
@@ -1004,7 +995,8 @@ void GameWorld::inputAndUpdate() {
 
         if (!IsMusicStreamPlaying(musics["title"])) {
             PlayMusicStream(musics["title"]);
-        } else {
+        }
+        else {
             UpdateMusicStream(musics["title"]);
         }
 
@@ -1021,11 +1013,11 @@ void GameWorld::inputAndUpdate() {
 
         else if (state == GAME_STATE_CREDITS_SCREEN) {
             Texture2D& creditTexture = ResourceManager::getInstance().getTexture("credit");
-            Rectangle creditRect = { 
-                (GetScreenWidth() - creditTexture.width) / 2.0f, 
-                (GetScreenHeight() - creditTexture.height) / 2.0f, 
-                1.0f * (creditTexture.width), 
-                1.0f * (creditTexture.height) 
+            Rectangle creditRect = {
+                (GetScreenWidth() - creditTexture.width) / 2.0f,
+                (GetScreenHeight() - creditTexture.height) / 2.0f,
+                1.0f * (creditTexture.width),
+                1.0f * (creditTexture.height)
             };
             if (!CheckCollisionPointRec(GetMousePosition(), creditRect) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
                 state = GAME_STATE_TITLE_SCREEN;
@@ -1034,7 +1026,7 @@ void GameWorld::inputAndUpdate() {
 
         else if (state == GAME_STATE_MENU_SCREEN) {
 
-            if (settingBoardIsOpen){
+            if (settingBoardIsOpen) {
                 return;
             }
 
@@ -1045,9 +1037,7 @@ void GameWorld::inputAndUpdate() {
             }
 
             else if (menuScreen->getButton("LOAD GAME")->isReleased()) {
-				/*loadBoardIsOpen = true;
-                state = GAME_STATE_LOADGAME_SCREEN;*/
-				std::cout << "Load Game button pressed. Load game functionality will be implemented later." << std::endl;
+                loadGame->load();
             }
 
             else if (menuScreen->getButton("DESIGN MAP")->isReleased()) {
@@ -1073,22 +1063,21 @@ void GameWorld::inputAndUpdate() {
             if (selectCharacterScreen->getMarioButton().isReleased()) {
                 // Mario selected - start the game
                 player.resetAll();
-				player.toMario(); // Switch to Mario
+                player.toMario(); // Switch to Mario
                 map.loadFromJsonFile(); // Load the map immediately
                 player.setMaxTime(400.0f); // Set the time limit (400 seconds = typical Mario game time)
-                
+
                 if (IsMusicStreamPlaying(musics["title"])) {
                     StopMusicStream(musics["title"]);
-                }            
+                }
                 state = GAME_STATE_PLAYING;
             }
 
             else if (selectCharacterScreen->getLuigiButton().isReleased()) {
-                // Luigi selected - implement later
-                // std::cout << "Luigi button pressed. Luigi functionality will be implemented later." << std::endl;
 
                 player.resetAll();
-				player.toLuigi(); // Switch to Luigi
+                player.toLuigi(); // Switch to Luigi
+                lastCheckpointData.isLuigi = true;
                 map.loadFromJsonFile(); // Load the map immediately
                 player.setMaxTime(400.0f); // Set the time limit (400 seconds = typical Mario game time)
 
@@ -1107,7 +1096,7 @@ void GameWorld::inputAndUpdate() {
         else if (state == GAME_STATE_MAP_EDITOR_SCREEN1) {
             if (mapEditorScreen1 != nullptr) {
                 mapEditorScreen1->update();
-                
+
                 // Only check other buttons if dialog is not open
                 if (!mapEditorScreen1->isDialogOpen()) {
                     Button* newMapButton = mapEditorScreen1->getButton("NEW MAP");
@@ -1145,95 +1134,24 @@ void GameWorld::inputAndUpdate() {
                 state = GAME_STATE_MENU_SCREEN;
             }
             else if (leaderBoardScreen && leaderBoardScreen->getReturnButton()->isReleased()) {
-            state = GAME_STATE_MENU_SCREEN;
+                state = GAME_STATE_MENU_SCREEN;
             }
         }
+
     }
-    
-    else if ( state == GAME_STATE_GAME_OVER ) {
+
+    else if (state == GAME_STATE_GAME_OVER) {
         player.playGameOverMusicStream();
-        careTaker -> saveToCareTakerLeaderBoard();
+        careTaker->saveToCareTakerLeaderBoard();
         careTaker->releaseLeaderBoardData();
         leaderBoardScreen->setLatestDataLoaded(true);
-		state = GAME_STATE_LEADERBOARD_SCREEN;
+        state = GAME_STATE_LEADERBOARD_SCREEN;
     }
-
-//     else if (state == GAME_STATE_LEADERBOARD_SCREEN) {
-//         if (IsKeyPressed(KEY_ESCAPE)) {
-//             state = GAME_STATE_MENU_SCREEN;
-//         }
-//         else if (leaderBoardScreen && leaderBoardScreen->getReturnButton()->isReleased()) {
-//         state = GAME_STATE_MENU_SCREEN;
-//         }
-//     }
-
-// 	// Added additional fireball collision checks
-//     for (auto& fireball : player.fireballs) {
-
-// 		// Check fireball collisions with baddies
-//         /*for (auto& baddie : Baddies) {
-//             if (baddie->getState() != SPRITE_STATE_DYING && baddie->getState() != SPRITE_STATE_TO_BE_REMOVED) {
-//                 if (shouldCheckCollision(fireball.getPos(), fireball.getDim(), baddie->getPos(), baddie->getDim(), maxDistForCollisionCheck)) {
-//                     if (fireball.checkCollision(baddie) == COLLISION_TYPE_COLLIDED) {
-//                         fireball.setState(SPRITE_STATE_TO_BE_REMOVED);
-//                         baddie->onHit();
-//                         PlaySound(sounds["stomp"]);
-//                         player.addPoints(baddie->getEarnedPoints());
-//                     }
-//                 }
-//             }
-//         }*/
-
-// 		// Check fireball collisions with tiles
-//         for (auto& tile : Tiles) {
-//             if (shouldCheckCollision(fireball.getPos(), fireball.getDim(), tile->getPos(), tile->getDim(), maxDistForCollisionCheck)) {
-//                 CollisionType col = fireball.checkCollision(tile);
-//                 switch (col) {
-//                     case COLLISION_TYPE_NORTH:
-//                         fireball.setVelY(-fireball.getVelY());
-//                         break;
-//                     case COLLISION_TYPE_SOUTH:
-//                         fireball.setVelY(-300);
-//                         break;
-//                     case COLLISION_TYPE_EAST:
-//                     case COLLISION_TYPE_WEST:
-//                         fireball.setState(SPRITE_STATE_TO_BE_REMOVED);
-//                         break;
-//                     default:
-//                         break;
-//                 }
-//             }
-//         }
-
-// 		// Check fireball collisions with blocks
-//         for (auto& block : Blocks) {
-//             if (shouldCheckCollision(fireball.getPos(), fireball.getDim(), block->getPos(), block->getDim(), maxDistForCollisionCheck)) {
-//                 CollisionType col = fireball.checkCollision(block);
-//                 switch (col) {
-//                     case COLLISION_TYPE_NORTH:
-//                         fireball.setVelY(-fireball.getVelY());
-//                         break;
-//                     case COLLISION_TYPE_SOUTH:
-//                         fireball.setVelY(-300);
-//                         break;
-//                     case COLLISION_TYPE_EAST:
-//                     case COLLISION_TYPE_WEST:
-//                         fireball.setState(SPRITE_STATE_TO_BE_REMOVED);
-//                         break;
-//                     default:
-//                         break;
-//                 }
-//             }
-//         }
-//     }
 }
-
 void GameWorld::draw() {
     BeginDrawing();
     ClearBackground(WHITE);
     std::map<std::string, Texture2D>& textures = ResourceManager::getInstance().getTextures();
-
-    // std:: cerr << "Total played time: " << totalPlayedTime << " seconds" << std::endl;
 
     if (state == GAME_STATE_TITLE_SCREEN) {
         titleScreen->draw();
@@ -1366,13 +1284,11 @@ void GameWorld::draw() {
         }
         
     }
+    
 
 
     if (settingBoardIsOpen) {
         settingScreen->draw();
-    }
-    if (loadBoardIsOpen) { 
-        loadGameScreen->draw();
     }
 
     if (helpingBoardIsOpen) {
@@ -1440,24 +1356,11 @@ void GameWorld::resetGame() {
     map.reset();
     totalPlayedTime = 0; // Reset total played time when starting a new game
     pauseMusic = false;  // Ensure music isn't paused after reset
-    hasCheckpoint = false;
-
     state = GAME_STATE_TITLE_SCREEN;
 }
 
 void GameWorld::nextMap() {
     if (map.hasNext()) {
-        const int nextMapId = map.getId() + 1;
-        lastCheckpointData = Data(
-            nextMapId,
-            player.getPoints(),
-            player.getLives(),
-            player.getCoins(),
-            player.getYoshiCoins(),
-            player.getRemainingTime(),
-            player.getType()
-        );
-        hasCheckpoint = true;
         state = GAME_STATE_PLAYING;
 
         // Add Player's elapsed time to total played time when map is completed
@@ -1465,6 +1368,14 @@ void GameWorld::nextMap() {
         player.setPointsFromPreviousMap(player.getPoints());
         player.setCoinsFromPreviousMap(player.getCoins());
 	    // careTaker -> saveToCareTakerLeaderBoard();
+        lastCheckpointData = savedData(
+            map.getId(),
+            player.getLives(),
+            player.getPoints(),
+            player.getCoins(),
+			player.getType(),
+            lastCheckpointData.isLuigi
+            );
         player.reset(false, false);
     } else {
         state = GAME_STATE_FINISHED;
@@ -1524,3 +1435,7 @@ float GameWorld::getMaxDistForCollisionCheck() const {
 void GameWorld::setCaretaker(CareTaker* caretaker) {
     this->careTaker = caretaker;
 }
+void GameWorld::setLoadGame( LoadGame* loadgame) {
+    this->loadGame = loadgame;
+}
+

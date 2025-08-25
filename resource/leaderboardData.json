@@ -34,6 +34,14 @@
         },
         {
             "clearanceTime": 0,
+            "coins": 57,
+            "date": "2025-08-24",
+            "lives": -1,
+            "score": 59800,
+            "yoshiCoins": 0
+        },
+        {
+            "clearanceTime": 0,
             "coins": 22,
             "date": "2025-08-21",
             "lives": -1,

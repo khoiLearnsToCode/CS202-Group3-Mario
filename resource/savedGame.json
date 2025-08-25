@@ -1,1 +1,10 @@
-{}
+{
+    "savedgame": {
+        "PlayerType": 0,
+        "coins": 35,
+        "isLuigi": false,
+        "lives": 4,
+        "mapID": 3,
+        "score": 82550
+    }
+}

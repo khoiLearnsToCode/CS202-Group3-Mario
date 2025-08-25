@@ -324,12 +324,6 @@ void ResourceManager::loadTextures() {
             textures[TextFormat("tile_%d", i)] = LoadTexture(TextFormat("../resource/graphic/tiles/tile_%d.png", i));
         }
 
-
-        //textures["tileCourseClearPoleBackTop"] = LoadTexture("resources/graphics/tiles/scenario/tile_CourseClearPoleBackTop.png");
-        //textures["tileCourseClearPoleBackBody"] = LoadTexture("resources/graphics/tiles/scenario/tile_CourseClearPoleBackBody.png");
-        //textures["tileCourseClearPoleFrontTop"] = LoadTexture("resources/graphics/tiles/scenario/tile_CourseClearPoleFrontTop.png");
-        //textures["tileCourseClearPoleFrontBody"] = LoadTexture("resources/graphics/tiles/scenario/tile_CourseClearPoleFrontBody.png");
-
         // blocks
         textures["block88"] = LoadTexture("../resource/graphic/sprites/blocks/Cloud_0.png");
         textures["block89"] = LoadTexture("../resource/graphic/sprites/blocks/Exclamation_0.png");
@@ -592,6 +586,8 @@ void ResourceManager::loadTextures() {
         textures["helpButtonRelease"] = LoadTexture("../resource/graphic/ui/helpButtonRelease.png");
         textures["returnButtonPress"] = LoadTexture("../resource/graphic/ui/returnButtonPress.png");
         textures["returnButtonRelease"] = LoadTexture("../resource/graphic/ui/returnButtonRelease.png");
+        textures["saveButtonRelease"] = LoadTexture("../resource/graphic/ui/saveButtonRelease.png");
+        textures["saveButtonPress"] = LoadTexture("../resource/graphic/ui/saveButtonPress.png");
 
         textures["leaderButtonPress"] = LoadTexture("../resource/graphic/ui/leaderButtonPress.png");
         textures["leaderButtonRelease"] = LoadTexture("../resource/graphic/ui/leaderButtonRelease.png");

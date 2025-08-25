@@ -6,28 +6,27 @@
 
 #include <iostream>
 #include <fstream>
-#include <vector>
 
 class CareTaker {
+    Memento* savedMemento;
     std::vector<Memento*> mementos;
     std::vector<Memento*> leaderboardMementos;
     GameWorld* gw;
     std::ifstream fin;
     std::ofstream fout;
 
-    public:
+public:
     CareTaker(GameWorld* gw);
     CareTaker(const CareTaker&) = delete;
     CareTaker& operator=(const CareTaker&) = delete;
     ~CareTaker();
 
-    void save();
-
-    void restore(int index);
+    void save(); 
+    void restore(int index); 
     void showSavedData() const;
-    std::vector<Memento*> getSavedData() const;
-    
+    std:: vector<Memento*>getSavedData() const;  
     void saveToCareTakerLeaderBoard();
     void releaseLeaderBoardData() const;
     std::vector<Memento*>& getLeaderBoard();
 };
+

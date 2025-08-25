@@ -846,6 +846,14 @@ bool Map::hasNext() {
 void Map::first() {
     id = 1;
 }
+void Map::second()
+{
+    id = 2;
+}
+void Map::third()
+{
+    id = 3;
+}
 
 void Map::eraseBaddieFromDrawingVectors(Baddie* baddie) {
 
