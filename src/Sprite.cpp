@@ -230,27 +230,15 @@ CollisionType Sprite::checkCollision(Sprite* sprite) {
         Rectangle rect = sprite->getRect();
 
         if (cpN.checkCollision(rect)) {
-            //if (GameWorld::debug) {
-            //    sprite->setColor(cpN.getColor());
-            //}
             return COLLISION_TYPE_NORTH;
         }
         else if (cpS.checkCollision(rect)) {
-            //if (GameWorld::debug) {
-            //    sprite->setColor(cpS.getColor());
-            //}
             return COLLISION_TYPE_SOUTH;
         }
         else if (cpE.checkCollision(rect)) {
-            //if (GameWorld::debug) {
-            //    sprite->setColor(cpE.getColor());
-            //}
             return COLLISION_TYPE_EAST;
         }
         else if (cpW.checkCollision(rect)) {
-            //if (GameWorld::debug) {
-            //    sprite->setColor(cpW.getColor());
-            //}
             return COLLISION_TYPE_WEST;
         }
 

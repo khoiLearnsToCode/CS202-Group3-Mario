@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.31.0)
 project(mariogame VERSION 0.1.0 LANGUAGES C CXX)
 
+set (CMAKE_CXX_STANDARD 17)
+set (CMAKE_CXX_STANDARD_REQUIRED ON)
+set (CMAKE_CXX_EXTENSIONS OFF)
+
 list(APPEND CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/vcpkg_installed/x64-windows")
 find_package(raylib CONFIG REQUIRED)
 
@@ -17,10 +21,17 @@ endforeach()
 # include all src files in the src directory
 file(GLOB_RECURSE SOURCES "src/*.cpp" "src/*.c")
 
-# Add the resource directory to the build
-file(COPY ${CMAKE_SOURCE_DIR}/resource DESTINATION ${CMAKE_BINARY_DIR})
+# Custom target to sync resource directory
+add_custom_target(sync_resources ALL
+    COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/resource
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/resource ${CMAKE_BINARY_DIR}/resource
+    COMMENT "Syncing resource directory..."
+)
 
 add_executable(mariogame ${SOURCES})
+
+# Make sure resources are synced before building the executable
+add_dependencies(mariogame sync_resources)
 
 target_link_libraries(mariogame PRIVATE raylib)
 

@@ -12,18 +12,19 @@ private:
     // Static instance pointer
     static ResourceManager* instance;
 
-    // Instance data members (no longer static)
     std::map<std::string, Texture2D> textures;
     std::map<std::string, Sound> sounds;
     std::map<std::string, Music> musics;
+    std::map<std::string, Font> fonts;
 
-    bool loadFromRRES;
+    float musicVolume; // Default music volume
+    float sfxVolume;   // Default SFX volume
 
     // Private constructor (prevents external instantiation)
     ResourceManager();
 
     // Private destructor
-    ~ResourceManager();
+    ~ResourceManager() = default;
 
     // Delete copy constructor and assignment operator
     ResourceManager(const ResourceManager&) = delete;
@@ -33,14 +34,16 @@ private:
     void loadTextures();
     void loadSounds();
     void loadMusics();
+    void loadFonts();
 
-    void loadTexture(const std::string& key, const std::string& path);
-    void loadSound(const std::string& key, const std::string& path);
-    void loadMusic(const std::string& key, const std::string& path);
+    // void loadTexture(const std::string& key, const std::string& path);
+    // void loadSound(const std::string& key, const std::string& path);
+    // void loadMusic(const std::string& key, const std::string& path);
 
     void unloadTextures();
     void unloadSounds();
     void unloadMusics();
+    void unloadFonts();
 
 public:
     // Static method to get the singleton instance
@@ -56,9 +59,16 @@ public:
     std::map<std::string, Texture2D>& getTextures();
     std::map<std::string, Sound>& getSounds();
     std::map<std::string, Music>& getMusics();
+    std::map<std::string, Font>& getFonts();
+
+    float getMusicVolume() const;
+    float getSfxVolume() const;
+    void setMusicVolume(float volume);
+    void setSfxVolume(float volume);
 
     // Utility methods
     Texture2D& getTexture(const std::string& key);
     Sound& getSound(const std::string& key);
     Music& getMusic(const std::string& key);
+    Font& getFont(const std::string& key);
 };

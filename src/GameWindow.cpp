@@ -4,48 +4,6 @@
 #include <string>
 #include <utility>
 
- /**
-  * @brief Construct a new GameWindow object
-  */
-
-//GameWindow::GameWindow(bool initAudio, TraceLogLevel logLevel) :
-//    GameWindow(800, 450, "Window Title", 60, true, false, false, false, false, false, initAudio, logLevel) {
-//}
-//
-//GameWindow::GameWindow(int width, int height, std::string title, bool initAudio, TraceLogLevel logLevel) :
-//    GameWindow(width, height, std::move(title), 60, true, false, false, false, false, false, initAudio, logLevel) {
-//}
-//
-//GameWindow::GameWindow(int width, int height, std::string title, int targetFPS, bool initAudio, TraceLogLevel logLevel) :
-//    GameWindow(width, height, std::move(title), targetFPS, true, false, false, false, false, false, initAudio, logLevel) {
-//}
-//
-//GameWindow::GameWindow(int width, int height, std::string title, bool antialiasing, bool initAudio, TraceLogLevel logLevel) :
-//    GameWindow(width, height, std::move(title), 60, antialiasing, false, false, false, false, false, initAudio, logLevel) {
-//}
-//
-//GameWindow::GameWindow(int width, int height, std::string title, int targetFPS, bool antialiasing, bool initAudio, TraceLogLevel logLevel) :
-//    GameWindow(width, height, std::move(title), targetFPS, antialiasing, false, false, false, false, false, initAudio, logLevel) {
-//}
-//
-//GameWindow::GameWindow(int width, int height, std::string title, int targetFPS,
-//    bool antialiasing, bool resizable, bool fullScreen,
-//    bool undecorated, bool alwaysOnTop, bool alwaysRun, bool initAudio, TraceLogLevel logLevel) :
-//    width(width),
-//    height(height),
-//    title(std::move(title)),
-//    targetFPS(targetFPS),
-//    antialiasing(antialiasing),
-//    resizable(resizable),
-//    fullScreen(fullScreen),
-//    undecorated(undecorated),
-//    alwaysOnTop(alwaysOnTop),
-//    alwaysRun(alwaysRun),
-//    initAudio(initAudio),
-//    logLevel(logLevel),
-//    camera(Camera2D()),
-//    initialized(false) {
-//}
 
 GameWindow::GameWindow(int width, int height, std::string title) : 
     width(width),
@@ -53,51 +11,26 @@ GameWindow::GameWindow(int width, int height, std::string title) :
     title(std::move(title)),
     targetFPS(60),
     initAudio(true),
+    gw(),
     camera(Camera2D()),
+    careTaker(&gw),
+    loadGame(&gw),
     initialized(false) 
 {}
 
-/**
- * @brief Destroy the GameWindow object
- */
+
 GameWindow::~GameWindow() {
 }
 
-/**
- * @brief Initializes the Window, starts the game loop and, when it
- * finishes, the window will be finished too.
- */
+
 void GameWindow::init() {
 
     if (!initialized) {
 
-        /*if (antialiasing) {
-            SetConfigFlags(FLAG_MSAA_4X_HINT);
-        }
-
-        if (resizable) {
-            SetConfigFlags(FLAG_WINDOW_RESIZABLE);
-        }
-
-        if (fullScreen) {
-            SetConfigFlags(FLAG_FULLSCREEN_MODE);
-        }
-
-        if (undecorated) {
-            SetConfigFlags(FLAG_WINDOW_UNDECORATED);
-        }
-
-        if (alwaysOnTop) {
-            SetConfigFlags(FLAG_WINDOW_TOPMOST);
-        }
-
-        if (alwaysRun) {
-            SetConfigFlags(FLAG_WINDOW_ALWAYS_RUN);
-        }
-
-        SetTraceLogLevel(logLevel);*/
-
         InitWindow(width, height, title.c_str());
+        Image icon = LoadImage("../resource/graphic/gui/marioIcon.jpg");
+        SetWindowIcon(icon);
+        UnloadImage(icon);
 
         if (initAudio) {
             InitAudioDevice();
@@ -106,6 +39,7 @@ void GameWindow::init() {
 
         GameWorld::loadResources();
 
+        gw.initScreensAndButtons();
         initialized = true;
 
         camera.target = Vector2{ 0, 0 };
@@ -120,6 +54,7 @@ void GameWindow::init() {
         }
 
         GameWorld::unloadResources();
+        ResourceManager::destroyInstance();
         if (initAudio) {
             CloseAudioDevice();
         }
@@ -150,104 +85,3 @@ void GameWindow::setTargetFPS(int targetFPS) {
     }
 }
 
-//std::string GameWindow::getTitle() const {
-//    return title;
-//}
-//
-//int GameWindow::getTargetFPS() const {
-//    return targetFPS;
-//}
-//
-//bool GameWindow::isAntialiasing() const {
-//    return antialiasing;
-//}
-//
-//bool GameWindow::isResizable() const {
-//    return resizable;
-//}
-//
-//bool GameWindow::isFullScreen() const {
-//    return fullScreen;
-//}
-//
-//bool GameWindow::isUndecorated() const {
-//    return undecorated;
-//}
-//
-//bool GameWindow::isAlwaysOnTop() const {
-//    return alwaysOnTop;
-//}
-//
-//bool GameWindow::isAlwaysRun() const {
-//    return alwaysRun;
-//}
-//
-//bool GameWindow::isInitAudio() const {
-//    return initAudio;
-//}
-//
-//bool GameWindow::isInitialized() const {
-//    return initialized;
-//}
-//
-//void GameWindow::setWidth(int width) {
-//    if (!initialized) {
-//        this->width = width;
-//    }
-//}
-//
-//void GameWindow::setHeight(int height) {
-//    if (!initialized) {
-//        this->height = height;
-//    }
-//}
-//
-//void GameWindow::setTitle(std::string title) {
-//    if (!initialized) {
-//        this->title = std::move(title);
-//    }
-//}
-
-
-
-//void GameWindow::setAntialiasing(bool antialiasing) {
-//    if (!initialized) {
-//        this->antialiasing = antialiasing;
-//    }
-//}
-//
-//void GameWindow::setResizable(bool resizable) {
-//    if (!initialized) {
-//        this->resizable = resizable;
-//    }
-//}
-//
-//void GameWindow::setFullScreen(bool fullScreen) {
-//    if (!initialized) {
-//        this->fullScreen = fullScreen;
-//    }
-//}
-//
-//void GameWindow::setUndecorated(bool undecorated) {
-//    if (!initialized) {
-//        this->undecorated = undecorated;
-//    }
-//}
-//
-//void GameWindow::setAlwaysOnTop(bool alwaysOnTop) {
-//    if (!initialized) {
-//        this->alwaysOnTop = alwaysOnTop;
-//    }
-//}
-//
-//void GameWindow::setAlwaysRun(bool alwaysRun) {
-//    if (!initialized) {
-//        this->alwaysRun = alwaysRun;
-//    }
-//}
-//
-//void GameWindow::setInitAudio(bool initAudio) {
-//    if (!initialized) {
-//        this->initAudio = initAudio;
-//    }
-//}

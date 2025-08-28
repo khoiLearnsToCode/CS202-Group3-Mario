@@ -1,0 +1,75 @@
+#include "Baddie.h"
+#include "raylib.h"
+#include "SpriteState.h"
+
+Baddie::Baddie() :
+    Baddie(Vector2{ 0.0f, 0.0f }, Vector2{ 0.0f, 0.0f }, Vector2{ 0.0f, 0.0f }, BLACK, 0, 0, 0, 0) {
+}
+
+Baddie::Baddie( Vector2 pos, Vector2 dim, Color color ) :
+    Baddie(pos, dim, Vector2{ 0,0 }, color, 0, 0, 0, 0) {
+}
+
+Baddie::Baddie( Vector2 pos, Vector2 dim, Color color, float frameTime, int maxFrames ) :
+    Baddie(pos, dim, Vector2{ 0,0 }, color, frameTime, maxFrames, 0, 0) {
+}
+
+Baddie::Baddie( Vector2 pos, Vector2 dim, Vector2 vel, Color color ) : 
+    Baddie( pos, dim, vel, color, 0, 0, 0, 0 ) {
+}
+
+Baddie::Baddie( Vector2 pos, Vector2 dim, Vector2 vel, Color color, float frameTime, int maxFrames ) :
+    Baddie( pos, dim, vel, color, frameTime, maxFrames, 0, 0 ) {
+}
+
+Baddie::Baddie( Vector2 pos, Vector2 dim, Vector2 vel, Color color, float frameTime, int maxFrames, int hitsToDie, int earnedPoints ) :
+    Sprite( pos, dim, vel, color, frameTime, maxFrames, DIRECTION_LEFT, hitsToDie, earnedPoints ),
+    dyingFrameAcum( 0 ),
+    dyingFrameTime( 0.1 ),
+    maxDyingFrames( 4 ),
+    currentDyingFrame( 0 ),
+    pointsFrameAcum( 0 ),
+    pointsFrameTime( 1 ),
+    posOnDying( Vector2{0,0}) {
+
+    const Color c = ColorFromHSV( GetRandomValue( 0, 360 ), 1, 0.9 );
+    cpN.setColor( c );
+    cpS.setColor( c );
+    cpE.setColor( c );
+    cpW.setColor( c );
+
+}
+
+Baddie::~Baddie() = default;
+
+void Baddie::activateWithPlayerProximity( Player &player ) {
+    if ( CheckCollisionPointRec( 
+        Vector2{ pos.x + dim.x / 2, pos.y + dim.y / 2 },
+        Rectangle{
+            player.getX() + player.getWidth() / 2 - player.getActivationWidth() / 2,
+            player.getY() + player.getHeight() / 2 - player.getActivationWidth() / 2,
+            player.getActivationWidth(),
+            player.getActivationWidth() })) {
+        state = SPRITE_STATE_ACTIVE;
+    }
+}
+
+void Baddie::setAttributesOnDying() {
+    vel.x = GetRandomValue( 0, 1 ) == 0 ? 200 : -200;
+    vel.y = -200;
+}
+
+void Baddie::onNorthCollision() {
+}
+
+void Baddie::onSouthCollision() {
+}
+
+void Baddie::onHit() {
+    state = SPRITE_STATE_DYING;
+    posOnDying = pos;
+    //setAttributesOnDying();
+}
+
+void Baddie::followTheLeader( Sprite* sprite ) {
+}

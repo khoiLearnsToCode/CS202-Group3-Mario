@@ -1,79 +1,126 @@
 #pragma once
 
-class Mario;
+class Player;
+class LeaderBoardScreen;
 
 #include "Drawable.h"
 #include "GameState.h"
 #include "Map.h"
-//#include "Mario.h"
+#include "Button.h"
+#include "ResourceManager.h"
+#include "Screen.h"
+#include "TitleScreen.h"
+#include "MenuScreen.h"
+#include "MapEditorScreen1.h"
+#include "MapEditorScreen2.h"
+#include "SelectCharacterScreen.h"
+#include "SettingScreen.h"
+#include"LoadGame.h"
+#include "HelpingScreen.h"
+#include "GuardScreen.h"
+#include "LeaderBoardScreen.h"
+#include "CareTaker.h"
+#include "Memento.h"
+#include "Player.h"
 #include "raylib.h"
+#include <iostream>
 
 class GameWorld : public virtual Drawable {
 
-    //Mario mario;
+    TitleScreen* titleScreen;
+    MenuScreen* menuScreen;
+    MapEditorScreen1* mapEditorScreen1;
+    MapEditorScreen2* mapEditorScreen2;
+    SelectCharacterScreen* selectCharacterScreen;
+    SettingScreen* settingScreen;
+    HelpingScreen* helpingScreen;
+    GuardScreen* guardScreen;
+    LeaderBoardScreen* leaderBoardScreen;
+
+    friend class CareTaker;
+    friend class SettingScreen;
+    friend class LoadGame;
+
+    Player player;
     Map map;
     Camera2D* camera;
-    bool showControls;
+    bool settingBoardIsOpen;
+    bool helpingBoardIsOpen;
+    bool leaderBoardIsOpen;
     GameState stateBeforePause;
     int remainingTimePointCount;
+    int totalPlayedTime;
 
     bool pauseMusic;
-    bool pauseMarioUpdate;
-    bool showOverlayOnPause;
+    bool pausePlayer;
+    // bool showOverlayOnPause;
 
-    bool irisOutFinished;
-    float irisOutTime;
-    float irisOutAcum;
+    bool outroFinished;
+    float outroTime;
+    float outroAcum;
+
+    ButtonTextTexture* settingButton;
+    ButtonTextTexture* helpButton;
+
+    // Pause-game buttons cooldown
+    float pauseButtonsCooldownAcum;
+    float pauseButtonsCooldownTime;
+
+    // Distance-based collision detection threshold
+    const float maxDistForCollisionCheck;
+
+
+    Memento* dataFromGameWorldToLeaderboard();
+    void setCaretaker(CareTaker* caretaker);
+
+    savedData* dataFromGameWorldToLoad();
+    void setLoadGame(LoadGame* loadgame);
+	void dataFromLoadToGameWorld(savedData* data);
+
+    savedData lastCheckpointData;
+
+    CareTaker* careTaker;
+	LoadGame* loadGame;
 
 public:
 
-    static bool immortalMario;
+    // static bool immortalPlayer;
     static GameState state;
     static float gravity;
 
-    /**
-     * @brief Construct a new GameWorld object.
-     */
     GameWorld();
-
-    /**
-     * @brief Destroy the GameWorld object.
-     */
     ~GameWorld() override;
 
-    /**
-     * @brief Reads user input and updates the state of the game.
-     */
-    void inputAndUpdate();
+    void initScreensAndButtons();
 
-    /**
-     * @brief Draws the state of the game.
-     */
+    // get user input, update game state
+    void inputAndUpdate();
     void draw() override;
 
-    /**
-     * @brief Load game resources like images, textures, sounds, fonts, shaders,
-     * etc.
-     * Should be called inside the constructor.
-     */
     static void loadResources();
-
-    /**
-     * @brief Unload the once loaded game resources.
-     * Should be called inside the destructor.
-     */
     static void unloadResources();
 
     void setCamera(Camera2D* camera);
     Camera2D* getCamera() const;
 
+    int getTotalPlayedTime() const;
+
+    void addToTotalPlayedTime(float timeToAdd);
+
+    void stopAllMusic();
     void resetMap();
     void resetGame();
     void nextMap();
-    void pauseGame(bool playPauseSFX, bool pauseMusic, bool showOverlay, bool pauseMarioUpdate);
+    void pauseGame(bool playPauseSFX, bool pauseMusic, bool pausePlayer, bool showSettingBoard, bool showHelpingBoard);
     void unpauseGame();
+    void showGuardScreen(GuardAction action); 
+    CareTaker* getCareTaker() const { return careTaker; } 
+    LoadGame* getLoadGame()  { return loadGame; }
 
-    bool isPauseMusicOnPause() const;
-    bool isShowOverlayOnPause() const;
+    // Distance threshold getter for collision optimization
+    float getMaxDistForCollisionCheck() const;
+
+    // bool isPauseMusicOnPause() const;
+    // bool isShowOverlayOnPause() const;
 
 };

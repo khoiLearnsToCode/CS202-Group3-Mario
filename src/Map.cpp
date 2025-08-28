@@ -1,60 +1,41 @@
-/**
- * @file Map.cpp
- * @author Prof. Dr. David Buzatto
- * @brief Map class implementation.
- *
- * @copyright Copyright (c) 2024
- */
-//#include "Baddie.h"
 //#include "BanzaiBill.h"
-//#include "Block.h"
-//#include "BlueKoopaTroopa.h"
-//#include "BobOmb.h"
-//#include "BulletBill.h"
-//#include "BuzzyBeetle.h"
-//#include "CloudBlock.h"
-//#include "Coin.h"
-//#include "CourseClearToken.h"
-//#include "ExclamationBlock.h"
-//#include "EyesClosedBlock.h"
-//#include "EyesOpenedBlock.h"
-//#include "FlyingGoomba.h"
+#include "BlueKoopaTroopa.h"
+#include "BobOmb.h"
+#include "BulletBill.h"
+#include "BuzzyBeetle.h"
+#include "Block.h"
+#include "Item.h"
+#include "FlyingGoomba.h"
 #include "GameWorld.h"
-//#include "GlassBlock.h"
-//#include "Goomba.h"
-//#include "GreenKoopaTroopa.h"
-//#include "InvisibleBlock.h"
-//#include "Item.h"
-//#include "JumpingPiranhaPlant.h"
+#include "Goomba.h"
+#include "GreenKoopaTroopa.h"
+#include "Item.h"
+#include "JumpingPiranhaPlant.h"
 #include "Map.h"
-//#include "MessageBlock.h"
-//#include "MontyMole.h"
-//#include "MummyBeetle.h"
-//#include "Muncher.h"
-//#include "PiranhaPlant.h"
-//#include "QuestionBlock.h"
-//#include "QuestionFireFlowerBlock.h"
-//#include "QuestionMushroomBlock.h"
-//#include "QuestionOneUpMushroomBlock.h"
-//#include "QuestionStarBlock.h"
-//#include "QuestionThreeUpMoonBlock.h"
+#include "MontyMole.h"
+#include "MummyBeetle.h"
+#include "Muncher.h"
+#include "PiranhaPlant.h"
 #include "raylib.h"
-//#include "RedKoopaTroopa.h"
+#include "RedKoopaTroopa.h"
 #include "ResourceManager.h"
-//#include "Rex.h"
+#include "Rex.h"
 #include "Sprite.h"
-//#include "StoneBlock.h"
-//#include "Swooper.h"
-//#include "utils.h"
-//#include "WoodBlock.h"
-//#include "YellowKoopaTroopa.h"
-//#include "YoshiCoin.h"
+#include "Swooper.h"
+#include "YellowKoopaTroopa.h"
 #include <iostream>
+#include <fstream>
 #include <sstream>
 #include <string>
 #include <vector>
 
-Map::Map(Mario& mario, int id, bool loadTestMap, bool parseBlocks, bool parseItems, bool parseBaddies, GameWorld* gw) :
+const std::vector<Color> Map::backgroundColorPallete = {
+    { 62, 191, 255, 255 },  // Sky blue
+    { 255, 255, 225, 255 }, // Light yellow
+    { 2, 38, 83, 255 },     // Dark blue
+};
+
+Map::Map(Player& player, int id, bool loadTestMap, GameWorld* gw) :
 
     id(id),
     maxId(3),
@@ -62,77 +43,580 @@ Map::Map(Mario& mario, int id, bool loadTestMap, bool parseBlocks, bool parseIte
     maxWidth(0),
     maxHeight(0),
 
-//    mario(mario),
-//    marioOffset(0),
-
-    backgroundId(0),
-    maxBackgroundId(10),
+    player(player),
+    playerOffset(0),
+    backgroundId(1),
+    maxBackgroundId(3),
     backgroundColor(WHITE),
     backgroundTexture(Texture()),
-    //drawBlackScreen(false),
-    //drawBlackScreenFadeAcum(0),
-    //drawBlackScreenFadeTime(1.5),
+    drawBlackScreen(false),
+    drawBlackScreenFadeAcum(0),
+    drawBlackScreenFadeTime(1.5),
 
-    tileSetId(1),
+    // Near sight vision effect for map3
+    lastValidPlayerPos({0, 0}),
+
+    //tileSetId(1),
     //maxTileSetId(4),
 
-    //musicId(0),
-    //maxMusicId(9),
+    musicId(1),
+    maxMusicId(9),
 
     //parseBlocks(parseBlocks),
     //parseItems(parseItems),
     //parseBaddies(parseBaddies),
 
     loadTestMap(loadTestMap),
+    loadFromUserDesignedMap(false),
+    currentData(nullptr),
     parsed(false),
 
-    //drawMessage(false),
     camera(nullptr),
     gw(gw) {
 }
 
 Map::~Map() {
 
-    for (const auto& tile : tiles) {
+    for (const auto& tile : untouchableTiles) {
         delete tile;
     }
 
-    for (const auto& backScenarioTile : backScenarioTiles) {
-        delete backScenarioTile;
+    for (const auto& tile : touchableTiles) {
+        delete tile;
     }
 
-    for (const auto& frontScenarioTile : frontScenarioTiles) {
-        delete frontScenarioTile;
+    for (const auto& item : items) {
+       delete item;
     }
 
-    //for (const auto& item : items) {
-    //    delete item;
-    //}
+    for (const auto& staticItem : staticItems) {
+       delete staticItem;
+    }
 
-    //for (const auto& staticItem : staticItems) {
-    //    delete staticItem;
-    //}
+    for (const auto& baddie : baddies) {
+       delete baddie;
+    }
 
-    //for (const auto& baddie : baddies) {
-    //    delete baddie;
-    //}
+    for (const auto& block : blocks) {
+       delete block;
+    }
 
-    //for (const auto& block : blocks) {
-    //    delete block;
-    //}
+}
 
+void Map::loadFromJsonFile(bool shouldLoadTestMap) {
+    //clear current map
+    //reset();
+
+    if (parsed) {
+        return;
+    }
+
+    if (loadFromUserDesignedMap) {
+        loadUserData();
+        return;
+    }
+
+    loadTestMap = shouldLoadTestMap;
+    player.setPos(100, 1688);
+
+    std::string jsonFilePath;
+    if (loadTestMap) {
+        jsonFilePath = "../resource/maps/test.json";
+    } 
+    
+    else {
+        jsonFilePath = "../resource/maps/map" + std::to_string(id) + ".json";
+        backgroundId = id;
+        backgroundColor = backgroundColorPallete[id - 1];
+    }
+
+    std::ifstream fin(jsonFilePath);
+    if (!fin){
+        std::cout << "Cannot open " << jsonFilePath << std::endl;
+        return;
+    }
+
+    nlohmann::json mapJson;
+    try {
+        fin >> mapJson;
+    } catch (const std::exception& e) {
+        std::cout << "Error parsing JSON file " << jsonFilePath << ": " << e.what() << std::endl;
+        return;
+    }
+
+    // Check if required fields exist
+    if (!mapJson.contains("width") || !mapJson.contains("height") || 
+        !mapJson.contains("layers") || mapJson["layers"].empty() ||
+        !mapJson["layers"][0].contains("data")) {
+        std::cout << "JSON file " << jsonFilePath << " is missing required fields" << std::endl;
+        return;
+    }
+
+    int width = mapJson["width"];
+	int height = mapJson["height"];
+    maxWidth = width * TILE_WIDTH;
+    maxHeight = height * TILE_WIDTH;
+
+    // Set background ID
+    if (mapJson.contains("backgroundId")) {
+        backgroundId = mapJson["backgroundId"];
+        if (backgroundId < 0) {
+            backgroundId = 0;
+        } else if (backgroundId > maxBackgroundId) {
+            backgroundId = maxBackgroundId;
+        }
+    }
+    // backgroundId is already set to map id by default if not loading test map
+
+    // Set music ID
+    if (mapJson.contains("musicId")) {
+        musicId = mapJson["musicId"];
+        if (musicId < 0) {
+            musicId = 0;
+        } else if (musicId > maxMusicId) {
+            musicId = maxMusicId;
+        }
+    }
+    // musicId is already set to map id by default in constructor
+
+    // Load tile IDs and dimensions
+	int tilewidth = mapJson["tilewidth"];
+    std::vector<int> tileIDsUntouchable = mapJson["layers"][0]["data"];
+
+    // Load IDs as data
+    for (int y = 0; y < height; y++){
+        for (int x = 0; x < width; x++){
+            int tileID = tileIDsUntouchable[y * width + x];
+            if (tileID != 0){
+                untouchableTiles.push_back(new Tile(Vector2{1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, Vector2{TILE_WIDTH * 1.0f, TILE_WIDTH * 1.0f},
+                BLACK, "tile_" + std::to_string(tileID), true, TILE_TYPE_NON_SOLID));
+            }
+        }
+    } 
+    tileIDsUntouchable.clear();
+
+    // Load touchable tiles
+    std::vector<int> tileIDsTouchable = mapJson["layers"][2]["data"];
+
+    for (int y = 0; y < height; y++){
+        for (int x = 0; x < width; x++){
+            int tileID = tileIDsTouchable[y * width + x];
+            if (tileID != 0){
+                touchableTiles.push_back(new Tile(Vector2{1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, Vector2{TILE_WIDTH * 1.0f, TILE_WIDTH * 1.0f},
+                BLACK, "tile_" + std::to_string(tileID), true));
+            }
+        }
+    }
+    tileIDsTouchable.clear();
+
+    // Load back baddies
+    std::vector<int> backBaddieIDs = mapJson["layers"][1]["data"];
+
+    for (int y = 0; y < height; y++){
+        for (int x = 0; x < width; x++){
+            int baddieID = backBaddieIDs[y * width + x];
+            if (baddieID != 146 && baddieID != 136) continue;
+
+            Baddie* newBaddie;
+
+            if (baddieID == 146) { // Piranha Plant
+                newBaddie = new PiranhaPlant({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {32,66}, RED);
+            } 
+
+            else if (baddieID == 136) { // Jumping Piranha Plant
+                newBaddie = new JumpingPiranhaPlant({1.0f * x * TILE_WIDTH + 16, 1.0f * y * TILE_WIDTH + 34}, {32,42}, RED);
+            } 
+
+            backBaddies.push_back(newBaddie);
+            baddies.push_back(newBaddie);
+        }
+    }
+
+    backBaddieIDs.clear();
+
+    // Load front baddies
+    std::vector<int> frontBaddieIDs = mapJson["layers"][5]["data"];
+
+    for (int y = 0; y < height; y++){
+        for (int x = 0; x < width; x++){
+            int baddieID = frontBaddieIDs[y * width + x];
+            if (baddieID == 0 || baddieID < 121 || baddieID > 158) continue;
+
+            Baddie* newBaddie;
+            if (baddieID == 121) {
+                newBaddie = new BlueKoopaTroopa({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {32,54}, {-100,0}, BLUE);
+            } 
+
+            else if (baddieID == 123) {
+                newBaddie = new BobOmb({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {24,30}, {-100,0}, BLACK);
+            } 
+
+            else if (baddieID == 125) { //bullet bill
+                newBaddie = new BulletBill({1.0f * x * TILE_WIDTH, 1.0f * (y+2) * TILE_WIDTH }, {32,28}, {-200,0}, BLACK);
+            } 
+
+            else if (baddieID == 126) { // buzzy beetle
+                newBaddie = new BuzzyBeetle({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {32,32}, {-80,0}, BLUE);
+            }
+
+            else if (baddieID == 128) { //flying gomba
+                newBaddie = new FlyingGoomba({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {66,50}, {-100,0}, MAROON);
+            } 
+
+            else if (baddieID == 132) { //goomba
+                newBaddie = new Goomba({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {32,30}, {-100,0}, MAROON);
+            } 
+
+            else if (baddieID == 134) { //green koopa troopa
+                newBaddie = new GreenKoopaTroopa({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {32,54}, {-100,0}, GREEN);
+            } 
+
+            else if (baddieID == 140) { //monty mole
+                newBaddie = new MontyMole({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {32,30}, {-200,0}, BROWN);
+            } 
+
+            else if (baddieID == 142) { // mummy beetle
+                newBaddie = new MummyBeetle({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {32,32}, {-80,0}, GRAY);
+            } 
+
+            else if (baddieID == 144) { //muncher
+                newBaddie = new Muncher({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {32,30}, BROWN);
+            }
+
+            else if (baddieID == 148) { // red koopa troopa
+                newBaddie = new RedKoopaTroopa({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {32,54}, {-100,0}, RED);
+            } 
+
+            else if (baddieID == 152) { //rex
+                newBaddie = new Rex({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {40,64}, {-100,0}, VIOLET);
+            }
+
+            else if (baddieID == 154) { //swooper
+                newBaddie = new Swooper({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {32,34}, {-100,0}, BLACK);
+            } 
+
+            else if (baddieID == 157) { // yellow koopa troopa
+                newBaddie = new YellowKoopaTroopa({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {32,54}, {-100,0}, YELLOW);
+            } 
+            
+            else {
+                std::cerr << "Unsupported baddie ID: " << baddieID << " at position (" << x << ", " << y << ")" << std::endl;
+                continue; // Skip unsupported baddies
+            }
+            frontBaddies.push_back(newBaddie);
+            baddies.push_back(newBaddie);
+        }
+    }
+
+    frontBaddieIDs.clear();
+
+    // Load blocks
+    std::vector<int> blockIDs = mapJson["layers"][3]["data"];
+    std::vector<int> itemIDs = mapJson["layers"][4]["data"];
+    for (int y = 0; y < height; y++){
+        for (int x = 0; x < width; x++){
+            int blockID = blockIDs[y * width + x];
+            if (blockID == 0) continue;
+
+            if (blockID < 88 || blockID > 102) {
+                std::cerr << "Unsupported block ID: " << blockID << " at position (" << x << ", " << y << ")" << std::endl;
+                continue; // Skip unsupported blocks
+            }
+
+            Block* newBlock = nullptr;
+
+            if (blockID == 88) {
+                newBlock = new CloudBlock({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {TILE_WIDTH, TILE_WIDTH}, WHITE);
+            }
+
+            else if (blockID == 89) {
+                newBlock = new ExclamationBlock({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {TILE_WIDTH, TILE_WIDTH}, WHITE);
+            }
+
+            else if (blockID == 90) {
+                newBlock = new EyesClosedBlock({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {TILE_WIDTH, TILE_WIDTH}, WHITE);
+            }
+
+            else if (blockID == 91 || blockID == 92 || blockID == 93 || blockID == 94) {
+                newBlock = new EyesOpenedBlock({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {TILE_WIDTH, TILE_WIDTH}, WHITE);
+            }
+
+            else if (blockID == 95) {
+                newBlock = new GrassBlock({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {TILE_WIDTH, TILE_WIDTH}, WHITE);
+            }
+
+            else if (blockID == 96) {
+                std::cerr << "Unsupport message block\n";
+            }
+
+            // Handle question blocks and their items
+            else if (blockID == 97 || blockID == 98 || blockID == 99 || blockID == 100) {
+                int itemID = itemIDs[y * width + x];
+                if (itemID == 0) {
+                    newBlock = new QuestionBlock({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {TILE_WIDTH, TILE_WIDTH}, WHITE, 0.1f, 4);
+                }
+
+                else if (itemID == 103) {
+                    newBlock = new QuestionOneUpMushroomBlock({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {TILE_WIDTH, TILE_WIDTH}, WHITE, 0.1f, 4);
+                }
+
+                else if (itemID == 104) {
+                    newBlock = new QuestionThreeUpMoonBlock({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {TILE_WIDTH, TILE_WIDTH}, WHITE, 0.1f, 4);
+                }
+
+                else if (itemID == 113 || itemID == 114 ) {
+                    newBlock = new QuestionFireFlowerBlock({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {TILE_WIDTH, TILE_WIDTH}, WHITE, 0.1f, 4);
+                }
+
+                else if (itemID == 115) {
+                    newBlock = new QuestionMushroomBlock({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {TILE_WIDTH, TILE_WIDTH}, WHITE, 0.1f, 4);
+                }
+
+                else if (itemID == 116) {
+                    newBlock = new QuestionStarBlock({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {TILE_WIDTH, TILE_WIDTH}, WHITE, 0.1f, 4);
+                }
+
+                else {
+                    std::cerr << "Unsupported item ID: " << itemID << " at position (" << x << ", " << y << ")" << std::endl;
+                    continue; // Skip unsupported items
+                }
+            }
+
+            else if (blockID == 101) {
+                newBlock = new StoneBlock({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {TILE_WIDTH, TILE_WIDTH}, WHITE);
+            }
+
+            else if (blockID == 102) {
+                newBlock = new WoodBlock({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {TILE_WIDTH, TILE_WIDTH}, WHITE);
+            }
+
+            if (newBlock) {
+                blocks.push_back(newBlock);
+            }            
+        }
+    }
+    
+    blockIDs.clear();
+
+    // Load static items
+    // std::vector<int> staticItemIDs = mapJson["layers"][4]["data"];
+    for (int y = 0; y < height; y++){
+        for (int x = 0; x < width; x++){
+            int staticItemID = itemIDs[y * width + x];
+            if (staticItemID == 0) continue;
+
+            Item* newStaticItem = nullptr;
+
+            if (staticItemID >= 108 && staticItemID <= 111) { // Coins
+                newStaticItem = new Coin({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {TILE_WIDTH, TILE_WIDTH}, WHITE);
+            } 
+
+            else if (staticItemID == 112) { // Course Clear Token
+                newStaticItem = new CourseClearToken({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {TILE_WIDTH, TILE_WIDTH}, WHITE);
+            } 
+
+            else if (staticItemID >= 117 && staticItemID <= 120) { // Yoshi Coins
+                newStaticItem = new YoshiCoin({1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH}, {TILE_WIDTH, TILE_WIDTH}, WHITE);
+            } 
+
+            else {
+                std::cerr << "Unsupported static item ID: " << staticItemID << " at position (" << x << ", " << y << ")" << std::endl;
+                continue; // Skip unsupported static items
+
+            }
+
+            if (newStaticItem) {
+                staticItems.push_back(newStaticItem);
+            }
+        }
+    }
+
+    itemIDs.clear();
+ 
+    parsed = true;
+
+    fin.close();
+}
+
+void Map::loadUserData() {
+
+    if (parsed) {
+        return;
+    }
+
+    if (!currentData) {
+        std::cerr << "No user data to load." << std::endl;
+        return;
+    }
+
+    backgroundColor = currentData->backgroundColor;
+    backgroundId = currentData->backgroundID;
+    id = 100;
+    
+    // User-designed maps are 200x60 tiles (12000 elements total)
+    int width = 200;
+    int height = 60;
+    maxWidth = width * TILE_WIDTH;
+    maxHeight = height * TILE_WIDTH;
+    
+    // Set default player position
+    player.setPos(10, 10);
+
+
+    // Set music ID to default (could be extended to be configurable)
+    musicId = 1;
+
+    // Load entities from the single layer - all will be touchable tiles
+    const std::vector<int>& entitiesID = currentData->entitiesID;
+    
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            int entityID = entitiesID[y * width + x];
+            if (entityID == 0) continue;
+
+            Vector2 pos = {1.0f * x * TILE_WIDTH, 1.0f * y * TILE_WIDTH};
+            Vector2 dim = {TILE_WIDTH * 1.0f, TILE_WIDTH * 1.0f};
+
+            // Handle different entity types based on ID ranges
+            
+            // Tiles (make all as touchable tiles since it's single layer)
+            if (entityID >= 1 && entityID <= 87) {
+                touchableTiles.push_back(new Tile(pos, dim, BLACK, "tile_" + std::to_string(entityID), true));
+            }
+            
+            // Blocks (88-102)
+            else if (entityID >= 88 && entityID <= 102) {
+                Block* newBlock = nullptr;
+
+                if (entityID == 88) {
+                    newBlock = new CloudBlock(pos, dim, WHITE);
+                } else if (entityID == 89) {
+                    newBlock = new ExclamationBlock(pos, dim, WHITE);
+                } else if (entityID == 90) {
+                    newBlock = new EyesClosedBlock(pos, dim, WHITE);
+                } else if (entityID >= 91 && entityID <= 94) {
+                    newBlock = new EyesOpenedBlock(pos, dim, WHITE);
+                } else if (entityID == 95) {
+                    newBlock = new GrassBlock(pos, dim, WHITE);
+                } else if (entityID >= 97 && entityID <= 100) {
+                    // Question blocks - default to regular question block
+                    newBlock = new QuestionBlock(pos, dim, WHITE, 0.1f, 4);
+                } else if (entityID == 101) {
+                    newBlock = new StoneBlock(pos, dim, WHITE);
+                } else if (entityID == 102) {
+                    newBlock = new WoodBlock(pos, dim, WHITE);
+                }
+
+                if (newBlock) {
+                    blocks.push_back(newBlock);
+                }
+            }
+            
+            // Items that should become question blocks (103-104, 113-116)
+            else if (entityID == 103 || entityID == 104 || (entityID >= 113 && entityID <= 116)) {
+                Block* newBlock = nullptr;
+
+                if (entityID == 103) {
+                    newBlock = new QuestionOneUpMushroomBlock(pos, dim, WHITE, 0.1f, 4);
+                } else if (entityID == 104) {
+                    newBlock = new QuestionThreeUpMoonBlock(pos, dim, WHITE, 0.1f, 4);
+                } else if (entityID == 113 || entityID == 114) {
+                    newBlock = new QuestionFireFlowerBlock(pos, dim, WHITE, 0.1f, 4);
+                } else if (entityID == 115) {
+                    newBlock = new QuestionMushroomBlock(pos, dim, WHITE, 0.1f, 4);
+                } else if (entityID == 116) {
+                    newBlock = new QuestionStarBlock(pos, dim, WHITE, 0.1f, 4);
+                }
+
+                if (newBlock) {
+                    blocks.push_back(newBlock);
+                }
+            }
+            
+            // Static Items (108-112, 117-120) - only coins, course clear token, and yoshi coins remain as static
+            else if ((entityID >= 108 && entityID <= 112) || (entityID >= 117 && entityID <= 120)) {
+                Item* newStaticItem = nullptr;
+
+                if (entityID >= 108 && entityID <= 111) {
+                    newStaticItem = new Coin(pos, dim, WHITE);
+                } else if (entityID == 112) {
+                    newStaticItem = new CourseClearToken(pos, dim, WHITE);
+                } else if (entityID >= 117 && entityID <= 120) {
+                    newStaticItem = new YoshiCoin(pos, dim, WHITE);
+                }
+
+                if (newStaticItem) {
+                    staticItems.push_back(newStaticItem);
+                }
+            }
+            
+            // Baddies (121-158)
+            else if (entityID >= 121 && entityID <= 158) {
+                Baddie* newBaddie = nullptr;
+
+                if (entityID == 121 || entityID == 122) {
+                    newBaddie = new BlueKoopaTroopa(pos, {32,54}, {-100,0}, BLUE);
+                } else if (entityID == 123 || entityID == 124) {
+                    newBaddie = new BobOmb(pos, {24,30}, {-100,0}, BLACK);
+                } else if (entityID == 125) { // bullet bill
+                    newBaddie = new BulletBill({pos.x, pos.y + 2 * TILE_WIDTH}, {32,28}, {-200,0}, BLACK);
+                } else if (entityID == 126 || entityID == 127) { // buzzy beetle
+                    newBaddie = new BuzzyBeetle(pos, {32,32}, {-80,0}, BLUE);
+                } else if (entityID >= 128 && entityID <= 131) { // flying goomba
+                    newBaddie = new FlyingGoomba(pos, {66,50}, {-100,0}, MAROON);
+                } else if (entityID == 132 || entityID == 133) { // goomba
+                    newBaddie = new Goomba(pos, {32,30}, {-100,0}, MAROON);
+                } else if (entityID == 134 || entityID == 135) { // green koopa troopa
+                    newBaddie = new GreenKoopaTroopa(pos, {32,54}, {-100,0}, GREEN);
+                } else if (entityID >= 136 && entityID <= 139) { // jumping piranha plant
+                    newBaddie = new JumpingPiranhaPlant({pos.x + 16, pos.y + 34}, {32,42}, RED);
+                } else if (entityID == 140 || entityID == 141) { // monty mole
+                    newBaddie = new MontyMole(pos, {32,30}, {-200,0}, BROWN);
+                } else if (entityID == 142 || entityID == 143) { // mummy beetle
+                    newBaddie = new MummyBeetle(pos, {32,32}, {-80,0}, GRAY);
+                } else if (entityID == 144 || entityID == 145) { // muncher
+                    newBaddie = new Muncher(pos, {32,30}, BROWN);
+                } else if (entityID == 146 || entityID == 147) { // piranha plant
+                    newBaddie = new PiranhaPlant(pos, {32,66}, RED);
+                } else if (entityID == 148 || entityID == 149) { // red koopa troopa
+                    newBaddie = new RedKoopaTroopa(pos, {32,54}, {-100,0}, RED);
+                } else if (entityID >= 150 && entityID <= 153) { // rex
+                    newBaddie = new Rex(pos, {40,64}, {-100,0}, VIOLET);
+                } else if (entityID >= 154 && entityID <= 156) { // swooper
+                    newBaddie = new Swooper(pos, {32,34}, {-100,0}, BLACK);
+                } else if (entityID == 157 || entityID == 158) { // yellow koopa troopa
+                    newBaddie = new YellowKoopaTroopa(pos, {32,54}, {-100,0}, YELLOW);
+                }
+
+                if (newBaddie) {
+                    baddies.push_back(newBaddie);
+                    frontBaddies.push_back(newBaddie); // Add to front baddies for drawing
+                }
+            }
+        }
+    }
+
+    parsed = true;
 }
 
 void Map::draw() {
 
-    const int repeats = maxWidth / backgroundTexture.width + 2;
     DrawRectangle(0, 0, maxWidth, maxHeight, backgroundColor);
 
+    std::string backgroundTextureKey = "background" + std::to_string(backgroundId);
+    if (ResourceManager::getInstance().getTextures().find(backgroundTextureKey) != ResourceManager::getInstance().getTextures().end()) {
+        backgroundTexture = ResourceManager::getInstance().getTexture(backgroundTextureKey);
+    } else {
+        backgroundTexture = Texture2D(); // Fallback to an empty texture if not found
+        std::cerr << "Background texture not found: " << backgroundTextureKey << std::endl;
+    }
+
     if (backgroundId > 0) {
+        const int repeats = maxWidth / backgroundTexture.width + 2;
         for (int i = 0; i <= repeats; i++) {
             DrawTexture(
                 backgroundTexture,
-                -backgroundTexture.width + i * backgroundTexture.width - marioOffset * 0.06,
+                -backgroundTexture.width + i * backgroundTexture.width - playerOffset * 0.06,
                 maxHeight - backgroundTexture.height,
                 WHITE);
         }
@@ -142,603 +626,117 @@ void Map::draw() {
     //    backScenarioTile->draw();
     //}
 
-    //for (const auto& baddie : backBaddies) {
-    //    baddie->draw();
-    //}
+    for (const auto& baddie : backBaddies) {
+       baddie->draw();
+    }
 
-    for (const auto& tile : tiles) {
+    for (const auto& tile : untouchableTiles) {
         tile->draw();
     }
 
-    //for (const auto& block : blocks) {
-    //    block->draw();
-    //}
-
-    //for (const auto& item : items) {
-    //    item->draw();
-    //}
-
-    //for (const auto& staticItem : staticItems) {
-    //    staticItem->draw();
-    //}
-
-    //for (const auto& baddie : frontBaddies) {
-    //    baddie->draw();
-    //}
-
-    // for future implementation -> optimize rendering and input processing components that are only inside some boundary
-    // needs to change the components storage to a 2D structure or an optimized symtable.
-    //if (GameWorld::debug) {
-    //    DrawRectangle(mario.getPos().x - TILE_WIDTH * 2, mario.getPos().y - TILE_WIDTH * 2, TILE_WIDTH * 4, TILE_WIDTH * 4, Fade(BLACK, .5));
-    //}
-
-    //mario.draw();
-
-    for (const auto& frontScenarioTile : frontScenarioTiles) {
-        frontScenarioTile->draw();
+    for (const auto& block : blocks) {
+       block->draw();
     }
 
-    //if (drawBlackScreen) {
-    //    if (drawBlackScreenFadeAcum < drawBlackScreenFadeTime) {
-    //        drawBlackScreenFadeAcum += GetFrameTime();
-    //    }
-    //    DrawRectangle(0, 0, maxWidth, maxHeight, Fade(BLACK, 0.5 * drawBlackScreenFadeAcum / drawBlackScreenFadeTime));
-    //}
+    for (const auto& item : items) {
+       item->draw();
+    }
 
-    //if (drawMessage) {
+    for (const auto& staticItem : staticItems) {
+       staticItem->draw();
+    }
 
-    //    std::vector<std::string> messages = split(message, "\\n");
-    //    const Vector2 center = GetScreenToWorld2D(Vector2(GetScreenWidth() / 2, GetScreenHeight() / 2), *camera);
-    //    int currentLine = 0;
-    //    const int margin = 10;
-    //    const int vSpacing = 5;
+    for (const auto& baddie : frontBaddies) {
+       baddie->draw();
+    }
 
-    //    int maxWidth = 0;
-    //    int maxHeight = messages.size() * getDrawMessageStringHeight() + (messages.size() - 1) * vSpacing;
+    for (const auto& tile : touchableTiles) {
+        tile->draw();
+    
+    }
+    
+    player.draw();
 
-    //    for (const auto& m : messages) {
-    //        const int w = getDrawMessageStringWidth(m);
-    //        if (maxWidth < w) {
-    //            maxWidth = w;
-    //        }
-    //    }
+    Vector2 pos{10.0f, GetScreenHeight() - 20.0f};
+    Vector2 drawPos = GetScreenToWorld2D(pos, *camera);
+    
+    if (id == 3) {  // Near sight vision effect for map3
+        // Update last valid Player position when he's not dying
+        if (player.getState() != SPRITE_STATE_DYING) {
+            lastValidPlayerPos = player.getPos();
+        }
+        
+        for (float radius = 0; radius < GetScreenWidth() * 1.5f; radius += GetScreenWidth() / 100.0f) {
+            DrawRing(lastValidPlayerPos, radius, GetScreenWidth() * 1.5f, 0.0f, 360.0f, 32, Fade(BLACK, 0.07f));
+        }
+    }
 
-    //    const int xStart = center.x - maxWidth / 2 + margin;
-    //    const int yStart = center.y - maxHeight / 2 + margin - 50;
+    DrawFPS(drawPos.x, drawPos.y);
 
-    //    DrawRectangle(xStart - margin, yStart - margin, maxWidth + margin * 2, maxHeight + margin * 2, BLACK);
-
-    //    for (const auto& m : messages) {
-    //        drawMessageString(m,
-    //            xStart,
-    //            yStart + currentLine * getDrawMessageStringHeight() + (currentLine < (int)messages.size() ? currentLine * vSpacing : 0));
-    //        currentLine++;
-    //    }
-
-    //}
-
-    //if (GameWorld::debug) {
-    //    int columns = maxWidth / TILE_WIDTH;
-    //    int lines = maxHeight / TILE_WIDTH;
-    //    for (int i = 0; i < lines; i++) {
-    //        DrawLine(0, i * TILE_WIDTH, maxWidth, i * TILE_WIDTH, BLACK);
-    //    }
-    //    for (int i = 0; i < columns; i++) {
-    //        DrawLine(i * TILE_WIDTH, 0, i * TILE_WIDTH, maxHeight, BLACK);
-    //    }
-    //}
-
+    if (drawBlackScreen) {
+       if (drawBlackScreenFadeAcum < drawBlackScreenFadeTime) {
+           drawBlackScreenFadeAcum += GetFrameTime();
+       }
+       DrawRectangle(0, 0, maxWidth, maxHeight, Fade(BLACK, 0.5 * drawBlackScreenFadeAcum / drawBlackScreenFadeTime));
+    }
 }
 
 std::vector<Tile*>& Map::getTiles() {
-    return tiles;
+    return touchableTiles;
 }
 
 std::vector<Block*>& Map::getBlocks() {
     return blocks;
 }
 
-//std::vector<Item*>& Map::getItems() {
-//    return items;
-//}
+std::vector<Item*>& Map::getItems() {
+   return items;
+}
 
-//std::vector<Item*>& Map::getStaticItems() {
-//    return staticItems;
-//}
+std::vector<Item*>& Map::getStaticItems() {
+   return staticItems;
+}
 
-//std::vector<Baddie*>& Map::getBaddies() {
-//    return baddies;
-//}
+std::vector<Baddie*>& Map::getBaddies() {
+   return baddies;
+}
 
-//void Map::playMusic() const {
-//
-//    if (musicId != 0) {
-//
-//        std::map<std::string, Music> musics = ResourceManager::getMusics();
-//        const std::string key(TextFormat("music%d", musicId));
-//
-//        if (mario.isInvincible()) {
-//            if (IsMusicStreamPlaying(musics[key])) {
-//                StopMusicStream(musics[key]);
-//            }
-//            if (!IsMusicStreamPlaying(musics["invincible"])) {
-//                PlayMusicStream(musics["invincible"]);
-//                SeekMusicStream(musics["invincible"], 1);
-//            }
-//            else {
-//                UpdateMusicStream(musics["invincible"]);
-//            }
-//        }
-//        else {
-//            if (!IsMusicStreamPlaying(musics[key])) {
-//                StopMusicStream(musics["invincible"]);
-//                PlayMusicStream(musics[key]);
-//            }
-//            else {
-//                UpdateMusicStream(musics[key]);
-//            }
-//        }
-//
-//    }
-//}
+void Map::playMusic() const {
 
-//void Map::parseMap() {
-//
-//    if (!parsed) {
-//
-//        char* mapData;
-//        std::vector<std::string> blockMessages;
-//        int messagePosition = 0;
-//
-//        if (loadTestMap) {
-//            mapData = LoadFileText(TextFormat("resources/maps/mapTests.txt"));
-//        }
-//        else {
-//            mapData = LoadFileText(TextFormat("resources/maps/map%d.txt", id));
-//        }
-//
-//        std::map<std::string, Texture2D>& textures = ResourceManager::getTextures();
-//
-//        int currentColumn = 0;
-//        int currentLine = 0;
-//        bool ignoreLine = false;
-//
-//        while (*mapData != '\0') {
-//
-//            const float x = currentColumn * TILE_WIDTH;
-//            const float y = currentLine * TILE_WIDTH;
-//
-//            if (*mapData == '#') {
-//                ignoreLine = true;
-//            }
-//
-//            if (currentLine == 0 && currentColumn == 0) {
-//
-//                if (*mapData == 'c') {            // parse color
-//
-//                    ignoreLine = true;
-//                    mapData += 3;
-//                    std::string hexColor;
-//
-//                    while (*mapData != ' ') {
-//                        hexColor += std::string(1, *mapData);
-//                        mapData++;
-//                    }
-//
-//                    backgroundColor = GetColor(std::stoul(hexColor, nullptr, 16));
-//                    currentColumn = 1;
-//
-//                }
-//                else if (*mapData == 'b') {     // parse background id
-//
-//                    ignoreLine = true;
-//                    mapData += 3;
-//                    std::string number;
-//
-//                    while (*mapData != ' ') {
-//                        number += std::string(1, *mapData);
-//                        mapData++;
-//                    }
-//                    backgroundId = std::stoi(number);
-//                    if (backgroundId < 0) {
-//                        backgroundId = 0;
-//                    }
-//                    else if (backgroundId > maxBackgroundId) {
-//                        backgroundId = maxBackgroundId;
-//                    }
-//
-//                    if (backgroundId > 0) {
-//                        backgroundTexture = textures[TextFormat("background%d", backgroundId)];
-//                    }
-//                    currentColumn = 1;
-//
-//                }
-//                else if (*mapData == 't') {     // parse tile set id
-//
-//                    ignoreLine = true;
-//                    mapData += 3;
-//                    std::string number;
-//
-//                    while (*mapData != ' ') {
-//                        number += std::string(1, *mapData);
-//                        mapData++;
-//                    }
-//                    tileSetId = std::stoi(number);
-//                    if (tileSetId <= 0) {
-//                        tileSetId = 1;
-//                    }
-//                    else if (tileSetId > maxTileSetId) {
-//                        tileSetId = maxTileSetId;
-//                    }
-//
-//                    currentColumn = 1;
-//
-//                }
-//                else if (*mapData == 'm') {     // parse music id
-//
-//                    ignoreLine = true;
-//                    mapData += 3;
-//                    std::string number;
-//
-//                    while (*mapData != ' ') {
-//                        number += std::string(1, *mapData);
-//                        mapData++;
-//                    }
-//                    musicId = std::stoi(number);
-//                    if (musicId < 0) {
-//                        musicId = 0;
-//                    }
-//                    else if (musicId > maxMusicId) {
-//                        musicId = maxMusicId;
-//                    }
-//
-//                    currentColumn = 1;
-//
-//                }
-//                else if (*mapData == 'f') {     // parse time to finish
-//
-//                    ignoreLine = true;
-//                    mapData += 3;
-//                    std::string number;
-//
-//                    while (*mapData != ' ') {
-//                        number += std::string(1, *mapData);
-//                        mapData++;
-//                    }
-//                    mario.setMaxTime(std::stoi(number));
-//
-//                    currentColumn = 1;
-//
-//                }
-//                else if (*mapData == 'h') {     // parse map messages
-//
-//                    ignoreLine = true;
-//                    mapData += 3;
-//                    std::string currentMessage;
-//
-//                    while (*mapData != '\n') {
-//                        currentMessage += std::string(1, *mapData);
-//                        mapData++;
-//                    }
-//
-//                    blockMessages.push_back(currentMessage);
-//                    currentColumn = 1;
-//
-//                }
-//
-//            }
-//
-//            if (!ignoreLine) {
-//
-//                std::string blockMessage;
-//                MessageBlock* newMessageBlock;
-//                Baddie* newBaddie;
-//
-//                // processing boundary tiles when used as first column
-//                // for camera adjustment
-//                if (*mapData != '/') {
-//                    if (maxWidth < x) {
-//                        maxWidth = x;
-//                    }
-//                    if (maxHeight < y) {
-//                        maxHeight = y;
-//                    }
-//                }
-//
-//                switch (*mapData) {
-//
-//                    // test tiles
-//                case 'a':
-//                    tiles.push_back(new Tile(Vector2(x, y), Vector2(TILE_WIDTH, TILE_WIDTH), GREEN, "", true, TILE_TYPE_SOLID_FROM_ABOVE));
-//                    break;
-//                case 'b':
-//                    tiles.push_back(new Tile(Vector2(x, y), Vector2(TILE_WIDTH * 4, TILE_WIDTH * 4), BLUE, "", true, TILE_TYPE_SLOPE_UP));
-//                    break;
-//                case 'd':
-//                    tiles.push_back(new Tile(Vector2(x, y), Vector2(TILE_WIDTH * 4, TILE_WIDTH * 4), ORANGE, "", true, TILE_TYPE_SLOPE_DOWN));
-//                    break;
-//                case 'e':
-//                    tiles.push_back(new Tile(Vector2(x, y), Vector2(TILE_WIDTH, TILE_WIDTH), PURPLE, "", true, TILE_TYPE_NON_SOLID));
-//                    break;
-//                    /*case 'c':
-//                        tiles.push_back( new Tile( Vector2( x, y ), Vector2( TILE_WIDTH, TILE_WIDTH ), RED, "", true ) );
-//                        break;
-//                    case 'd':
-//                        tiles.push_back( new Tile( Vector2( x, y ), Vector2( TILE_WIDTH, TILE_WIDTH ), ORANGE, "", true ) );
-//                        break;*/
-//
-//                        // blocks
-//                case 'i':
-//                    if (parseBlocks) blocks.push_back(new EyesClosedBlock(Vector2(x, y), Vector2(TILE_WIDTH, TILE_WIDTH), DEBUGGABLE_TILE_COLOR));
-//                    break;
-//                case 'y':
-//                    if (parseBlocks) blocks.push_back(new EyesOpenedBlock(Vector2(x, y), Vector2(TILE_WIDTH, TILE_WIDTH), DEBUGGABLE_TILE_COLOR));
-//                    break;
-//                case 's':
-//                    if (parseBlocks) blocks.push_back(new StoneBlock(Vector2(x, y), Vector2(TILE_WIDTH, TILE_WIDTH), DEBUGGABLE_TILE_COLOR));
-//                    break;
-//                case 'w':
-//                    if (parseBlocks) blocks.push_back(new WoodBlock(Vector2(x, y), Vector2(TILE_WIDTH, TILE_WIDTH), DEBUGGABLE_TILE_COLOR));
-//                    break;
-//                case 'g':
-//                    if (parseBlocks) blocks.push_back(new GlassBlock(Vector2(x, y), Vector2(TILE_WIDTH, TILE_WIDTH), DEBUGGABLE_TILE_COLOR));
-//                    break;
-//                case 'c':
-//                    if (parseBlocks) blocks.push_back(new CloudBlock(Vector2(x, y), Vector2(TILE_WIDTH, TILE_WIDTH), DEBUGGABLE_TILE_COLOR));
-//                    break;
-//                case 'v':
-//                    if (parseBlocks) if (parseBlocks) blocks.push_back(new InvisibleBlock(Vector2(x, y), Vector2(TILE_WIDTH, TILE_WIDTH), DEBUGGABLE_TILE_COLOR));
-//                    break;
-//                case 'h':
-//
-//                    if (messagePosition >= 0 && messagePosition < (int)blockMessages.size()) {
-//                        blockMessage = blockMessages[messagePosition];
-//                    }
-//
-//                    newMessageBlock = new MessageBlock(Vector2(x, y), Vector2(TILE_WIDTH, TILE_WIDTH), DEBUGGABLE_TILE_COLOR, blockMessage);
-//
-//                    if (parseBlocks) {
-//                        blocks.push_back(newMessageBlock);
-//                        messageBlocks.push_back(newMessageBlock);
-//                    }
-//
-//                    messagePosition++;
-//
-//                    break;
-//
-//                case '!':
-//                    if (parseBlocks) blocks.push_back(new ExclamationBlock(Vector2(x, y), Vector2(TILE_WIDTH, TILE_WIDTH), DEBUGGABLE_TILE_COLOR));
-//                    break;
-//                case '?':
-//                    if (parseBlocks) blocks.push_back(new QuestionBlock(Vector2(x, y), Vector2(TILE_WIDTH, TILE_WIDTH), DEBUGGABLE_TILE_COLOR));
-//                    break;
-//                case 'm':
-//                    if (parseBlocks) blocks.push_back(new QuestionMushroomBlock(Vector2(x, y), Vector2(TILE_WIDTH, TILE_WIDTH), DEBUGGABLE_TILE_COLOR));
-//                    break;
-//                case 'f':
-//                    if (parseBlocks) blocks.push_back(new QuestionFireFlowerBlock(Vector2(x, y), Vector2(TILE_WIDTH, TILE_WIDTH), DEBUGGABLE_TILE_COLOR));
-//                    break;
-//                case 'u':
-//                    if (parseBlocks) blocks.push_back(new QuestionOneUpMushroomBlock(Vector2(x, y), Vector2(TILE_WIDTH, TILE_WIDTH), DEBUGGABLE_TILE_COLOR));
-//                    break;
-//                case '+':
-//                    if (parseBlocks) blocks.push_back(new QuestionThreeUpMoonBlock(Vector2(x, y), Vector2(TILE_WIDTH, TILE_WIDTH), DEBUGGABLE_TILE_COLOR));
-//                    break;
-//                case '*':
-//                    if (parseBlocks) blocks.push_back(new QuestionStarBlock(Vector2(x, y), Vector2(TILE_WIDTH, TILE_WIDTH), DEBUGGABLE_TILE_COLOR));
-//                    break;
-//
-//                    // bondarie tiles
-//                case '/':
-//                    tiles.push_back(new Tile(Vector2(x, y), Vector2(TILE_WIDTH, TILE_WIDTH), WHITE, "", false));
-//                    break;
-//                case '|':
-//                    tiles.push_back(new Tile(Vector2(x, y), Vector2(TILE_WIDTH, TILE_WIDTH), BLACK, "", false, TILE_TYPE_SOLID_ONLY_FOR_BADDIES));
-//                    break;
-//
-//                    // scenario tiles
-//                case '{': backScenarioTiles.push_back(new Tile(Vector2(x, y), Vector2(TILE_WIDTH, TILE_WIDTH), DEBUGGABLE_TILE_COLOR, "tileCourseClearPoleBackTop", true));
-//                    break;
-//                case '[': backScenarioTiles.push_back(new Tile(Vector2(x, y), Vector2(TILE_WIDTH, TILE_WIDTH), DEBUGGABLE_TILE_COLOR, "tileCourseClearPoleBackBody", true));
-//                    break;
-//                case '}': frontScenarioTiles.push_back(new Tile(Vector2(x, y), Vector2(TILE_WIDTH, TILE_WIDTH), DEBUGGABLE_TILE_COLOR, "tileCourseClearPoleFrontTop", true));
-//                    break;
-//                case ']': frontScenarioTiles.push_back(new Tile(Vector2(x, y), Vector2(TILE_WIDTH, TILE_WIDTH), DEBUGGABLE_TILE_COLOR, "tileCourseClearPoleFrontBody", true));
-//                    break;
-//
-//                    // tiles from A to Z (depends on tile set parameter)
-//                default:
-//                    if (*mapData >= 'A' && *mapData <= 'Z') {
-//                        std::stringstream ss;
-//                        ss << *mapData << tileSetId;
-//                        tiles.push_back(new Tile(Vector2(x, y), Vector2(TILE_WIDTH, TILE_WIDTH), DEBUGGABLE_TILE_COLOR, ss.str(), true));
-//                    }
-//                    break;
-//
-//                    // items
-//                case 'o':
-//                    if (parseItems) staticItems.push_back(new Coin(Vector2(x + 4, y), Vector2(24, 32), YELLOW));
-//                    break;
-//                case ':':
-//                    if (parseItems) staticItems.push_back(new YoshiCoin(Vector2(x, y + 5), Vector2(32, 50), YELLOW));
-//                    break;
-//                case '=':
-//                    if (parseItems) staticItems.push_back(new CourseClearToken(Vector2(x - TILE_WIDTH, y), Vector2(64, 32), LIGHTGRAY));
-//                    break;
-//                    /*case 'm':
-//                        items.push_back( new Mushroom( Vector2( x, y ), Vector2( 32, 32 ), Vector2( 200, 0 ), RED ) );
-//                        break;
-//                    case 'f':
-//                        items.push_back( new FireFlower( Vector2( x, y ), Vector2( 32, 32 ), ORANGE ) );
-//                        break;
-//                    case 'u':
-//                        items.push_back( new OneUpMushroom( Vector2( x, y ), Vector2( 32, 32 ), Vector2( 250, 0 ), GREEN ) );
-//                        break;
-//                    case '+':
-//                        items.push_back( new ThreeUpMoon( Vector2( x, y ), Vector2( 30, 32 ), Vector2( 300, 0 ), YELLOW ) );
-//                        break;
-//                    case '*':
-//                        if ( parseItems ) staticItems.push_back( new Star( Vector2( x, y ), Vector2( 30, 32 ), Vector2( 300, 0 ), YELLOW ) );
-//                        break;*/
-//
-//                        // baddies
-//                case '1':
-//                    if (parseBaddies) {
-//                        newBaddie = new Goomba(Vector2(x, y), Vector2(32, 30), Vector2(-100, 0), MAROON);
-//                        baddies.push_back(newBaddie);
-//                        frontBaddies.push_back(newBaddie);
-//                    }
-//                    break;
-//                case '2':
-//                    if (parseBaddies) {
-//                        newBaddie = new FlyingGoomba(Vector2(x, y), Vector2(66, 50), Vector2(-100, 0), MAROON);
-//                        baddies.push_back(newBaddie);
-//                        frontBaddies.push_back(newBaddie);
-//                    }
-//                    break;
-//                case '3':
-//                    if (parseBaddies) {
-//                        newBaddie = new GreenKoopaTroopa(Vector2(x, y), Vector2(32, 54), Vector2(-100, 0), GREEN);
-//                        baddies.push_back(newBaddie);
-//                        frontBaddies.push_back(newBaddie);
-//                    }
-//                    break;
-//                case '4':
-//                    if (parseBaddies) {
-//                        newBaddie = new RedKoopaTroopa(Vector2(x, y), Vector2(32, 54), Vector2(-100, 0), RED);
-//                        baddies.push_back(newBaddie);
-//                        frontBaddies.push_back(newBaddie);
-//                    }
-//                    break;
-//                case '5':
-//                    if (parseBaddies) {
-//                        newBaddie = new BlueKoopaTroopa(Vector2(x, y), Vector2(32, 54), Vector2(-100, 0), BLUE);
-//                        baddies.push_back(newBaddie);
-//                        frontBaddies.push_back(newBaddie);
-//                    }
-//                    break;
-//                case '6':
-//                    if (parseBaddies) {
-//                        newBaddie = new YellowKoopaTroopa(Vector2(x, y), Vector2(32, 54), Vector2(-100, 0), YELLOW);
-//                        baddies.push_back(newBaddie);
-//                        frontBaddies.push_back(newBaddie);
-//                    }
-//                    break;
-//                case '7':
-//                    if (parseBaddies) {
-//                        newBaddie = new BobOmb(Vector2(x, y), Vector2(24, 30), Vector2(-100, 0), BLACK);
-//                        baddies.push_back(newBaddie);
-//                        frontBaddies.push_back(newBaddie);
-//                    }
-//                    break;
-//                case '8':
-//                    if (parseBaddies) {
-//                        newBaddie = new BulletBill(Vector2(x, y + 2), Vector2(32, 28), Vector2(-200, 0), BLACK);
-//                        baddies.push_back(newBaddie);
-//                        frontBaddies.push_back(newBaddie);
-//                    }
-//                    break;
-//                case '9':
-//                    if (parseBaddies) {
-//                        newBaddie = new Swooper(Vector2(x, y), Vector2(32, 34), Vector2(-100, 0), GREEN);
-//                        baddies.push_back(newBaddie);
-//                        frontBaddies.push_back(newBaddie);
-//                    }
-//                    break;
-//                case '@':
-//                    if (parseBaddies) {
-//                        newBaddie = new BuzzyBeetle(Vector2(x, y), Vector2(32, 32), Vector2(-80, 0), BLUE);
-//                        baddies.push_back(newBaddie);
-//                        frontBaddies.push_back(newBaddie);
-//                    }
-//                    break;
-//                case '$':
-//                    if (parseBaddies) {
-//                        newBaddie = new MummyBeetle(Vector2(x, y), Vector2(32, 32), Vector2(-80, 0), GRAY);
-//                        baddies.push_back(newBaddie);
-//                        frontBaddies.push_back(newBaddie);
-//                    }
-//                    break;
-//                case '%':
-//                    if (parseBaddies) {
-//                        newBaddie = new Rex(Vector2(x, y), Vector2(40, 64), Vector2(-100, 0), VIOLET);
-//                        baddies.push_back(newBaddie);
-//                        frontBaddies.push_back(newBaddie);
-//                    }
-//                    break;
-//                case '&':
-//                    if (parseBaddies) {
-//                        newBaddie = new Muncher(Vector2(x, y), Vector2(32, 30), BROWN);
-//                        baddies.push_back(newBaddie);
-//                        frontBaddies.push_back(newBaddie);
-//                    }
-//                    break;
-//                case '~':
-//                    if (parseBaddies) {
-//                        newBaddie = new PiranhaPlant(Vector2(x + 16, y + 36), Vector2(32, 66), RED);
-//                        baddies.push_back(newBaddie);
-//                        backBaddies.push_back(newBaddie);
-//                    }
-//                    break;
-//                case '^':
-//                    if (parseBaddies) {
-//                        newBaddie = new JumpingPiranhaPlant(Vector2(x + 16, y + 34), Vector2(32, 42), RED);
-//                        baddies.push_back(newBaddie);
-//                        backBaddies.push_back(newBaddie);
-//                    }
-//                    break;
-//                case '<':
-//                    if (parseBaddies) {
-//                        newBaddie = new BanzaiBill(Vector2(x, y), Vector2(128, 128), Vector2(-200, 0), BLACK);
-//                        baddies.push_back(newBaddie);
-//                        frontBaddies.push_back(newBaddie);
-//                    }
-//                    break;
-//                case '.':
-//                    if (parseBaddies) {
-//                        newBaddie = new MontyMole(Vector2(x, y), Vector2(32, 30), Vector2(-200, 0), BROWN);
-//                        baddies.push_back(newBaddie);
-//                        frontBaddies.push_back(newBaddie);
-//                    }
-//                    break;
-//
-//                    // no tile
-//                case ' ':
-//                    break;
-//
-//                    // mario/player
-//                case 'p':
-//                    mario.setPos(Vector2(x, y));
-//                    break;
-//
-//                    // parsing control
-//                case '\n':
-//                    currentLine++;
-//                    currentColumn = -1;
-//                    ignoreLine = false;
-//                    break;
-//
-//                }
-//
-//            }
-//
-//            if (ignoreLine && *mapData == '\n') {
-//                ignoreLine = false;
-//                currentColumn = -1;
-//            }
-//
-//            currentColumn++;
-//            mapData++;
-//
-//        }
-//
-//        maxWidth -= TILE_WIDTH;
-//        maxHeight += TILE_WIDTH;
-//        parsed = true;
-//
-//    }
-//
-//}
+   if (musicId != 0) {
+
+       std::map<std::string, Music>& musics = ResourceManager::getInstance().getMusics();
+       const std::string key(TextFormat("music%d", musicId));
+
+       if (player.isInvincible()) {
+           // Stop regular music if playing
+           if (IsMusicStreamPlaying(musics[key])) {
+               StopMusicStream(musics[key]);
+           }
+           // Play invincible music if not already playing
+           if (!IsMusicStreamPlaying(musics["invincible"])) {
+               PlayMusicStream(musics["invincible"]);
+               SeekMusicStream(musics["invincible"], 1);
+           } else {
+               UpdateMusicStream(musics["invincible"]);
+           }
+       }
+       else {
+           // Stop invincible music if playing
+           if (IsMusicStreamPlaying(musics["invincible"])) {
+               StopMusicStream(musics["invincible"]);
+           }
+           // Play regular music if not already playing
+           if (!IsMusicStreamPlaying(musics[key])) {
+               PlayMusicStream(musics[key]);
+           } else {
+               UpdateMusicStream(musics[key]);
+           }
+       }
+
+   }
+}
+
 
 float Map::getMaxWidth() const {
     return maxWidth;
@@ -748,24 +746,13 @@ float Map::getMaxHeight() const {
     return maxHeight;
 }
 
-//void Map::setMarioOffset(float marioOffset) {
-//    this->marioOffset = marioOffset;
-//}
+void Map::setPlayerOffset(float playerOffset) {
+   this->playerOffset = playerOffset;
+}
 
-//void Map::setDrawBlackScreen(bool drawBlackScreen) {
-//    this->drawBlackScreen = drawBlackScreen;
-//}
-
-//void Map::setDrawMessage(bool drawMessage) {
-//    this->drawMessage = drawMessage;
-//    for (const auto& mb : messageBlocks) {
-//        mb->resetHit();
-//    }
-//}
-
-//void Map::setMessage(std::string message) {
-//    this->message = std::move(message);
-//}
+void Map::setDrawBlackScreen(bool drawBlackScreen) {
+   this->drawBlackScreen = drawBlackScreen;
+}
 
 void Map::setCamera(Camera2D* camera) {
     this->camera = camera;
@@ -775,59 +762,73 @@ void Map::setGameWorld(GameWorld* gw) {
     this->gw = gw;
 }
 
+void Map::setCurrentData(UserMapData* data) {
+    this->currentData = data;
+}
+
+void Map::setLoadFromUserDesignedMap(bool loadFromUser) {
+    this->loadFromUserDesignedMap = loadFromUser;
+    reset();
+}
+
+int Map::getId() const {
+    return id;
+}
+
 void Map::reset() {
 
     maxWidth = 0;
     maxHeight = 0;
-    marioOffset = 0;
-    //drawBlackScreen = false;
-    //drawBlackScreenFadeAcum = 0;
+    playerOffset = 0;
+    drawBlackScreen = false;
+    drawBlackScreenFadeAcum = 0;
 
-    for (const auto& tile : tiles) {
+    // Reset near sight vision position
+    lastValidPlayerPos = {0, 0};
+
+    for (const auto& tile : untouchableTiles) {
         delete tile;
     }
-    tiles.clear();
+    untouchableTiles.clear();
 
-    for (const auto& backScenarioTile : backScenarioTiles) {
-        delete backScenarioTile;
+    for (const auto& tile : touchableTiles) {
+        delete tile;
     }
-    backScenarioTiles.clear();
+    touchableTiles.clear();
 
-    for (const auto& frontScenarioTile : frontScenarioTiles) {
-        delete frontScenarioTile;
+    for (const auto& block : blocks) {
+       delete block;
     }
-    frontScenarioTiles.clear();
+    blocks.clear();
 
-    //for (const auto& block : blocks) {
-    //    delete block;
-    //}
-    //blocks.clear();
-    //messageBlocks.clear();
+    for (const auto& item : items) {
+       delete item;
+    }
+    items.clear();
 
-    //for (const auto& item : items) {
-    //    delete item;
-    //}
-    //items.clear();
+    for (const auto& staticItem : staticItems) {
+       delete staticItem;
+    }
+    staticItems.clear();
 
-    //for (const auto& staticItem : staticItems) {
-    //    delete staticItem;
-    //}
-    //staticItems.clear();
+    for (const auto& baddie : baddies) {
+       delete baddie;
+    }
+    baddies.clear();
+    frontBaddies.clear();
+    backBaddies.clear();
 
-    //for (const auto& baddie : baddies) {
-    //    delete baddie;
-    //}
-    //baddies.clear();
-    //frontBaddies.clear();
-    //backBaddies.clear();
-
-//    StopMusicStream(ResourceManager::getMusics()[std::string(TextFormat("music%d", musicId))]);
+    // Stop all music streams properly before resetting
+    std::map<std::string, Music>& musics = ResourceManager::getInstance().getMusics();
+    StopMusicStream(musics[std::string(TextFormat("music%d", musicId))]);
+    StopMusicStream(musics["invincible"]);
+    
     parsed = false;
-    //parseMap();
+    loadFromJsonFile();
 
 }
 
-bool Map::next() {
+bool Map::hasNext() {
 
     id++;
 
@@ -845,25 +846,28 @@ bool Map::next() {
 void Map::first() {
     id = 1;
 }
+void Map::second()
+{
+    id = 2;
+}
+void Map::third()
+{
+    id = 3;
+}
 
-//void Map::pauseGameToShowMessage() const {
-//    gw->pauseGame(false, false, false, true);
-//}
+void Map::eraseBaddieFromDrawingVectors(Baddie* baddie) {
 
-//void Map::eraseBaddieFromDrawingVectors(Baddie* baddie) {
-//
-//    for (size_t i = 0; i < frontBaddies.size(); i++) {
-//        if (frontBaddies[i] == baddie) {
-//            frontBaddies.erase(frontBaddies.begin() + i);
-//            return;
-//        }
-//    }
-//
-//    for (size_t i = 0; i < backBaddies.size(); i++) {
-//        if (backBaddies[i] == baddie) {
-//            backBaddies.erase(backBaddies.begin() + i);
-//            return;
-//        }
-//    }
-//
-//}
+   for (size_t i = 0; i < frontBaddies.size(); i++) {
+       if (frontBaddies[i] == baddie) {
+           frontBaddies.erase(frontBaddies.begin() + i);
+           return;
+       }
+   }
+
+   for (size_t i = 0; i < backBaddies.size(); i++) {
+       if (backBaddies[i] == baddie) {
+           backBaddies.erase(backBaddies.begin() + i);
+           return;
+       }
+   }
+}

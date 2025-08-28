@@ -1,5 +1,6 @@
 #pragma once
 #include "GameWorld.h"
+#include "ResourceManager.h"
 #include "string"
 
 class GameWindow {
@@ -12,6 +13,8 @@ class GameWindow {
 
     GameWorld gw;
     Camera2D camera;
+    CareTaker careTaker;
+	LoadGame loadGame;
     bool initialized;
 
 public:

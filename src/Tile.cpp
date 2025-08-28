@@ -9,7 +9,10 @@
 #include <utility>
 
 Tile::Tile(Vector2 pos, Vector2 dim, Color color, std::string key, bool visible) :
-    Tile(pos, dim, color, key, visible, TILE_TYPE_SOLID) {
+    Sprite(pos, dim, color),
+    key(std::move(key)),
+    visible(visible),
+    type(TILE_TYPE_SOLID) {
 }
 
 Tile::Tile(Vector2 pos, Vector2 dim, Color color, std::string key, bool visible, TileType type) :
@@ -30,7 +33,7 @@ void Tile::draw() {
 
         std::map<std::string, Texture2D>& textures = ResourceManager::getInstance().getTextures();
 
-        if (key.length() != 0) {
+        if (key.length() != 0 && textures.find(key) != textures.end()) {
             DrawTexture(textures[key], pos.x, pos.y, WHITE);
         }
         else {
@@ -51,12 +54,8 @@ void Tile::draw() {
         }
 
     }
-
-    //if (GameWorld::debug && color.a != 0) {
-    //    DrawRectangle(pos.x, pos.y, dim.x, dim.y, Fade(color, 0.5));
-    //}
-
 }
+   
 
 TileType Tile::getType() const {
     return type;

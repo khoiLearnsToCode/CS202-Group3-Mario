@@ -5,6 +5,25 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <cmath>
+
+std::string serialize_vector_with_chunks(const std::vector<int>& vec, size_t chunk_size) {
+    std::stringstream ss;
+    ss << "\n\t["; 
+    for (size_t i = 0; i < vec.size(); ++i) {
+        ss << vec[i];
+        if (i != vec.size() - 1) { 
+            ss << ","; 
+        }
+        if ((i + 1) % chunk_size == 0 || i == vec.size() - 1) {
+            ss << "\n\t"; 
+        } else {
+            ss << " "; 
+        }
+    }
+    ss << "]"; 
+    return ss.str();
+}
 
 double toRadians(double degrees) {
     return degrees * PI / 180.0;
@@ -49,32 +68,32 @@ void drawYellowSmallNumber(int number, int x, int y) {
 }
 
 void drawSmallNumber(int number, int x, int y, std::string textureId) {
-    Texture2D texture = ResourceManager::getTextures()[textureId];
+    Texture2D texture = ResourceManager::getInstance().getTextures()[textureId];
     int w = 18;
     int h = 14;
     std::string str = std::to_string(number);
     int px = x;
     for (char i : str) {
-        DrawTextureRec(texture, Rectangle((i - '0') * w, 0, w, h), Vector2(px, y), WHITE);
+        DrawTextureRec(texture, Rectangle{(i - '0') * w * 1.0f, 0, w*1.0f, h*1.0f}, Vector2{px*1.0f, y*1.0f}, WHITE);
         px += w - 2;
     }
 }
 
 void drawBigNumber(int number, int x, int y) {
-    Texture2D texture = ResourceManager::getTextures()["guiNumbersBig"];
+    Texture2D texture = ResourceManager::getInstance().getTextures()["guiNumbersBig"];
     int w = 18;
     int h = 28;
     std::string str = std::to_string(number);
     int px = x;
     for (char i : str) {
-        DrawTextureRec(texture, Rectangle((i - '0') * w, 0, w, h), Vector2(px, y), WHITE);
+        DrawTextureRec(texture, Rectangle{(i - '0') * w * 1.0f, 0, w*1.0f, h*1.0f}, Vector2{px*1.0f, y*1.0f}, WHITE);
         px += w - 2;
     }
 }
 
 void drawString(std::string str, int x, int y) {
 
-    Texture2D texture = ResourceManager::getTextures()["guiAlfa"];
+    Texture2D texture = ResourceManager::getInstance().getTextures()["guiAlfa"];
     int w = 18;
     int h = 20;
     int px = x;
@@ -117,7 +136,7 @@ void drawString(std::string str, int x, int y) {
         }
 
         if (!space) {
-            DrawTextureRec(texture, Rectangle(code * w, textureY, w, h), Vector2(px, y), WHITE);
+            DrawTextureRec(texture, Rectangle{code * w * 1.0f, textureY * 1.0f, w * 1.0f, h * 1.0f}, Vector2{px * 1.0f, y * 1.0f}, WHITE);
         }
 
         px += w - 2;
@@ -128,7 +147,7 @@ void drawString(std::string str, int x, int y) {
 
 void drawString(std::wstring str, int x, int y) {
 
-    const Texture2D texture = ResourceManager::getTextures()["guiAlfa"];
+    const Texture2D texture = ResourceManager::getInstance().getTextures()["guiAlfa"];
     int w = 18;
     int h = 20;
     int px = x;
@@ -187,7 +206,7 @@ void drawString(std::wstring str, int x, int y) {
         }
 
         if (!space) {
-            DrawTextureRec(texture, Rectangle(code * w, textureY, w, h), Vector2(px, y), WHITE);
+            DrawTextureRec(texture, Rectangle{code * w * 1.0f, textureY * 1.0f, w * 1.0f, h * 1.0f}, Vector2{px * 1.0f, y * 1.0f}, WHITE);
         }
 
         px += w - 2;
@@ -222,7 +241,7 @@ int getDrawStringHeight() {
 
 void drawMessageString(std::string str, int x, int y) {
 
-    const Texture2D texture = ResourceManager::getTextures()["guiAlfaLowerUpper"];
+    const Texture2D texture = ResourceManager::getInstance().getTextures()["guiAlfaLowerUpper"];
     int w = 16;
     int h = 16;
     int px = x;
@@ -270,7 +289,7 @@ void drawMessageString(std::string str, int x, int y) {
         }
 
         if (!space) {
-            DrawTextureRec(texture, Rectangle(code * w, textureY, w, h), Vector2(px, y), WHITE);
+            DrawTextureRec(texture, Rectangle{code * w * 1.0f, textureY * 1.0f, w * 1.0f, h * 1.0f}, Vector2{px * 1.0f, y * 1.0f}, WHITE);
         }
 
         px += w - 2;
@@ -317,4 +336,34 @@ std::vector<std::string> split(const std::string& s, char delim) {
     }
 
     return result;
+}
+
+// Distance-based collision detection utilities
+float calculateDistance(Vector2 pos1, Vector2 pos2) {
+    float dx = pos2.x - pos1.x;
+    float dy = pos2.y - pos1.y;
+    return sqrtf(dx * dx + dy * dy);
+}
+
+float calculateDistanceSquared(Vector2 pos1, Vector2 pos2) {
+    float dx = pos2.x - pos1.x;
+    float dy = pos2.y - pos1.y;
+    return dx * dx + dy * dy;
+}
+
+bool isWithinDistance(Vector2 pos1, Vector2 pos2, float maxDistance) {
+    // Use squared distance to avoid expensive sqrt calculation
+    float maxDistanceSquared = maxDistance * maxDistance;
+    return calculateDistanceSquared(pos1, pos2) <= maxDistanceSquared;
+}
+
+bool shouldCheckCollision(Vector2 pos1, Vector2 dim1, Vector2 pos2, Vector2 dim2, float maxDistance) {
+    // Calculate center points of both objects
+    Vector2 center1 = { pos1.x + dim1.x / 2.0f, pos1.y + dim1.y / 2.0f };
+    Vector2 center2 = { pos2.x + dim2.x / 2.0f, pos2.y + dim2.y / 2.0f };
+    
+    // Add object dimensions to collision distance for better accuracy
+    float adjustedMaxDistance = maxDistance + (dim1.x + dim1.y + dim2.x + dim2.y) / 4.0f;
+    
+    return isWithinDistance(center1, center2, adjustedMaxDistance);
 }
